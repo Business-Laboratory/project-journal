@@ -1,3 +1,5 @@
+// Client/Admin Home
+
 import tw, { css } from 'twin.macro'
 import Head from 'next/head'
 import Link from 'next/link'
