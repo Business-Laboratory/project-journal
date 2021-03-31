@@ -14,4 +14,36 @@ model User {
   id    Int     @id @default(autoincrement())
   email String  @unique
   name  String?
+
+  @@map(name: "users")
+}
+
+model Client {
+  id Int @id @default(autoincrement())
+
+  @@map(name: "clients")
+}
+
+model Project {
+  id Int @id @default(autoincrement())
+
+  @@map(name: "projects")
+}
+
+model Employee {
+  id Int @id @default(autoincrement())
+
+  @@map(name: "employees")
+}
+
+model WeeklyUpdate {
+  id Int @id @default(autoincrement())
+
+  @@map(name: "weekly_updates")
+}
+
+model Summary {
+  id Int @id @default(autoincrement())
+
+  @@map(name: "summaries")
 }
