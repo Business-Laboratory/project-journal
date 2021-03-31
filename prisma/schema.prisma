@@ -38,12 +38,12 @@ model Client {
 }
 
 model Project {
-  id            Int            @id @default(autoincrement())
-  client        Client         @relation(fields: [clientId], references: [id])
-  clientId      Int
-  imageUrl      String? // uncertain if String is the right type
-  summary       Summary?
-  weeklyUpdates WeeklyUpdate[]
+  id       Int      @id @default(autoincrement())
+  client   Client   @relation(fields: [clientId], references: [id])
+  clientId Int
+  imageUrl String? // uncertain if String is the right type
+  summary  Summary?
+  updates  Update[]
 
   @@map(name: "projects")
 }
@@ -59,7 +59,7 @@ model Employee {
   @@map(name: "employees")
 }
 
-model WeeklyUpdate {
+model Update {
   id          Int      @id @default(autoincrement())
   title       String
   body        String
@@ -68,7 +68,7 @@ model WeeklyUpdate {
   project     Project? @relation(fields: [projectId], references: [id])
   projectId   Int?
 
-  @@map(name: "weekly_updates")
+  @@map(name: "updates")
 }
 
 model Summary {
