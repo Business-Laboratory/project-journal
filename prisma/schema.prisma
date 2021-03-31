@@ -11,39 +11,71 @@ generator client {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+  id       Int       @id @default(autoincrement())
+  email    String    @unique
+  name     String
+  role     Role      @default(USER)
+  employee Employee?
 
   @@map(name: "users")
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
 model Client {
-  id Int @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
+  name        String
+  projects    Project[]
+  employees   Employee[]
+  logoUrl     String?
+  createdAt   DateTime   @default(now())
+  lastEditted DateTime   @default(now())
 
   @@map(name: "clients")
 }
 
 model Project {
-  id Int @id @default(autoincrement())
+  id            Int            @id @default(autoincrement())
+  client        Client         @relation(fields: [clientId], references: [id])
+  clientId      Int
+  imageUrl      String? // uncertain if String is the right type
+  Summary       Summary?       @relation(fields: [summaryId], references: [id])
+  summaryId     Int?
+  weeklyUpdates WeeklyUpdate[]
 
   @@map(name: "projects")
 }
 
 model Employee {
-  id Int @id @default(autoincrement())
+  id       Int     @id @default(autoincrement())
+  Client   Client  @relation(fields: [clientId], references: [id])
+  clientId Int
+  User     User    @relation(fields: [userId], references: [id])
+  userId   Int
+  title    String?
 
   @@map(name: "employees")
 }
 
 model WeeklyUpdate {
-  id Int @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
+  title       String
+  body        String
+  createdAt   DateTime @default(now())
+  lastEditted DateTime @default(now())
 
   @@map(name: "weekly_updates")
+  Project   Project? @relation(fields: [projectId], references: [id])
+  projectId Int?
 }
 
 model Summary {
-  id Int @id @default(autoincrement())
+  id   Int     @id @default(autoincrement())
+  body String?
 
+  Project Project[]
   @@map(name: "summaries")
 }
