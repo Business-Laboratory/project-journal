@@ -26,13 +26,13 @@ enum Role {
 }
 
 model Client {
-  id          Int        @id @default(autoincrement())
-  name        String
-  projects    Project[]
-  employees   Employee[]
-  logoUrl     String?
-  createdAt   DateTime   @default(now())
-  lastEditted DateTime   @default(now())
+  id         Int        @id @default(autoincrement())
+  name       String
+  projects   Project[]
+  employees  Employee[]
+  logoUrl    String?
+  createdAt  DateTime   @default(now())
+  lastEdited DateTime   @default(now())
 
   @@map(name: "clients")
 }
@@ -60,13 +60,13 @@ model Employee {
 }
 
 model Update {
-  id          Int      @id @default(autoincrement())
-  title       String
-  body        String
-  createdAt   DateTime @default(now())
-  lastEditted DateTime @default(now())
-  project     Project? @relation(fields: [projectId], references: [id])
-  projectId   Int?
+  id         Int      @id @default(autoincrement())
+  title      String
+  body       String
+  createdAt  DateTime @default(now())
+  lastEdited DateTime @default(now())
+  project    Project? @relation(fields: [projectId], references: [id])
+  projectId  Int?
 
   @@map(name: "updates")
 }
