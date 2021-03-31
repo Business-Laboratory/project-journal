@@ -42,8 +42,7 @@ model Project {
   client        Client         @relation(fields: [clientId], references: [id])
   clientId      Int
   imageUrl      String? // uncertain if String is the right type
-  Summary       Summary?       @relation(fields: [summaryId], references: [id])
-  summaryId     Int?
+  summary       Summary?
   weeklyUpdates WeeklyUpdate[]
 
   @@map(name: "projects")
@@ -66,16 +65,17 @@ model WeeklyUpdate {
   body        String
   createdAt   DateTime @default(now())
   lastEditted DateTime @default(now())
+  project     Project? @relation(fields: [projectId], references: [id])
+  projectId   Int?
 
   @@map(name: "weekly_updates")
-  Project   Project? @relation(fields: [projectId], references: [id])
-  projectId Int?
 }
 
 model Summary {
-  id   Int     @id @default(autoincrement())
-  body String?
+  id        Int      @id @default(autoincrement())
+  body      String?
+  project   Project? @relation(fields: [projectId], references: [id])
+  projectId Int?
 
-  Project Project[]
   @@map(name: "summaries")
 }
