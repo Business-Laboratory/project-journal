@@ -10,5 +10,5 @@ export default NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
     }),
   ],
-  adapter: Adapters.Prisma.Adapter({ prisma: prisma }),
+  adapter: Adapters.Prisma.Adapter({ prisma }),
 })
