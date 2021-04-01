@@ -9,6 +9,8 @@ function Login() {
       <main tw="flex flex-col space-y-8">
         <LoginProviderButton>Continue with Google</LoginProviderButton>
         <LoginProviderButton>Continue with Microsoft</LoginProviderButton>
+        <hr tw="w-full h-0 border-t-2 border-lichen-green-200" />
+        <EmailLogin />
       </main>
     </div>
   )
@@ -16,7 +18,29 @@ function Login() {
 
 function LoginProviderButton(props: React.ComponentPropsWithoutRef<'button'>) {
   return (
-    <button tw="py-4 px-12 border-2 border-copper-400 bl-text-lg" {...props} />
+    <button
+      tw="py-4 px-12 border-2 border-copper-400 bl-text-lg hover:(ring-1 ring-copper-300) focus:(outline-none ring-2 ring-copper-300)"
+      {...props}
+    />
+  )
+}
+
+function EmailLogin() {
+  return (
+    <div tw="flex flex-col space-y-2">
+      <label htmlFor="email-login" tw="bl-text-sm">
+        Email
+      </label>
+      <input
+        id="email-login"
+        tw="h-12 px-2 border-2 border-copper-400 bl-text-base hover:(ring-1 ring-copper-300) focus:(outline-none ring-2 ring-copper-300)"
+        name="email"
+        type="email"
+      />
+      <p tw="text-xs max-w-fit">
+        You will be sent a link to a password-free sign in.
+      </p>
+    </div>
   )
 }
 
