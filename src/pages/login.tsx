@@ -1,13 +1,11 @@
 import 'twin.macro'
 import Header from 'next/head'
-import { signIn, useSession } from 'next-auth/client'
+import { signIn } from 'next-auth/client'
+import { useAuth } from '@components/auth-context'
 
 function Login() {
-  const [session, loading] = useSession()
-
-  if (!loading) {
-    console.log(session)
-  }
+  const auth = useAuth()
+  if (auth) return null
 
   return (
     <div tw="relative mx-auto space-y-16 max-w-max top-24">
@@ -29,7 +27,7 @@ function Login() {
 function LoginProviderButton(props: React.ComponentPropsWithoutRef<'button'>) {
   return (
     <button
-      tw="py-4 px-12 border-2 border-copper-400 bl-text-lg hover:(ring-1 ring-copper-300) focus:(outline-none ring-2 ring-copper-300)"
+      tw="py-2 px-8 border-2 border-copper-400 bl-text-lg hover:(ring-1 ring-copper-300) focus:(outline-none ring-2 ring-copper-300)"
       {...props}
     />
   )
@@ -50,6 +48,7 @@ function EmailLogin() {
       <p tw="text-xs max-w-fit">
         You will be sent a link to a password-free sign in.
       </p>
+      <LoginProviderButton>Sign in with Email</LoginProviderButton>
     </div>
   )
 }
