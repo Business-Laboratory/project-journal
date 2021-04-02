@@ -7,6 +7,8 @@ function Login() {
   const auth = useAuth()
   if (auth) return null
 
+  console.log(process.env.NEXTAUTH_URL)
+
   return (
     <div tw="relative mx-auto space-y-16 max-w-max top-24">
       <header>
