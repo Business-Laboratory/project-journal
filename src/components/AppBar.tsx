@@ -7,7 +7,6 @@ import { useRouter } from 'next/dist/client/router'
 
 export default function Appbar() {
   const { pathname } = useRouter()
-  console.log(pathname)
   // Will pull auth and projects/clients from context once implemented
   const [auth, setAuth] = useState<'admin' | 'user'>('admin')
 
@@ -19,7 +18,8 @@ export default function Appbar() {
             Project Journal
           </a>
         </Link>
-        {auth === 'admin' ? (
+        {auth === 'admin' &&
+        (pathname === '/projects' || pathname === '/clients') ? (
           <div tw="ml-8">
             <Link href="/projects" passHref>
               <a
