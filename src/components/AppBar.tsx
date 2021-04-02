@@ -77,7 +77,7 @@ type MenuProps = {
   setAuth: Dispatch<SetStateAction<'admin' | 'user'>>
 }
 function UserMenu({ auth, setAuth }: MenuProps) {
-  const menuItemTw = tw`flex py-1 px-3 w-full hover:bg-gray-yellow-200 text-gray-yellow-200 text-xs hover:text-gray-yellow-600`
+  const menuItemTw = tw`flex py-1 px-3 w-full text-gray-yellow-200 text-xs cursor-pointer hover:bg-gray-yellow-200 hover:text-gray-yellow-600`
 
   return (
     <Menu>
