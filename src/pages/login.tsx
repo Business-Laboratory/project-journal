@@ -2,11 +2,13 @@ import tw from 'twin.macro'
 import { useState } from 'react'
 import Header from 'next/head'
 import { signIn } from 'next-auth/client'
-import { useAuth } from '@components/auth-context'
 
 function Login() {
-  const auth = useAuth()
-  if (auth) return null
+  const callbackUrl = `${process.env.NEXT_PUBLIC_VERCEL_URL}/`
+  console.log({
+    NEXT_PUBLIC_VERCEL_URL: process.env.NEXT_PUBLIC_VERCEL_URL,
+    callbackUrl,
+  })
 
   return (
     <div tw="relative mx-auto space-y-16 max-w-max top-24">
@@ -14,12 +16,18 @@ function Login() {
         <h1 tw="bl-text-5xl text-center">Log in</h1>
       </header>
       <main tw="flex flex-col space-y-8">
-        <LoginProviderButton onClick={() => signIn('google')}>
+        <LoginProviderButton
+          onClick={() => {
+            signIn('google', { callbackUrl })
+          }}
+        >
           Continue with Google
         </LoginProviderButton>
         <LoginProviderButton>Continue with Microsoft</LoginProviderButton>
         <hr tw="w-full h-0 border-t-2 border-lichen-green-200" />
-        <EmailLogin signIn={(email: string) => signIn('email', { email })} />
+        <EmailLogin
+          signIn={(email: string) => signIn('email', { email, callbackUrl })}
+        />
       </main>
     </div>
   )
@@ -82,6 +90,7 @@ function PageLayout({ children }: { children: React.ReactNode }) {
     </>
   )
 }
+
 Login.PageLayout = PageLayout
 
 export default Login
