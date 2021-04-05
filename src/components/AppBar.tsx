@@ -2,6 +2,7 @@ import tw, { css } from 'twin.macro'
 import Link from 'next/link'
 import { Dispatch, SetStateAction, useState } from 'react'
 import { Menu, MenuButton, MenuList, MenuItem } from '@reach/menu-button'
+import '@reach/menu-button/styles.css'
 import { LogoIcon } from 'icons'
 import { useRouter } from 'next/dist/client/router'
 
@@ -12,9 +13,9 @@ export default function Appbar() {
 
   return (
     <Header>
-      <div tw="inline-flex items-center">
+      <div tw="inline-flex">
         <Link href="/" passHref>
-          <a tw="ml-4 text-3xl font-bold font-display text-gray-yellow-100">
+          <a tw="ml-4 bl-text-3xl font-bold text-gray-yellow-100">
             Project Journal
           </a>
         </Link>
@@ -24,7 +25,7 @@ export default function Appbar() {
             <Link href="/projects" passHref>
               <a
                 css={[
-                  tw`ml-4 text-3xl`,
+                  tw`ml-4 bl-text-3xl`,
                   pathname === '/projects'
                     ? tw`underline text-gray-yellow-100`
                     : tw`text-gray-yellow-300`,
@@ -36,7 +37,7 @@ export default function Appbar() {
             <Link href="/clients" passHref>
               <a
                 css={[
-                  tw`ml-4 text-3xl`,
+                  tw`ml-4 bl-text-3xl`,
                   pathname === '/clients'
                     ? tw`underline text-gray-yellow-100`
                     : tw`text-gray-yellow-300`,
@@ -64,7 +65,7 @@ type HeaderProps = {
 function Header({ className, children }: HeaderProps) {
   return (
     <header
-      tw="w-full h-12 flex flex-row items-center justify-between bg-gray-yellow-500"
+      tw="w-full h-12 flex flex-row items-center justify-between bg-gray-yellow-500 top-0 sticky"
       className={className}
     >
       {children}
@@ -86,7 +87,7 @@ function UserMenu({ auth, setAuth }: MenuProps) {
       </MenuButton>
       <MenuList
         tw="
-        mt-4 flex flex-col items-center bg-gray-yellow-600 
+        mt-4 py-1 flex flex-col items-center bg-gray-yellow-600 
         border-solid border border-copper-300
         rounded 
       "
