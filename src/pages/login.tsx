@@ -1,4 +1,5 @@
-import 'twin.macro'
+import tw from 'twin.macro'
+import { useState } from 'react'
 import Header from 'next/head'
 import { signIn } from 'next-auth/client'
 import { useAuth } from '@components/auth-context'
@@ -6,8 +7,6 @@ import { useAuth } from '@components/auth-context'
 function Login() {
   const auth = useAuth()
   if (auth) return null
-
-  console.log(process.env.NEXTAUTH_URL)
 
   return (
     <div tw="relative mx-auto space-y-16 max-w-max top-24">
@@ -20,7 +19,7 @@ function Login() {
         </LoginProviderButton>
         <LoginProviderButton>Continue with Microsoft</LoginProviderButton>
         <hr tw="w-full h-0 border-t-2 border-lichen-green-200" />
-        <EmailLogin />
+        <EmailLogin signIn={(email: string) => signIn('email', { email })} />
       </main>
     </div>
   )
@@ -35,7 +34,8 @@ function LoginProviderButton(props: React.ComponentPropsWithoutRef<'button'>) {
   )
 }
 
-function EmailLogin() {
+function EmailLogin({ signIn }: { signIn: (email: string) => void }) {
+  const [email, setEmail] = useState('')
   return (
     <div tw="flex flex-col space-y-2">
       <label htmlFor="email-login" tw="bl-text-sm">
@@ -46,11 +46,25 @@ function EmailLogin() {
         tw="h-12 px-2 border-2 border-copper-400 bl-text-base hover:(ring-1 ring-copper-300) focus:(outline-none ring-2 ring-copper-300)"
         name="email"
         type="email"
+        value={email}
+        onChange={(e) => setEmail(e.currentTarget.value)}
       />
       <p tw="text-xs max-w-fit">
         You will be sent a link to a password-free sign in.
       </p>
-      <LoginProviderButton>Sign in with Email</LoginProviderButton>
+      <LoginProviderButton
+        css={[
+          !email
+            ? tw`bg-gray-red-200 text-gray-yellow-500 hover:(ring-0) focus:(ring-0)`
+            : null,
+        ]}
+        onClick={() => {
+          if (!email) return
+          signIn(email)
+        }}
+      >
+        Sign in with Email
+      </LoginProviderButton>
     </div>
   )
 }
