@@ -15,17 +15,15 @@ export default function Appbar() {
     <Header>
       <div tw="inline-flex">
         <Link href="/" passHref>
-          <a tw="ml-4 bl-text-3xl font-bold text-gray-yellow-100">
-            Project Journal
-          </a>
+          <a tw="bl-text-3xl font-bold text-gray-yellow-100">Project Journal</a>
         </Link>
         {auth === 'admin' &&
         (pathname === '/projects' || pathname === '/clients') ? (
-          <div tw="ml-8">
+          <div tw="ml-12 space-x-4">
             <Link href="/projects" passHref>
               <a
                 css={[
-                  tw`ml-4 bl-text-3xl`,
+                  tw`bl-text-3xl`,
                   pathname === '/projects'
                     ? tw`underline text-gray-yellow-100`
                     : tw`text-gray-yellow-300`,
@@ -37,7 +35,7 @@ export default function Appbar() {
             <Link href="/clients" passHref>
               <a
                 css={[
-                  tw`ml-4 bl-text-3xl`,
+                  tw`bl-text-3xl`,
                   pathname === '/clients'
                     ? tw`underline text-gray-yellow-100`
                     : tw`text-gray-yellow-300`,
@@ -65,7 +63,7 @@ type HeaderProps = {
 function Header({ className, children }: HeaderProps) {
   return (
     <header
-      tw="w-full h-12 flex flex-row items-center justify-between bg-gray-yellow-500 top-0 sticky"
+      tw="w-full h-12 px-4 flex flex-row items-center justify-between bg-gray-yellow-500 top-0 sticky"
       className={className}
     >
       {children}
@@ -82,7 +80,7 @@ function UserMenu({ auth, setAuth }: MenuProps) {
 
   return (
     <Menu>
-      <MenuButton tw="mr-4">
+      <MenuButton>
         <LogoIcon />
       </MenuButton>
       <MenuList
