@@ -1,5 +1,5 @@
 // Client/Admin Home that displays project cards
-import tw, { css } from 'twin.macro'
+import 'twin.macro'
 import Head from 'next/head'
 
 export default function Projects() {

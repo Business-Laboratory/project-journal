@@ -1,6 +1,3 @@
-// Client/Admin Home
-
-import tw, { css } from 'twin.macro'
 import { useEffect } from 'react'
 import { useRouter } from 'next/dist/client/router'
 

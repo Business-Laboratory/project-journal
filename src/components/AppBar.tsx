@@ -1,4 +1,4 @@
-import tw, { css } from 'twin.macro'
+import tw from 'twin.macro'
 import Link from 'next/link'
 import { Dispatch, SetStateAction, useState } from 'react'
 import { Menu, MenuButton, MenuList, MenuItem } from '@reach/menu-button'
@@ -76,7 +76,7 @@ type MenuProps = {
   setAuth: Dispatch<SetStateAction<'admin' | 'user'>>
 }
 function UserMenu({ auth, setAuth }: MenuProps) {
-  const menuItemTw = tw`flex py-1 px-3 w-full text-gray-yellow-200 text-xs cursor-pointer hover:bg-gray-yellow-200 hover:text-gray-yellow-600`
+  const menuItemTw = tw`flex w-full px-3 py-1 text-xs cursor-pointer text-gray-yellow-200 hover:bg-gray-yellow-200 hover:text-gray-yellow-600`
 
   return (
     <Menu>
@@ -85,9 +85,9 @@ function UserMenu({ auth, setAuth }: MenuProps) {
       </MenuButton>
       <MenuList
         tw="
-        mt-4 py-1 flex flex-col items-center bg-gray-yellow-600 
+        mt-4 py-1 flex flex-col items-center bg-gray-yellow-600
         border-solid border border-copper-300
-        rounded 
+        rounded
       "
       >
         <MenuItem css={menuItemTw} onSelect={() => setAuth('user')}>

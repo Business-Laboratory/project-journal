@@ -1,5 +1,5 @@
 // Alternate Admin Home view that displays clients
-import tw, { css } from 'twin.macro'
+import 'twin.macro'
 import Head from 'next/head'
 
 export default function Clients() {
