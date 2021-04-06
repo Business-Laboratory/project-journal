@@ -13,9 +13,10 @@ type ComponentWithPageLayout = {
 
 function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
   return (
-    <>
+    <AuthProvider>
       <GlobalStyles />
-      <AuthProvider>
+      {/* this style is applied to avoid the "bounce" on iOS/macOS: https://stackoverflow.com/a/21247262/10128987 */}
+      <div tw="absolute inset-0 overflow-auto">
         <AppBar />
         {
           // get a page root if one was set
@@ -27,8 +28,8 @@ function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
             <Component {...pageProps} />
           )
         }
-      </AuthProvider>
-    </>
+      </div>
+    </AuthProvider>
   )
 }
 

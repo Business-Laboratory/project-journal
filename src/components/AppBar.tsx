@@ -1,4 +1,4 @@
-import tw, { css } from 'twin.macro'
+import tw from 'twin.macro'
 import { Dispatch, SetStateAction, useState } from 'react'
 import Link from 'next/link'
 import { signOut } from 'next-auth/client'
