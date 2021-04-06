@@ -4,7 +4,7 @@ import Head from 'next/head'
 
 export default function Clients() {
   return (
-    <div tw="flex flex-col h-screen bg-gray-yellow-100">
+    <div tw="flex flex-col bg-gray-yellow-100">
       <Head>
         <title>Layout examples</title>
       </Head>
