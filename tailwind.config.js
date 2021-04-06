@@ -53,10 +53,21 @@ module.exports = {
     }),
     // look up all default values here: https://github.com/tailwindlabs/tailwindcss/blob/master/stubs/defaultConfig.stub.js
     extend: {
-      minWidth: (theme) => ({
-        auto: 'auto',
-        ...theme('spacing'),
-      }),
+      maxWidth: {
+        fit: 'fit-content',
+      },
+      minWidth: {
+        fit: 'fit-content',
+      },
+      width: {
+        fit: 'fit-content',
+      },
+      gridAutoColumns: {
+        fit: 'fit-content',
+      },
+      gridAutoRows: {
+        fit: 'fit-content',
+      },
       colors: {
         'matisse-red': {
           100: '#FF6356',

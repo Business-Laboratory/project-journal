@@ -1,3 +1,4 @@
+import { AuthProvider } from '@components/auth-context'
 import type { AppProps } from 'next/app'
 import React from 'react'
 import { GlobalStyles } from 'twin.macro'
@@ -14,17 +15,19 @@ function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
   return (
     <>
       <GlobalStyles />
-      <AppBar />
-      {
-        // get a page root if one was set
-        Component.PageLayout ? (
-          <Component.PageLayout>
+      <AuthProvider>
+        <AppBar />
+        {
+          // get a page root if one was set
+          Component.PageLayout ? (
+            <Component.PageLayout>
+              <Component {...pageProps} />
+            </Component.PageLayout>
+          ) : (
             <Component {...pageProps} />
-          </Component.PageLayout>
-        ) : (
-          <Component {...pageProps} />
-        )
-      }
+          )
+        }
+      </AuthProvider>
     </>
   )
 }
