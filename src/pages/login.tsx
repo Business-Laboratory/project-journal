@@ -10,11 +10,11 @@ function Login() {
       <Header>
         <title>Login | Project Journal</title>
       </Header>
-      <div tw="mx-auto space-y-16 max-w-max mt-10">
+      <div tw="mx-auto max-w-max my-10 text-gray-yellow-600">
         <header>
           <h1 tw="bl-text-4xl text-center">Log in</h1>
         </header>
-        <main tw="flex flex-col mt-9 space-y-8">
+        <main tw="flex flex-col mt-9 space-y-9">
           <LoginProviderButton
             onClick={() => {
               signIn('google', { callbackUrl })
@@ -29,7 +29,7 @@ function Login() {
           >
             continue with microsoft
           </LoginProviderButton>
-          <hr tw="w-full h-0 border-t-2 border-lichen-green-200" />
+          <hr tw="w-full h-0 border-t-2 border-lichen-green-200 border-dashed" />
           <EmailLogin />
         </main>
       </div>
@@ -48,14 +48,16 @@ function EmailLogin() {
   const disabled = loginState === 'disabled' || loginState === 'loggingIn'
   return (
     <form tw="flex flex-col space-y-2">
-      <label htmlFor="email-login" tw="bl-text-sm">
+      <label htmlFor="email-login" tw="bl-text-xs text-gray-yellow-300">
         Email
       </label>
       <input
         id="email-login"
-        tw="h-12 px-2 border-2 border-copper-400 bl-text-base hover:(ring-1 ring-copper-300) focus:(outline-none ring-2 ring-copper-300)"
+        tw="border-b border-gray-yellow-600 bl-text-base placeholder-gray-yellow-400"
+        // hover:(ring-1 ring-copper-300) focus:(outline-none ring-2 ring-copper-300)
         name="email"
         type="email"
+        placeholder="Email"
         value={email}
         onChange={(e) => {
           const value = e.currentTarget.value
@@ -63,8 +65,8 @@ function EmailLogin() {
           setLoginState(validateEmail(value) ? 'enabled' : 'disabled')
         }}
       />
-      <p tw="text-xs max-w-fit">
-        You will be sent a link to a password-free sign in.
+      <p tw="bl-text-sm max-w-fit">
+        You will be sent a link to a password-free sign in
       </p>
       <LoginProviderButton
         disabled={disabled}
@@ -82,7 +84,9 @@ function EmailLogin() {
         }}
         type="submit"
       >
-        {loginState === 'loggingIn' ? 'sending email...' : 'sign in with email'}
+        {loginState === 'loggingIn'
+          ? 'sending email...'
+          : 'continue with email'}
       </LoginProviderButton>
       {loginState === 'error' ? (
         <p tw="bl-text-sm text-matisse-red-200 max-w-fit" role="alert">
@@ -101,9 +105,9 @@ function LoginProviderButton({
   return (
     <button
       css={[
-        tw`py-2 px-8 border-2 border-copper-300 bl-text-lg uppercase hover:(ring-1 ring-copper-300) focus:(outline-none ring-2 ring-copper-300)`,
+        tw`py-1 px-8 border-2 border-copper-300 bl-text-lg uppercase hover:(ring-1 ring-copper-300) focus:(outline-none ring-2 ring-copper-300)`,
         disabled
-          ? tw`bg-gray-red-200 text-gray-yellow-500 hover:(ring-0) focus:(ring-0)`
+          ? tw`bg-gray-yellow-300 text-gray-yellow-500 hover:(ring-0) focus:(ring-0) bg-opacity-60`
           : null,
       ]}
       disabled={disabled}
