@@ -1,3 +1,4 @@
+import { AuthProvider } from '@components/auth-context'
 import type { AppProps } from 'next/app'
 import React from 'react'
 import { GlobalStyles } from 'twin.macro'
@@ -12,7 +13,7 @@ type ComponentWithPageLayout = {
 
 function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
   return (
-    <>
+    <AuthProvider>
       <GlobalStyles />
       {/* this style is applied to avoid the "bounce" on iOS/macOS: https://stackoverflow.com/a/21247262/10128987 */}
       <div tw="absolute inset-0 overflow-auto">
@@ -28,7 +29,7 @@ function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
           )
         }
       </div>
-    </>
+    </AuthProvider>
   )
 }
 
