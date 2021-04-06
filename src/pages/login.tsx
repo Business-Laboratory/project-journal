@@ -18,7 +18,13 @@ function Login() {
         >
           Continue with Google
         </LoginProviderButton>
-        <LoginProviderButton>Continue with Microsoft</LoginProviderButton>
+        <LoginProviderButton
+          onClick={() => {
+            signIn('azure-ad-b2c', { callbackUrl })
+          }}
+        >
+          Continue with Microsoft
+        </LoginProviderButton>
         <hr tw="w-full h-0 border-t-2 border-lichen-green-200" />
         <EmailLogin />
       </main>
