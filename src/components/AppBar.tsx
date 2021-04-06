@@ -16,8 +16,6 @@ export default function AppBar() {
   const [auth, setAuth] = useState<'admin' | 'user'>('admin')
   const session = useAuth()
 
-  console.log(session)
-
   return (
     <Header>
       <nav tw="inline-flex">
