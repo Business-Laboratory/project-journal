@@ -3,13 +3,8 @@ import { useState } from 'react'
 import Header from 'next/head'
 import { signIn } from 'next-auth/client'
 
+const callbackUrl = `${process.env.NEXT_PUBLIC_VERCEL_URL}/`
 function Login() {
-  const callbackUrl = `${process.env.NEXT_PUBLIC_VERCEL_URL}/`
-  console.log({
-    NEXT_PUBLIC_VERCEL_URL: process.env.NEXT_PUBLIC_VERCEL_URL,
-    callbackUrl,
-  })
-
   return (
     <div tw="relative mx-auto space-y-16 max-w-max top-24">
       <header>
@@ -25,9 +20,7 @@ function Login() {
         </LoginProviderButton>
         <LoginProviderButton>Continue with Microsoft</LoginProviderButton>
         <hr tw="w-full h-0 border-t-2 border-lichen-green-200" />
-        <EmailLogin
-          signIn={(email: string) => signIn('email', { email, callbackUrl })}
-        />
+        <EmailLogin />
       </main>
     </div>
   )
@@ -42,10 +35,15 @@ function LoginProviderButton(props: React.ComponentPropsWithoutRef<'button'>) {
   )
 }
 
-function EmailLogin({ signIn }: { signIn: (email: string) => void }) {
+function EmailLogin() {
   const [email, setEmail] = useState('')
+  const [loginState, setLoginState] = useState<
+    'disabled' | 'enabled' | 'loggingIn' | 'error'
+  >('disabled')
+
+  const disabled = loginState === 'disabled' || loginState === 'loggingIn'
   return (
-    <div tw="flex flex-col space-y-2">
+    <form tw="flex flex-col space-y-2">
       <label htmlFor="email-login" tw="bl-text-sm">
         Email
       </label>
@@ -55,26 +53,52 @@ function EmailLogin({ signIn }: { signIn: (email: string) => void }) {
         name="email"
         type="email"
         value={email}
-        onChange={(e) => setEmail(e.currentTarget.value)}
+        onChange={(e) => {
+          const value = e.currentTarget.value
+          setEmail(value)
+          setLoginState(validateEmail(value) ? 'enabled' : 'disabled')
+        }}
       />
       <p tw="text-xs max-w-fit">
         You will be sent a link to a password-free sign in.
       </p>
       <LoginProviderButton
         css={[
-          !email
+          disabled
             ? tw`bg-gray-red-200 text-gray-yellow-500 hover:(ring-0) focus:(ring-0)`
             : null,
         ]}
-        onClick={() => {
+        disabled={disabled}
+        onClick={async (e) => {
+          e.preventDefault()
           if (!email) return
-          signIn(email)
+          setLoginState('loggingIn')
+          try {
+            await signIn('email', { email, callbackUrl })
+          } catch (error) {
+            // when it fails, we want to warn the user
+            console.error(error)
+            setLoginState('error')
+          }
         }}
+        type="submit"
       >
-        Sign in with Email
+        {loginState === 'loggingIn' ? 'Sending email...' : 'Sign in with Email'}
       </LoginProviderButton>
-    </div>
+      {loginState === 'error' ? (
+        <p tw="bl-text-sm text-matisse-red-300 max-w-fit" role="alert">
+          Something went wrong, please try again. If the problem persists you
+          can email help@business-laboratory.com
+        </p>
+      ) : null}
+    </form>
   )
+}
+
+// taken from https://stackoverflow.com/questions/46155/how-to-validate-an-email-address-in-javascript
+function validateEmail(email: string) {
+  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  return re.test(String(email).toLowerCase())
 }
 
 // TODO: move all common page layout elements to either a shared component or `pages/_app.tsx`
