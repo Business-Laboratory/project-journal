@@ -2,10 +2,20 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { useSession } from 'next-auth/client'
 import type { Session } from 'next-auth'
 import { useRouter } from 'next/router'
+import { useQuery } from 'react-query'
 
 const AuthContext = createContext<Session | null | undefined>(undefined)
 
 export { AuthProvider, useAuth }
+
+async function fetchUser() {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL}/api/user`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'brookslybrand@gmail.com' }),
+  })
+  return res.json()
+}
 
 function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, loading] = useSession()
@@ -15,6 +25,11 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     'unchecked'
   )
   const router = useRouter()
+
+  // session?.user.email
+  const user = useQuery('user', fetchUser)
+
+  console.log(user)
 
   useEffect(() => {
     // perform checks after the user session has finished loading

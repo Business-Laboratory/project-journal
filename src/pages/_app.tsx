@@ -1,8 +1,11 @@
-import { AuthProvider } from '@components/auth-context'
-import type { AppProps } from 'next/app'
 import React from 'react'
+import type { AppProps } from 'next/app'
 import { GlobalStyles } from 'twin.macro'
+import { QueryClient, QueryClientProvider } from 'react-query'
+
+import { AuthProvider } from '@components/auth-context'
 import AppBar from '@components/AppBar'
+
 import '../styles/globals.css'
 
 type ComponentWithPageLayout = {
@@ -11,25 +14,29 @@ type ComponentWithPageLayout = {
   }
 }
 
+const queryClient = new QueryClient()
+
 function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
   return (
-    <AuthProvider>
-      <GlobalStyles />
-      {/* this style is applied to avoid the "bounce" on iOS/macOS: https://stackoverflow.com/a/21247262/10128987 */}
-      <div tw="absolute inset-0 overflow-auto">
-        <AppBar />
-        {
-          // get a page root if one was set
-          Component.PageLayout ? (
-            <Component.PageLayout>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <GlobalStyles />
+        {/* this style is applied to avoid the "bounce" on iOS/macOS: https://stackoverflow.com/a/21247262/10128987 */}
+        <div tw="absolute inset-0 overflow-auto">
+          <AppBar />
+          {
+            // get a page root if one was set
+            Component.PageLayout ? (
+              <Component.PageLayout>
+                <Component {...pageProps} />
+              </Component.PageLayout>
+            ) : (
               <Component {...pageProps} />
-            </Component.PageLayout>
-          ) : (
-            <Component {...pageProps} />
-          )
-        }
-      </div>
-    </AuthProvider>
+            )
+          }
+        </div>
+      </AuthProvider>
+    </QueryClientProvider>
   )
 }
 
