@@ -75,22 +75,22 @@ enum Role {
 }
 
 model Client {
-  id         Int        @id @default(autoincrement())
-  name       String
-  projects   Project[]
-  employees  Employee[]
-  logoUrl    String?
-  createdAt  DateTime   @default(now())
-  lastEdited DateTime   @default(now())
+  id        Int        @id @default(autoincrement())
+  name      String
+  projects  Project[]
+  employees Employee[]
+  logoUrl   String?    @map(name: "logo_url")
+  createdAt DateTime   @default(now()) @map(name: "created_at")
+  updatedAt DateTime   @default(now()) @map(name: "updated_at")
 
   @@map(name: "clients")
 }
 
 model Project {
   id       Int      @id @default(autoincrement())
-  client   Client   @relation(fields: [clientId], references: [id])
-  clientId Int
-  imageUrl String? // uncertain if String is the right type
+  client   Client?  @relation(fields: [clientId], references: [id])
+  clientId Int?     @map(name: "client_id")
+  imageUrl String?  @map(name: "image_url")
   summary  Summary?
   updates  Update[]
 
@@ -100,22 +100,22 @@ model Project {
 model Employee {
   id       Int     @id @default(autoincrement())
   Client   Client  @relation(fields: [clientId], references: [id])
-  clientId Int
+  clientId Int     @map(name: "client_id")
   User     User    @relation(fields: [userId], references: [id])
-  userId   Int
+  userId   Int     @map(name: "user_id")
   title    String?
 
   @@map(name: "employees")
 }
 
 model Update {
-  id         Int      @id @default(autoincrement())
-  title      String
-  body       String
-  createdAt  DateTime @default(now())
-  lastEdited DateTime @default(now())
-  project    Project? @relation(fields: [projectId], references: [id])
-  projectId  Int?
+  id        Int      @id @default(autoincrement())
+  title     String
+  body      String
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @map(name: "updated_at")
+  project   Project? @relation(fields: [projectId], references: [id])
+  projectId Int?     @map(name: "project_id")
 
   @@map(name: "updates")
 }
@@ -124,7 +124,7 @@ model Summary {
   id        Int      @id @default(autoincrement())
   body      String?
   project   Project? @relation(fields: [projectId], references: [id])
-  projectId Int?
+  projectId Int?     @map(name: "project_id")
 
   @@map(name: "summaries")
 }
