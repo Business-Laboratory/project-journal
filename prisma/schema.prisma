@@ -54,6 +54,7 @@ model User {
   updatedAt     DateTime  @default(now()) @map(name: "updated_at")
   role          Role      @default(USER)
   employee      Employee?
+  projects      Project[]
 
   @@map(name: "users")
 }
@@ -88,9 +89,11 @@ model Client {
 
 model Project {
   id       Int      @id @default(autoincrement())
+  name     String?
+  imageUrl String?  @map(name: "image_url")
   client   Client?  @relation(fields: [clientId], references: [id])
   clientId Int?     @map(name: "client_id")
-  imageUrl String?  @map(name: "image_url")
+  team     User[]
   summary  Summary?
   updates  Update[]
 
@@ -121,10 +124,11 @@ model Update {
 }
 
 model Summary {
-  id        Int      @id @default(autoincrement())
-  body      String?
-  project   Project? @relation(fields: [projectId], references: [id])
-  projectId Int?     @map(name: "project_id")
+  id          Int      @id @default(autoincrement())
+  description String?
+  roadmap     String?
+  project     Project? @relation(fields: [projectId], references: [id])
+  projectId   Int?     @map(name: "project_id")
 
   @@map(name: "summaries")
 }
