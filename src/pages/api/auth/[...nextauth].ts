@@ -10,8 +10,8 @@ export default NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
     }),
     Providers.Email({
-      server: process.env.EMAIL_SERVER_TEMP ?? '',
-      from: process.env.EMAIL_FROM_TEMP,
+      server: process.env.EMAIL_SERVER ?? '',
+      from: process.env.EMAIL_FROM,
     }),
   ],
   adapter: Adapters.Prisma.Adapter({ prisma }),
