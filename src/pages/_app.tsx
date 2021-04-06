@@ -14,17 +14,20 @@ function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
   return (
     <>
       <GlobalStyles />
-      <AppBar />
-      {
-        // get a page root if one was set
-        Component.PageLayout ? (
-          <Component.PageLayout>
+      {/* this style is applied to avoid the "bounce" on iOS/macOS: https://stackoverflow.com/a/21247262/10128987 */}
+      <div tw="absolute inset-0 overflow-auto">
+        <AppBar />
+        {
+          // get a page root if one was set
+          Component.PageLayout ? (
+            <Component.PageLayout>
+              <Component {...pageProps} />
+            </Component.PageLayout>
+          ) : (
             <Component {...pageProps} />
-          </Component.PageLayout>
-        ) : (
-          <Component {...pageProps} />
-        )
-      }
+          )
+        }
+      </div>
     </>
   )
 }
