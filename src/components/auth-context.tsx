@@ -3,17 +3,32 @@ import { useSession } from 'next-auth/client'
 import type { Session } from 'next-auth'
 import { useRouter } from 'next/router'
 import { useQuery } from 'react-query'
+import type { QueryFunction } from 'react-query'
+import type { UserData } from 'pages/api/user'
 
 const AuthContext = createContext<Session | null | undefined>(undefined)
 
 export { AuthProvider, useAuth }
 
-async function fetchUser() {
+type UserQueryKey = ['user', { email: string }]
+// async function fetchUser() {
+const fetchUser: QueryFunction<UserData, UserQueryKey> = async ({
+  queryKey,
+}) => {
+  const [, { email }] = queryKey
+
+  if (!email) {
+    throw new Error(`No email provided`)
+  }
+
   const res = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL}/api/user`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: 'brookslybrand@gmail.com' }),
+    body: JSON.stringify({ email }),
   })
+  if (!res.ok) {
+    throw new Error(`Something went wrong`)
+  }
   return res.json()
 }
 
@@ -26,10 +41,15 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   )
   const router = useRouter()
 
-  // session?.user.email
-  const user = useQuery('user', fetchUser)
+  const email = session?.user.email ?? ''
+  const user = useQuery(['user', { email }], fetchUser, {
+    enabled: Boolean(email), // only fetch the user's data if they're logged in with an email
+  })
 
-  console.log(user)
+  if (user.status === 'success') {
+    console.log(user.data.updatedAt)
+  }
+  // console.log(session)
 
   useEffect(() => {
     // perform checks after the user session has finished loading
