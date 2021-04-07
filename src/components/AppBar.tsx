@@ -71,7 +71,7 @@ type HeaderProps = {
 function Header({ className, children }: HeaderProps) {
   return (
     <header
-      tw="w-screen h-12 px-4 flex flex-row items-center justify-between bg-gray-yellow-500 top-0 sticky"
+      tw="w-screen h-12 px-4 flex flex-row items-center justify-between bg-gray-yellow-500 top-0 sticky z-10"
       className={className}
     >
       {children}
