@@ -14,7 +14,7 @@ export default function Clients() {
         <Link href={'#'} passHref>
           <a>
             <div tw="py-5 inline-flex space-x-4 items-center text-gray-yellow-600 hover:text-copper-300">
-              <PlusIcon tw="fill-copper-300" />
+              <PlusIcon />
               <text tw="bl-text-2xl ">Add client</text>
             </div>
           </a>
@@ -22,7 +22,7 @@ export default function Clients() {
         {CLIENTS.map(({ id, name, employees }: ClientProps) => (
           <div key={id} tw="pb-6">
             <div tw="pb-2 inline-flex items-center space-x-2">
-              <EditIcon tw="stroke-copper-300 cursor-pointer" />
+              <EditIcon tw="cursor-pointer" />
               <text tw="bl-text-3xl text-gray-yellow-600">{name}</text>
             </div>
             {employees.map(({ id: eId, name, email, role }: EmployeeProps) => (
