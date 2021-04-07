@@ -21,7 +21,7 @@ export default function Projects() {
             </div>
           </a>
         </Link>
-        <div tw="grid p-5 lg:grid-cols-2 grid-cols-1  gap-x-16 gap-y-5">
+        <div tw="grid p-5 lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
           {PROJECTS.map((project: ProjectProps) => (
             <Card key={project.id} project={project} />
           ))}
