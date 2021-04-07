@@ -67,7 +67,7 @@ function EmailLogin() {
           ]}
           name="email"
           type="email"
-          placeholder="Email"
+          placeholder="email@example.com"
           value={email}
           onChange={(e) => {
             const value = e.currentTarget.value
