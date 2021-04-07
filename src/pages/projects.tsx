@@ -6,17 +6,15 @@ import { PlusIcon } from 'icons'
 
 export default function Projects() {
   return (
-    <div tw="h-full bg-gray-yellow-100">
+    <div tw="bg-gray-yellow-100">
       <Head>
-        <title>Project Journal</title>
+        <title>Projects | Project Journal</title>
       </Head>
       <Main>
         <Link href={'#'} passHref>
-          <a>
-            <div tw="p-5 inline-flex space-x-4 items-center text-gray-yellow-600 hover:text-copper-300">
-              <PlusIcon tw="w-6 h-6" />
-              <text tw="bl-text-2xl">Add project</text>
-            </div>
+          <a tw="p-5 inline-flex space-x-4 items-center text-gray-yellow-600 hover:text-copper-300">
+            <PlusIcon tw="w-6 h-6" />
+            <span tw="bl-text-2xl">Add project</span>
           </a>
         </Link>
         <div tw="grid p-5 lg:grid-cols-2 grid-cols-1  gap-x-16 gap-y-5">
@@ -48,7 +46,7 @@ function Main({ className, children }: MainProps) {
 }
 
 function Card({ project }: { project: ProjectProps }) {
-  const { name, description, image } = project
+  const { name, description, imageUrl } = project
 
   return (
     <Link href={'#'} passHref>
@@ -66,7 +64,7 @@ function Card({ project }: { project: ProjectProps }) {
             </div>
           </div>
           <div tw="col-span-1">
-            <img tw="h-full w-full object-cover" src={image} alt={name} />
+            <img tw="h-full w-full object-cover" src={imageUrl} alt={name} />
           </div>
         </div>
       </a>
@@ -78,7 +76,7 @@ type ProjectProps = {
   id: number
   name: string
   description: string
-  image: string
+  imageUrl: string
 }
 const PROJECTS = [
   {
@@ -86,13 +84,13 @@ const PROJECTS = [
     name: 'Project Tracker 2.1',
     description:
       'Update the Project Tracker. Fix bugs. Add TypeScript. Add Testing. Update Input Utilization for multi-project and multi-month input. Add Explore People.',
-    image: '/images/project_tracker.png',
+    imageUrl: '/images/project_tracker.png',
   },
   {
     id: 2,
     name: 'Calumet Optimizer',
     description:
       'Optimization of a lubrication plant schedule that generates high revenue + plant value change for a given scenario.',
-    image: '/images/calumet_optimizer.png',
+    imageUrl: '/images/calumet_optimizer.png',
   },
 ]
