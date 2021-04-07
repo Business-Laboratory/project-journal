@@ -29,7 +29,7 @@ function Login() {
           >
             continue with microsoft
           </Button>
-          <hr tw="w-full h-0 border-t-2 border-gray-yellow-300 border-dashed" />
+          <hr tw="w-full h-0 border-t border-gray-yellow-300 border-dashed" />
           <EmailLogin />
         </main>
       </div>

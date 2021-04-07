@@ -12,7 +12,7 @@ function Button({ disabled, ...props }: ButtonProps) {
       css={[
         tw`px-2 py-1 uppercase border-2 border-copper-300 bl-text-lg`,
         disabled
-          ? tw`bg-gray-yellow-300 text-gray-yellow-500 hover:(ring-0) focus:(ring-0) bg-opacity-60`
+          ? tw`bg-gray-yellow-300 bg-opacity-60 text-gray-yellow-600 text-opacity-60`
           : null,
       ]}
       disabled={disabled}
