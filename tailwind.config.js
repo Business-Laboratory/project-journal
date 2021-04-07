@@ -43,7 +43,22 @@ module.exports = {
       ],
       icon: ['"Anicons Regular"', 'sans-serif'],
     },
-    screens: { sm, md, lg },
+    screens: {
+      sm: '640px',
+      // => @media (min-width: 640px) { ... }
+
+      md: '768px',
+      // => @media (min-width: 768px) { ... }
+
+      lg: '1024px',
+      // => @media (min-width: 1024px) { ... }
+
+      xl: '1280px',
+      // => @media (min-width: 1280px) { ... }
+
+      '2xl': '1536px',
+      // => @media (min-width: 1536px) { ... }
+    },
     // we often work svgs, so these are useful
     fill: (theme) => ({
       ...theme('colors'),
@@ -123,6 +138,7 @@ module.exports = {
     },
     boxShadow: {
       bl: '0 4px 4px rgba(0, 0, 0, .25)',
+      'bl-lg': '0 5px 5px rgba(0, 0, 0, .5)',
     },
   },
   variants: {},
