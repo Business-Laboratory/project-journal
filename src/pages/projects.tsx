@@ -65,7 +65,6 @@ function Card({ project }: { project: ProjectProps }) {
         </div>
         <div tw="relative col-span-1">
           <Image tw="object-cover" layout="fill" src={imageUrl} alt={name} />
-          {/* <img tw="h-full w-full object-cover" src={imageUrl} alt={name} /> */}
         </div>
       </a>
     </Link>
