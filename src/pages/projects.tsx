@@ -1,22 +1,21 @@
 // Client/Admin Home that displays project cards
-import tw, { css } from 'twin.macro'
+import tw from 'twin.macro'
 import Head from 'next/head'
 import Link from 'next/link'
+import Image from 'next/image'
 import { PlusIcon } from 'icons'
 
 export default function Projects() {
   return (
-    <div tw="h-full bg-gray-yellow-100">
+    <div tw="bg-gray-yellow-100">
       <Head>
-        <title>Project Journal</title>
+        <title>Projects | Project Journal</title>
       </Head>
       <Main>
         <Link href={'#'} passHref>
-          <a>
-            <div tw="p-5 inline-flex space-x-4 items-center text-gray-yellow-600 hover:text-copper-300">
-              <PlusIcon tw="w-6 h-6" />
-              <text tw="bl-text-2xl">Add project</text>
-            </div>
+          <a tw="p-5 inline-flex space-x-4 items-center text-gray-yellow-600 hover:text-copper-300">
+            <PlusIcon tw="w-6 h-6" />
+            <span tw="bl-text-2xl">Add project</span>
           </a>
         </Link>
         <div tw="grid p-5 lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
@@ -48,26 +47,24 @@ function Main({ className, children }: MainProps) {
 }
 
 function Card({ project }: { project: ProjectProps }) {
-  const { name, description, image } = project
+  const { name, description, imageUrl } = project
 
   return (
     <Link href={'#'} passHref>
-      <a>
-        <div
-          css={[
-            tw`col-auto grid grid-cols-3 border-2 border-copper-300 rounded shadow-bl`,
-            tw`transition duration-300 ease-in-out hover:shadow-bl-lg transform hover:-translate-y-1 hover:-translate-x-1`,
-          ]}
-        >
-          <div tw="col-span-2 border-r border-gray-yellow-300">
-            <div tw="p-3 pb-0.5 bl-text-3xl text-gray-yellow-600">{name}</div>
-            <div tw="px-3 pb-3 bl-text-base text-gray-yellow-600">
-              {description}
-            </div>
+      <a
+        css={[
+          tw`col-auto grid grid-cols-3 border-2 border-copper-300 rounded shadow-bl`,
+          tw`transition duration-300 ease-in-out hover:shadow-bl-lg transform hover:-translate-y-1 hover:-translate-x-1`,
+        ]}
+      >
+        <div tw="col-span-2 border-r border-gray-yellow-300">
+          <div tw="p-3 pb-0.5 bl-text-3xl text-gray-yellow-600">{name}</div>
+          <div tw="px-3 pb-3 bl-text-base text-gray-yellow-600">
+            {description}
           </div>
-          <div tw="col-span-1">
-            <img tw="h-full w-full object-cover" src={image} alt={name} />
-          </div>
+        </div>
+        <div tw="relative col-span-1">
+          <Image tw="object-cover" layout="fill" src={imageUrl} alt={name} />
         </div>
       </a>
     </Link>
@@ -78,7 +75,7 @@ type ProjectProps = {
   id: number
   name: string
   description: string
-  image: string
+  imageUrl: string
 }
 const PROJECTS = [
   {
@@ -86,13 +83,13 @@ const PROJECTS = [
     name: 'Project Tracker 2.1',
     description:
       'Update the Project Tracker. Fix bugs. Add TypeScript. Add Testing. Update Input Utilization for multi-project and multi-month input. Add Explore People.',
-    image: '/images/project_tracker.png',
+    imageUrl: '/images/project_tracker.png',
   },
   {
     id: 2,
     name: 'Calumet Optimizer',
     description:
       'Optimization of a lubrication plant schedule that generates high revenue + plant value change for a given scenario.',
-    image: '/images/calumet_optimizer.png',
+    imageUrl: '/images/calumet_optimizer.png',
   },
 ]

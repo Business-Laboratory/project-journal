@@ -1,21 +1,21 @@
 // Alternate Admin Home view that displays clients
-import tw, { css } from 'twin.macro'
+import 'twin.macro'
 import Head from 'next/head'
 import Link from 'next/link'
 import { PlusIcon, EditIcon } from 'icons'
 
 export default function Clients() {
   return (
-    <div tw="h-full bg-gray-yellow-100">
+    <div tw="bg-gray-yellow-100">
       <Head>
-        <title>Project Journal</title>
+        <title>Clients | Project Journal</title>
       </Head>
       <Main>
         <Link href={'#'} passHref>
           <a>
             <div tw="py-5 inline-flex space-x-4 items-center text-gray-yellow-600 hover:text-copper-300">
               <PlusIcon tw="w-6 h-6" />
-              <text tw="bl-text-2xl ">Add client</text>
+              <span tw="bl-text-2xl ">Add client</span>
             </div>
           </a>
         </Link>
@@ -23,19 +23,19 @@ export default function Clients() {
           <div key={id} tw="pb-6">
             <div tw="pb-2 inline-flex items-center space-x-2">
               <EditIcon tw="cursor-pointer w-7 h-7" />
-              <text tw="bl-text-3xl text-gray-yellow-600">{name}</text>
+              <span tw="bl-text-3xl text-gray-yellow-600">{name}</span>
             </div>
             {employees.map(({ id: eId, name, email, role }: EmployeeProps) => (
               <div key={eId} tw="grid grid-cols-3 col-auto">
-                <text tw="bl-text-base text-gray-yellow-600 col-span-1 py-1">
+                <span tw="bl-text-base text-gray-yellow-600 col-span-1 py-1">
                   {name}
-                </text>
-                <text tw="bl-text-base text-gray-yellow-600 col-span-1 py-1">
+                </span>
+                <span tw="bl-text-base text-gray-yellow-600 col-span-1 py-1">
                   {email}
-                </text>
-                <text tw="bl-text-base text-gray-yellow-600 col-span-1 py-1">
+                </span>
+                <span tw="bl-text-base text-gray-yellow-600 col-span-1 py-1">
                   {role}
-                </text>
+                </span>
               </div>
             ))}
           </div>

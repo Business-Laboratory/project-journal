@@ -10,14 +10,64 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Models related to accounts come from https://next-auth.js.org/schemas/adapters#prisma-adapter
+
+model Account {
+  id                 Int       @id @default(autoincrement())
+  compoundId         String    @unique @map(name: "compound_id")
+  userId             Int       @map(name: "user_id")
+  providerType       String    @map(name: "provider_type")
+  providerId         String    @map(name: "provider_id")
+  providerAccountId  String    @map(name: "provider_account_id")
+  refreshToken       String?   @map(name: "refresh_token")
+  accessToken        String?   @map(name: "access_token")
+  accessTokenExpires DateTime? @map(name: "access_token_expires")
+  createdAt          DateTime  @default(now()) @map(name: "created_at")
+  updatedAt          DateTime  @default(now()) @map(name: "updated_at")
+
+
+  @@index([providerAccountId], name: "providerAccountId")
+  @@index([providerId], name: "providerId")
+  @@index([userId], name: "userId")
+  @@map(name: "accounts")
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map(name: "user_id")
+  expires      DateTime
+  sessionToken String   @unique @map(name: "session_token")
+  accessToken  String   @unique @map(name: "access_token")
+  createdAt    DateTime @default(now()) @map(name: "created_at")
+  updatedAt    DateTime @default(now()) @map(name: "updated_at")
+
+  @@map(name: "sessions")
+}
+
 model User {
-  id       Int       @id @default(autoincrement())
-  email    String    @unique
-  name     String
-  role     Role      @default(USER)
-  employee Employee?
+  id            Int       @id @default(autoincrement())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime? @map(name: "email_verified")
+  image         String?
+  createdAt     DateTime  @default(now()) @map(name: "created_at")
+  updatedAt     DateTime  @default(now()) @map(name: "updated_at")
+  role          Role      @default(USER)
+  employee      Employee?
+  projects      Project[]
 
   @@map(name: "users")
+}
+
+model VerificationRequest {
+  id         Int      @id @default(autoincrement())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  createdAt  DateTime @default(now()) @map(name: "created_at")
+  updatedAt  DateTime @default(now()) @map(name: "updated_at")
+
+  @@map(name: "verification_requests")
 }
 
 enum Role {
@@ -26,22 +76,24 @@ enum Role {
 }
 
 model Client {
-  id         Int        @id @default(autoincrement())
-  name       String
-  projects   Project[]
-  employees  Employee[]
-  logoUrl    String?
-  createdAt  DateTime   @default(now())
-  lastEdited DateTime   @default(now())
+  id        Int        @id @default(autoincrement())
+  name      String
+  projects  Project[]
+  employees Employee[]
+  logoUrl   String?    @map(name: "logo_url")
+  createdAt DateTime   @default(now()) @map(name: "created_at")
+  updatedAt DateTime   @default(now()) @map(name: "updated_at")
 
   @@map(name: "clients")
 }
 
 model Project {
   id       Int      @id @default(autoincrement())
-  client   Client   @relation(fields: [clientId], references: [id])
-  clientId Int
-  imageUrl String? // uncertain if String is the right type
+  name     String?
+  imageUrl String?  @map(name: "image_url")
+  client   Client?  @relation(fields: [clientId], references: [id])
+  clientId Int?     @map(name: "client_id")
+  team     User[]
   summary  Summary?
   updates  Update[]
 
@@ -51,31 +103,32 @@ model Project {
 model Employee {
   id       Int     @id @default(autoincrement())
   Client   Client  @relation(fields: [clientId], references: [id])
-  clientId Int
+  clientId Int     @map(name: "client_id")
   User     User    @relation(fields: [userId], references: [id])
-  userId   Int
+  userId   Int     @map(name: "user_id")
   title    String?
 
   @@map(name: "employees")
 }
 
 model Update {
-  id         Int      @id @default(autoincrement())
-  title      String
-  body       String
-  createdAt  DateTime @default(now())
-  lastEdited DateTime @default(now())
-  project    Project? @relation(fields: [projectId], references: [id])
-  projectId  Int?
+  id        Int      @id @default(autoincrement())
+  title     String
+  body      String
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @map(name: "updated_at")
+  project   Project? @relation(fields: [projectId], references: [id])
+  projectId Int?     @map(name: "project_id")
 
   @@map(name: "updates")
 }
 
 model Summary {
-  id        Int      @id @default(autoincrement())
-  body      String?
-  project   Project? @relation(fields: [projectId], references: [id])
-  projectId Int?
+  id          Int      @id @default(autoincrement())
+  description String?
+  roadmap     String?
+  project     Project? @relation(fields: [projectId], references: [id])
+  projectId   Int?     @map(name: "project_id")
 
   @@map(name: "summaries")
 }

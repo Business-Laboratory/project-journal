@@ -2,13 +2,11 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-```
+1. Clone the repo and change into the directory
+2. Run `npm i`
+3. Run `npm run pull-env` (if the project is not already linked, run
+   `vercel link`)
+4. run `npm run dev` and navigate to `localhost:3000`
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 

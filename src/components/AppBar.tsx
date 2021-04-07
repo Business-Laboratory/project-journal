@@ -1,31 +1,36 @@
-import tw, { css } from 'twin.macro'
-import Link from 'next/link'
+import tw from 'twin.macro'
 import { Dispatch, SetStateAction, useState } from 'react'
+import Link from 'next/link'
+import { signOut } from 'next-auth/client'
+import { useRouter } from 'next/router'
 import { Menu, MenuButton, MenuList, MenuItem } from '@reach/menu-button'
-import '@reach/menu-button/styles.css'
-import { LogoIcon } from 'icons'
-import { useRouter } from 'next/dist/client/router'
 
-export default function Appbar() {
+import { useAuth } from '@components/auth-context'
+import { LogoIcon } from 'icons'
+
+import '@reach/menu-button/styles.css'
+
+export default function AppBar() {
   const { pathname } = useRouter()
   // Will pull auth and projects/clients from context once implemented
   const [auth, setAuth] = useState<'admin' | 'user'>('admin')
+  const session = useAuth()
 
   return (
     <Header>
-      <div tw="inline-flex">
+      <nav tw="inline-flex">
         <Link href="/" passHref>
-          <a tw="ml-4 bl-text-3xl font-bold text-gray-yellow-100">
-            Project Journal
-          </a>
+          <a tw="bl-text-3xl font-bold text-gray-yellow-100">Project Journal</a>
         </Link>
-        {auth === 'admin' &&
+        {/* TODO: Clean this up */}
+        {session &&
+        auth === 'admin' &&
         (pathname === '/projects' || pathname === '/clients') ? (
-          <div tw="ml-8">
+          <div tw="ml-12 space-x-4">
             <Link href="/projects" passHref>
               <a
                 css={[
-                  tw`ml-4 bl-text-3xl`,
+                  tw`bl-text-3xl`,
                   pathname === '/projects'
                     ? tw`underline text-gray-yellow-100`
                     : tw`text-gray-yellow-300`,
@@ -37,7 +42,7 @@ export default function Appbar() {
             <Link href="/clients" passHref>
               <a
                 css={[
-                  tw`ml-4 bl-text-3xl`,
+                  tw`bl-text-3xl`,
                   pathname === '/clients'
                     ? tw`underline text-gray-yellow-100`
                     : tw`text-gray-yellow-300`,
@@ -48,12 +53,13 @@ export default function Appbar() {
             </Link>
           </div>
         ) : null}
-      </div>
-      <UserMenu
-        // delete these once auth is implemented
-        auth={auth}
-        setAuth={setAuth}
-      />
+      </nav>
+      {session ? (
+        <UserMenu
+          setAuth={setAuth} // delete this once auth is implemented
+          imageUrl={session.user.image ?? undefined}
+        />
+      ) : null}
     </Header>
   )
 }
@@ -65,7 +71,7 @@ type HeaderProps = {
 function Header({ className, children }: HeaderProps) {
   return (
     <header
-      tw="w-full h-12 flex flex-row items-center justify-between bg-gray-yellow-500 top-0 sticky"
+      tw="w-screen h-12 px-4 flex flex-row items-center justify-between bg-gray-yellow-500 top-0 sticky z-10"
       className={className}
     >
       {children}
@@ -74,22 +80,22 @@ function Header({ className, children }: HeaderProps) {
 }
 
 type MenuProps = {
-  auth: 'admin' | 'user'
   setAuth: Dispatch<SetStateAction<'admin' | 'user'>>
+  imageUrl?: string
 }
-function UserMenu({ auth, setAuth }: MenuProps) {
-  const menuItemTw = tw`flex py-1 px-3 w-full text-gray-yellow-200 text-xs cursor-pointer hover:bg-gray-yellow-200 hover:text-gray-yellow-600`
-
+function UserMenu({ setAuth, imageUrl }: MenuProps) {
   return (
     <Menu>
-      <MenuButton tw="mr-4">
-        <LogoIcon />
+      <MenuButton>
+        <div tw="w-6 h-6 rounded-full overflow-hidden">
+          {imageUrl ? <img src={imageUrl} alt="" /> : <LogoIcon />}
+        </div>
       </MenuButton>
       <MenuList
         tw="
-        mt-4 py-1 flex flex-col items-center bg-gray-yellow-600 
+        mt-4 py-1 flex flex-col items-center bg-gray-yellow-600
         border-solid border border-copper-300
-        rounded 
+        rounded
       "
       >
         <MenuItem css={menuItemTw} onSelect={() => setAuth('user')}>
@@ -98,7 +104,19 @@ function UserMenu({ auth, setAuth }: MenuProps) {
         <MenuItem css={menuItemTw} onSelect={() => setAuth('admin')}>
           Admin
         </MenuItem>
+        <MenuItem
+          css={menuItemTw}
+          onSelect={() => {
+            signOut({
+              callbackUrl: `${process.env.NEXT_PUBLIC_VERCEL_URL}/login`,
+            })
+          }}
+        >
+          Log out
+        </MenuItem>
       </MenuList>
     </Menu>
   )
 }
+
+const menuItemTw = tw`flex w-full px-3 py-1 text-xs uppercase cursor-pointer text-gray-yellow-200 hover:bg-gray-yellow-200 hover:text-gray-yellow-600`
