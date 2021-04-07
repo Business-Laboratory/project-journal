@@ -1,5 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
 import prisma from '@lib/prisma'
+import { getSession } from 'next-auth/client'
+import type { NextApiRequest, NextApiResponse } from 'next'
 import type { UnwrapPromise } from '@types'
 
 export type UserData = UnwrapPromise<ReturnType<typeof getUser>>
@@ -8,9 +9,15 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const session = await getSession({ req })
+  if (!session) {
+    res.status(401).json({ error: 'User is not authorized' })
+    return
+  }
   const email = req.body.email
   if (!email) {
     res.status(501).json({ error: `No email given` })
+    return
   }
 
   try {

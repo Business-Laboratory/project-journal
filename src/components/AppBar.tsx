@@ -13,8 +13,7 @@ import '@reach/menu-button/styles.css'
 export default function AppBar() {
   const { pathname } = useRouter()
   // Will pull auth and projects/clients from context once implemented
-  const [auth, setAuth] = useState<'admin' | 'user'>('admin')
-  const session = useAuth()
+  const auth = useAuth()
 
   return (
     <Header>
@@ -23,8 +22,8 @@ export default function AppBar() {
           <a tw="bl-text-3xl font-bold text-gray-yellow-100">Project Journal</a>
         </Link>
         {/* TODO: Clean this up */}
-        {session &&
-        auth === 'admin' &&
+        {auth &&
+        auth.role === 'ADMIN' &&
         (pathname === '/projects' || pathname === '/clients') ? (
           <div tw="ml-12 space-x-4">
             <Link href="/projects" passHref>
@@ -54,12 +53,7 @@ export default function AppBar() {
           </div>
         ) : null}
       </nav>
-      {session ? (
-        <UserMenu
-          setAuth={setAuth} // delete this once auth is implemented
-          imageUrl={session.user.image ?? undefined}
-        />
-      ) : null}
+      {auth ? <UserMenu imageUrl={auth.image ?? undefined} /> : null}
     </Header>
   )
 }
@@ -80,10 +74,9 @@ function Header({ className, children }: HeaderProps) {
 }
 
 type MenuProps = {
-  setAuth: Dispatch<SetStateAction<'admin' | 'user'>>
   imageUrl?: string
 }
-function UserMenu({ setAuth, imageUrl }: MenuProps) {
+function UserMenu({ imageUrl }: MenuProps) {
   return (
     <Menu>
       <MenuButton>
@@ -98,12 +91,6 @@ function UserMenu({ setAuth, imageUrl }: MenuProps) {
         rounded
       "
       >
-        <MenuItem css={menuItemTw} onSelect={() => setAuth('user')}>
-          User
-        </MenuItem>
-        <MenuItem css={menuItemTw} onSelect={() => setAuth('admin')}>
-          Admin
-        </MenuItem>
         <MenuItem
           css={menuItemTw}
           onSelect={() => {
