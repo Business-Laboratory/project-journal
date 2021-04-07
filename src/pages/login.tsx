@@ -12,7 +12,7 @@ function Login() {
       <Header>
         <title>Login | Project Journal</title>
       </Header>
-      <div tw="mx-auto max-w-max my-10 text-gray-yellow-600">
+      <div tw="mx-auto px-4 max-w-max my-10 text-gray-yellow-600">
         <main tw="flex flex-col mt-9 space-y-9">
           <h1 tw="bl-text-4xl text-center">Log in</h1>
           <Button
@@ -29,7 +29,7 @@ function Login() {
           >
             continue with microsoft
           </Button>
-          <hr tw="w-full h-0 border-t-2 border-lichen-green-200 border-dashed" />
+          <hr tw="w-full h-0 border-t-2 border-gray-yellow-300 border-dashed" />
           <EmailLogin />
         </main>
       </div>
