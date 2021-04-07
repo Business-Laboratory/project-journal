@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client'
+
+export { prisma, getUser }
 declare global {
   var prismaClient: PrismaClient
 }
@@ -15,3 +17,15 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 export default prisma
+
+async function getUser(email: string) {
+  const user = await prisma.user.findUnique({
+    where: { email },
+  })
+
+  if (user === null) {
+    throw new Error(`No user found`)
+  }
+
+  return user
+}

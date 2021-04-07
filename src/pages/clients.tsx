@@ -4,7 +4,7 @@ import Head from 'next/head'
 
 export default function Clients() {
   return (
-    <div tw="flex flex-col bg-gray-yellow-100">
+    <>
       <Head>
         <title>Layout examples</title>
       </Head>
@@ -12,7 +12,7 @@ export default function Clients() {
       <div tw="flex flex-row flex-1 overflow-hidden">
         <Main></Main>
       </div>
-    </div>
+    </>
   )
 }
 

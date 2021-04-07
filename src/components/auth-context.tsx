@@ -1,8 +1,10 @@
 import 'twin.macro'
 import { createContext, useContext, useEffect, useState } from 'react'
-import { useSession } from 'next-auth/client'
+import { signOut, useSession } from 'next-auth/client'
 import { useRouter } from 'next/router'
 import { QueryStatus, useQuery } from 'react-query'
+
+import { Button } from './button'
 import type { QueryFunction } from 'react-query'
 import type { UserData } from 'pages/api/user'
 
@@ -19,7 +21,26 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   if (user.status === 'error') {
-    return <h1 tw="bl-text-3xl text-matisse-red-200">Something went wrong</h1>
+    let message = 'Something went wrong'
+    if (user.error instanceof Error) {
+      message = user.error.message
+    }
+
+    return (
+      <div tw=" mx-auto px-4 max-w-max my-10 text-gray-yellow-600 flex flex-col items-center space-y-8">
+        <h1 tw="bl-text-4xl text-center">{message}</h1>
+        <Button
+          tw="max-w-fit"
+          onClick={() => {
+            signOut({
+              callbackUrl: `${process.env.NEXT_PUBLIC_VERCEL_URL}/login`,
+            })
+          }}
+        >
+          Login with another account
+        </Button>
+      </div>
+    )
   }
 
   if (user.status === 'success') {
@@ -101,7 +122,9 @@ const fetchUser: QueryFunction<UserData, UserQueryKey> = async ({
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email }),
   })
-  if (!res.ok) {
+  if (res.status === 401) {
+    throw new Error(`User is not authorized to use this app`)
+  } else if (!res.ok) {
     throw new Error(`Something went wrong`)
   }
   return res.json()

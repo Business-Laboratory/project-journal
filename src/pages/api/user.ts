@@ -22,6 +22,11 @@ export default async function handler(
 
   try {
     const user = await getUser(req.body.email)
+
+    if (user.role === null) {
+      res.status(401).json({ error: 'User is not authorized' })
+    }
+
     res.status(200).json(user)
   } catch (error) {
     res.status(501).json({ error: `No user found` })
@@ -31,10 +36,6 @@ export default async function handler(
 async function getUser(email: string) {
   const user = await prisma.user.findUnique({
     where: { email },
-    include: {
-      projects: true,
-      employee: true,
-    },
   })
 
   if (user === null) {

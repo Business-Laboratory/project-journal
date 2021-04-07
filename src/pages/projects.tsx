@@ -7,7 +7,7 @@ import { PlusIcon } from 'icons'
 
 export default function Projects() {
   return (
-    <div tw="bg-gray-yellow-100">
+    <>
       <Head>
         <title>Projects | Project Journal</title>
       </Head>
@@ -27,7 +27,7 @@ export default function Projects() {
           ))}
         </div>
       </Main>
-    </div>
+    </>
   )
 }
 
@@ -53,8 +53,8 @@ function Card({ project }: { project: ProjectProps }) {
     <Link href={'#'} passHref>
       <a
         css={[
-          tw`col-auto grid grid-cols-3 border-2 border-copper-300 rounded shadow-bl`,
-          tw`transition duration-300 ease-in-out hover:shadow-bl-lg transform hover:-translate-y-1 hover:-translate-x-1`,
+          tw`grid grid-cols-3 col-auto border-2 rounded border-copper-300 shadow-bl`,
+          tw`transition duration-300 ease-in-out transform hover:shadow-bl-lg hover:-translate-y-1 hover:-translate-x-1`,
         ]}
       >
         <div tw="col-span-2 border-r border-gray-yellow-300">
