@@ -13,7 +13,7 @@ function Login() {
         <title>Login | Project Journal</title>
       </Header>
       <div tw="mx-auto px-4 max-w-max my-10 text-gray-yellow-600">
-        <main tw="flex flex-col mt-9 space-y-9">
+        <main tw="flex flex-col space-y-9">
           <h1 tw="bl-text-4xl text-center">Log in</h1>
           <Button
             onClick={() => {
@@ -76,7 +76,7 @@ function EmailLogin() {
           }}
         />
       </div>
-      <p tw="bl-text-sm max-w-fit">
+      <p tw="bl-text-sm max-w-max">
         You will be sent a link to a password-free sign in
       </p>
       <Button
