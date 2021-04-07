@@ -13,11 +13,9 @@ export default function Projects() {
       <Main>
         <Link href={'#'} passHref>
           <a>
-            <div tw="p-5 inline-flex space-x-4 items-center">
+            <div tw="p-5 inline-flex space-x-4 items-center text-gray-yellow-600 hover:text-copper-300">
               <PlusIcon tw="fill-copper-300" />
-              <text tw="bl-text-2xl text-gray-yellow-600 hover:text-copper-300">
-                Add project
-              </text>
+              <text tw="bl-text-2xl">Add project</text>
             </div>
           </a>
         </Link>
