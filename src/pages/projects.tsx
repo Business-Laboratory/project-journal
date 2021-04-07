@@ -1,5 +1,5 @@
 // Client/Admin Home that displays project cards
-import tw, { css } from 'twin.macro'
+import tw from 'twin.macro'
 import Head from 'next/head'
 import Link from 'next/link'
 import { PlusIcon } from 'icons'
