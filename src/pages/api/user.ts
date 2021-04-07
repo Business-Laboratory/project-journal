@@ -1,4 +1,4 @@
-import prisma from '@lib/prisma'
+import { getUser } from '@lib/prisma'
 import { getSession } from 'next-auth/client'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import type { UnwrapPromise } from '@types'
@@ -31,16 +31,4 @@ export default async function handler(
   } catch (error) {
     res.status(501).json({ error: `No user found` })
   }
-}
-
-async function getUser(email: string) {
-  const user = await prisma.user.findUnique({
-    where: { email },
-  })
-
-  if (user === null) {
-    throw new Error(`No user found`)
-  }
-
-  return user
 }

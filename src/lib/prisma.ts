@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 
-export { prisma, getUser }
+export { prisma, getUser, getEmployeesProducts }
 declare global {
   var prismaClient: PrismaClient
 }
@@ -16,11 +16,36 @@ if (process.env.NODE_ENV === 'production') {
   prisma = global.prismaClient
 }
 
-export default prisma
-
 async function getUser(email: string) {
   const user = await prisma.user.findUnique({
-    where: { email },
+    where: {
+      email,
+    },
+    include: {
+      projects: true,
+      employee: true,
+    },
+  })
+
+  if (user === null) {
+    throw new Error(`No user found`)
+  }
+
+  return user
+}
+
+async function getEmployeesProducts(userId: number) {
+  const user = await prisma.employee.findUnique({
+    where: {
+      userId,
+    },
+    include: {
+      Client: {
+        include: {
+          projects: true,
+        },
+      },
+    },
   })
 
   if (user === null) {

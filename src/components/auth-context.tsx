@@ -43,9 +43,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     )
   }
 
-  if (user.status === 'success') {
-    console.log(user.data)
-  }
+  console.log(user.data)
 
   return (
     <AuthContext.Provider value={user.data ?? null}>

@@ -105,7 +105,7 @@ model Employee {
   Client   Client  @relation(fields: [clientId], references: [id])
   clientId Int     @map(name: "client_id")
   User     User    @relation(fields: [userId], references: [id])
-  userId   Int     @map(name: "user_id")
+  userId   Int     @unique @map(name: "user_id")
   title    String?
 
   @@map(name: "employees")

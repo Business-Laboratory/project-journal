@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import type { AppProps } from 'next/app'
 import { GlobalStyles } from 'twin.macro'
 import { QueryClient, QueryClientProvider } from 'react-query'
@@ -17,6 +17,19 @@ type ComponentWithPageLayout = {
 const queryClient = new QueryClient()
 
 function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
+  useEffect(() => {
+    fetch('/api/getEmployeesProducts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: 8,
+      }),
+    }).then(async (res) => {
+      const data = await res.json()
+      console.log('Success!', data)
+    })
+  }, [])
+
   return (
     <QueryClientProvider client={queryClient}>
       <GlobalStyles />

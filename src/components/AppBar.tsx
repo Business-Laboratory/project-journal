@@ -86,10 +86,10 @@ function UserMenu({ imageUrl }: MenuProps) {
       </MenuButton>
       <MenuList
         tw="
-        mt-4 py-1 flex flex-col items-center bg-gray-yellow-600
-        border-solid border border-copper-300
-        rounded
-      "
+          mt-4 py-1 flex flex-col items-center bg-gray-yellow-600
+          border-solid border border-copper-300
+          rounded
+        "
       >
         <MenuItem
           css={menuItemTw}
