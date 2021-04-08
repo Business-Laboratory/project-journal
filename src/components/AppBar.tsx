@@ -12,7 +12,7 @@ import '@reach/menu-button/styles.css'
 export default function AppBar() {
   const { pathname } = useRouter()
   // Will pull auth and projects/clients from context once implemented
-  const auth = useAuth()
+  const user = useAuth()
 
   return (
     <Header>
@@ -20,8 +20,8 @@ export default function AppBar() {
         <Link href="/" passHref>
           <a tw="bl-text-3xl font-bold text-gray-yellow-100">Project Journal</a>
         </Link>
-        {/* TODO: Clean this up */}
-        {pathname === '/projects' || pathname === '/clients' ? (
+        {user?.role === 'ADMIN' &&
+        (pathname === '/projects' || pathname === '/clients') ? (
           <div tw="ml-12 space-x-4">
             <Link href="/projects" passHref>
               <a
@@ -50,7 +50,7 @@ export default function AppBar() {
           </div>
         ) : null}
       </nav>
-      {auth ? <UserMenu imageUrl={auth.image ?? undefined} /> : null}
+      {user ? <UserMenu imageUrl={user.image ?? undefined} /> : null}
     </Header>
   )
 }
