@@ -102,26 +102,3 @@ function Card({ name, description, imageUrl }: CardProps) {
     </Link>
   )
 }
-
-type ProjectProps = {
-  id: number
-  name: string
-  description: string
-  imageUrl: string
-}
-const PROJECTS = [
-  {
-    id: 1,
-    name: 'Project Tracker 2.1',
-    description:
-      'Update the Project Tracker. Fix bugs. Add TypeScript. Add Testing. Update Input Utilization for multi-project and multi-month input. Add Explore People.',
-    imageUrl: '/images/project_tracker.png',
-  },
-  {
-    id: 2,
-    name: 'Calumet Optimizer',
-    description:
-      'Optimization of a lubrication plant schedule that generates high revenue + plant value change for a given scenario.',
-    imageUrl: '/images/calumet_optimizer.png',
-  },
-]

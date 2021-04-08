@@ -1,5 +1,4 @@
 import tw from 'twin.macro'
-import { Dispatch, SetStateAction, useState } from 'react'
 import Link from 'next/link'
 import { signOut } from 'next-auth/client'
 import { useRouter } from 'next/router'
