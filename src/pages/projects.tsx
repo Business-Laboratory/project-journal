@@ -21,7 +21,7 @@ export default function Projects() {
 
   if (status === 'error') {
     return (
-      <h1 tw="mt-10 bl-text-3xl max-w-prose text-center text-matisse-red-200">
+      <h1 tw="bl-text-3xl max-w-prose text-center text-matisse-red-200">
         Something went wrong
       </h1>
     )
@@ -78,9 +78,9 @@ type MainProps = {
 }
 function Main({ className, children }: MainProps) {
   return (
-    <main tw="w-9/12 mt-8 mx-auto text-gray-yellow-600" className={className}>
+    <div tw="w-9/12 mx-auto" className={className}>
       {children}
-    </main>
+    </div>
   )
 }
 
