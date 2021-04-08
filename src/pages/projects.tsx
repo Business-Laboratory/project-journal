@@ -37,14 +37,14 @@ export default function Projects() {
       <Main>
         {user?.role === 'ADMIN' ? (
           <Link href={'#'} passHref>
-            <a tw="p-5 inline-flex space-x-4 items-center hover:text-copper-300">
+            <a tw="inline-flex space-x-2 items-center hover:text-copper-300">
               <PlusIcon tw="w-6 h-6" />
               <span tw="bl-text-2xl">Add project</span>
             </a>
           </Link>
         ) : null}
         {projects.length > 0 ? (
-          <div tw="grid p-5 lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
+          <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
             {projects.map((project, idx) => (
               <Card
                 key={project.id}
@@ -79,7 +79,7 @@ type MainProps = {
 function Main({ className, children }: MainProps) {
   return (
     <main
-      tw="w-9/12 mt-8 mx-auto max-w-lg lg:max-w-none text-gray-yellow-600"
+      tw="w-9/12 mt-8 space-y-8 mx-auto max-w-lg lg:max-w-none text-gray-yellow-600"
       className={className}
     >
       {children}
