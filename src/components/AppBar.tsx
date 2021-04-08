@@ -21,9 +21,7 @@ export default function AppBar() {
           <a tw="bl-text-3xl font-bold text-gray-yellow-100">Project Journal</a>
         </Link>
         {/* TODO: Clean this up */}
-        {auth &&
-        auth.role === 'ADMIN' &&
-        (pathname === '/projects' || pathname === '/clients') ? (
+        {pathname === '/projects' || pathname === '/clients' ? (
           <div tw="ml-12 space-x-4">
             <Link href="/projects" passHref>
               <a

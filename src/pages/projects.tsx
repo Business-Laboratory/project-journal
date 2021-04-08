@@ -5,11 +5,13 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { PlusIcon } from 'icons'
 import { useQuery } from 'react-query'
+import { useAuth } from '@components/auth-context'
 
 import type { QueryFunction } from 'react-query'
 import type { ProjectsData } from './api/projects'
 
 export default function Projects() {
+  const user = useAuth()
   const { status, data } = useQuery('projects', fetchProjects)
 
   // TODO: figure out the loading state
@@ -33,12 +35,14 @@ export default function Projects() {
         <title>Projects | Project Journal</title>
       </Head>
       <Main>
-        <Link href={'#'} passHref>
-          <a tw="p-5 inline-flex space-x-4 items-center hover:text-copper-300">
-            <PlusIcon tw="w-6 h-6" />
-            <span tw="bl-text-2xl">Add project</span>
-          </a>
-        </Link>
+        {user?.role === 'ADMIN' ? (
+          <Link href={'#'} passHref>
+            <a tw="p-5 inline-flex space-x-4 items-center hover:text-copper-300">
+              <PlusIcon tw="w-6 h-6" />
+              <span tw="bl-text-2xl">Add project</span>
+            </a>
+          </Link>
+        ) : null}
         {projects.length > 0 ? (
           <div tw="grid p-5 lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
             {projects.map((project, idx) => (
