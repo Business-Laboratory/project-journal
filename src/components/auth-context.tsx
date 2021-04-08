@@ -13,7 +13,7 @@ const AuthContext = createContext<UserData | null | undefined>(undefined)
 export { AuthProvider, useAuth }
 
 function AuthProvider({ children }: { children: React.ReactNode }) {
-  const user = useUserQuery()
+  const user = useGetUser()
 
   // TODO: add loading screen instead of bailing
   if (user.status === 'loading') {
@@ -43,8 +43,6 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     )
   }
 
-  console.log(user.data)
-
   return (
     <AuthContext.Provider value={user.data ?? null}>
       {children}
@@ -60,7 +58,7 @@ function useAuth() {
   return auth
 }
 
-function useUserQuery() {
+function useGetUser() {
   const [session, loading] = useSession()
   const routeCheck = useRedirect(session, loading)
 
@@ -105,7 +103,6 @@ function useRedirect(...args: ReturnType<typeof useSession>) {
 }
 
 type UserQueryKey = ['user', { email: string }]
-// async function fetchUser() {
 const fetchUser: QueryFunction<UserData, UserQueryKey> = async ({
   queryKey,
 }) => {

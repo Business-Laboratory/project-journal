@@ -4,8 +4,24 @@ import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
 import { PlusIcon } from 'icons'
+import { useQuery } from 'react-query'
+
+import type { QueryFunction } from 'react-query'
+import type { ProjectsData } from './api/projects'
 
 export default function Projects() {
+  const { status, data } = useQuery('projects', fetchProjects)
+
+  if (status === 'loading') {
+    return <p>It's loading</p>
+  }
+
+  if (status === 'error') {
+    return <p>It's error'</p>
+  }
+
+  const projects = data ?? []
+
   return (
     <>
       <Head>
@@ -13,22 +29,38 @@ export default function Projects() {
       </Head>
       <Main>
         <Link href={'#'} passHref>
-          <a tw="p-5 inline-flex space-x-4 items-center text-gray-yellow-600 hover:text-copper-300">
+          <a tw="p-5 inline-flex space-x-4 items-center hover:text-copper-300">
             <PlusIcon tw="w-6 h-6" />
             <span tw="bl-text-2xl">Add project</span>
           </a>
         </Link>
-        <div tw="grid p-5 lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
-          {PROJECTS.map((project: ProjectProps) => (
-            <Card key={project.id} project={project} />
-          ))}
-          {PROJECTS.map((project: ProjectProps) => (
-            <Card key={project.id} project={project} />
-          ))}
-        </div>
+        {projects.length > 0 ? (
+          <div tw="grid p-5 lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
+            {projects.map((project, idx) => (
+              <Card
+                key={project.id}
+                name={project.name ?? `Untitled Project (${idx + 1})`}
+                description={project.summary?.description ?? null}
+                imageUrl={project.imageUrl}
+              />
+            ))}
+          </div>
+        ) : (
+          <h1 tw="bl-text-3xl max-w-prose text-center">
+            There are currently no projects assigned to you
+          </h1>
+        )}
       </Main>
     </>
   )
+}
+
+const fetchProjects: QueryFunction<ProjectsData> = async () => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL}/api/projects`)
+  if (!res.ok) {
+    throw new Error(`Something went wrong`)
+  }
+  return res.json()
 }
 
 type MainProps = {
@@ -37,18 +69,18 @@ type MainProps = {
 }
 function Main({ className, children }: MainProps) {
   return (
-    <main
-      tw="w-9/12 mt-8 mx-auto overflow-x-hidden overflow-y-auto"
-      className={className}
-    >
+    <main tw="w-9/12 mt-8 mx-auto text-gray-yellow-600" className={className}>
       {children}
     </main>
   )
 }
 
-function Card({ project }: { project: ProjectProps }) {
-  const { name, description, imageUrl } = project
-
+type CardProps = {
+  name: string
+  description: string | null
+  imageUrl: string | null
+}
+function Card({ name, description, imageUrl }: CardProps) {
   return (
     <Link href={'#'} passHref>
       <a
@@ -58,13 +90,13 @@ function Card({ project }: { project: ProjectProps }) {
         ]}
       >
         <div tw="col-span-2 border-r border-gray-yellow-300">
-          <div tw="p-3 pb-0.5 bl-text-3xl text-gray-yellow-600">{name}</div>
-          <div tw="px-3 pb-3 bl-text-base text-gray-yellow-600">
-            {description}
-          </div>
+          <div tw="p-3 pb-0.5 bl-text-3xl">{name}</div>
+          <div tw="px-3 pb-3 bl-text-base">{description}</div>
         </div>
         <div tw="relative col-span-1">
-          <Image tw="object-cover" layout="fill" src={imageUrl} alt={name} />
+          {imageUrl ? (
+            <Image tw="object-cover" layout="fill" src={imageUrl} alt={name} />
+          ) : null}
         </div>
       </a>
     </Link>
