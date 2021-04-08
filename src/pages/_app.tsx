@@ -16,7 +16,7 @@ function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
     <AuthProvider>
       <GlobalStyles />
       {/* this style is applied to avoid the "bounce" on iOS/macOS: https://stackoverflow.com/a/21247262/10128987 */}
-      <div tw="absolute inset-0 overflow-auto">
+      <div tw="absolute inset-0 overflow-auto bg-gray-yellow-100">
         <AppBar />
         {
           // get a page root if one was set

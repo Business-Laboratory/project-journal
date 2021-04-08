@@ -7,47 +7,35 @@ import { Fragment } from 'react'
 
 export default function Clients() {
   return (
-    <div tw="bg-gray-yellow-100">
+    <div>
       <Head>
-        <title>Clients |Project Journal</title>
+        <title>Clients | Project Journal</title>
       </Head>
       <Main>
         <Link href={'#'} passHref>
           <a>
-            <div tw="py-5 inline-flex space-x-4 items-center text-gray-yellow-600 hover:text-copper-300">
+            <div tw="inline-flex space-x-4 items-center hover:text-copper-300">
               <PlusIcon tw="w-6 h-6" />
-              <span tw="bl-text-2xl ">Add client</span>
+              <span tw="bl-text-2xl">Add client</span>
             </div>
           </a>
         </Link>
         {CLIENTS.map(({ id, name, employees }: ClientProps) => (
-          <div key={id} tw="pb-6">
-            <div tw="pb-2 inline-flex items-center space-x-2">
+          <div key={id} tw="space-y-4">
+            <div tw="inline-flex items-center space-x-2">
               <EditIcon tw="cursor-pointer w-7 h-7" />
-              <span tw="bl-text-3xl text-gray-yellow-600">{name}</span>
+              <span tw="bl-text-3xl">{name}</span>
             </div>
-            <div tw="grid grid-cols-3 col-auto">
-              <span tw="bl-text-lg text-gray-yellow-600 col-span-1 py-1">
-                Name
-              </span>
-              <span tw="bl-text-lg text-gray-yellow-600 col-span-1 py-1">
-                Email
-              </span>
-              <span tw="bl-text-lg text-gray-yellow-600 col-span-1 py-1">
-                Role
-              </span>
+            <div tw="grid grid-cols-3 gap-x-3 gap-y-2 bl-text-lg">
+              <span tw="col-span-1">Name</span>
+              <span tw="col-span-1">Email</span>
+              <span tw="col-span-1">Role</span>
               {employees.map(
                 ({ id: eId, name, email, role }: EmployeeProps) => (
                   <Fragment key={eId}>
-                    <span tw="bl-text-base text-gray-yellow-600 col-span-1 py-1">
-                      {name}
-                    </span>
-                    <span tw="bl-text-base text-gray-yellow-600 col-span-1 py-1">
-                      {email}
-                    </span>
-                    <span tw="bl-text-base text-gray-yellow-600 col-span-1 py-1">
-                      {role}
-                    </span>
+                    <span tw="bl-text-base col-span-1">{name}</span>
+                    <span tw="bl-text-base col-span-1">{email}</span>
+                    <span tw="bl-text-base col-span-1">{role}</span>
                   </Fragment>
                 )
               )}
@@ -66,7 +54,7 @@ type MainProps = {
 function Main({ className, children }: MainProps) {
   return (
     <main
-      tw="w-7/12 mt-8 mx-auto overflow-x-hidden overflow-y-auto"
+      tw="max-w-max mt-10 mx-auto space-y-8 text-gray-yellow-600 overflow-x-hidden overflow-y-auto"
       className={className}
     >
       {children}
