@@ -78,7 +78,10 @@ type MainProps = {
 }
 function Main({ className, children }: MainProps) {
   return (
-    <main tw="w-9/12 mt-8 mx-auto text-gray-yellow-600" className={className}>
+    <main
+      tw="w-9/12 mt-8 mx-auto max-w-lg lg:max-w-none text-gray-yellow-600"
+      className={className}
+    >
       {children}
     </main>
   )
