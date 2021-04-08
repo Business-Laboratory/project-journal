@@ -54,7 +54,7 @@ type MainProps = {
 function Main({ className, children }: MainProps) {
   return (
     <main
-      tw="max-w-max mt-10 mx-auto space-y-8 text-gray-yellow-600 overflow-x-hidden overflow-y-auto"
+      tw="max-w-max mx-auto space-y-8 overflow-x-hidden overflow-y-auto"
       className={className}
     >
       {children}

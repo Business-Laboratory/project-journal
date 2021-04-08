@@ -27,7 +27,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     return (
-      <div tw=" mx-auto px-4 max-w-max my-10 text-gray-yellow-600 flex flex-col items-center space-y-8">
+      <div tw="mx-auto px-4 max-w-max flex flex-col items-center space-y-8">
         <h1 tw="bl-text-4xl text-center">{message}</h1>
         <Button
           tw="max-w-fit"

@@ -12,7 +12,7 @@ function Login() {
       <Header>
         <title>Login | Project Journal</title>
       </Header>
-      <div tw="mx-auto px-4 max-w-max my-10 text-gray-yellow-600">
+      <div tw="mx-auto px-4 max-w-max">
         <main tw="flex flex-col space-y-9">
           <h1 tw="bl-text-4xl text-center">Log in</h1>
           <Button

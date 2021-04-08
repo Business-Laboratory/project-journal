@@ -21,7 +21,7 @@ function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
     <QueryClientProvider client={queryClient}>
       <GlobalStyles />
       {/* this style is applied to avoid the "bounce" on iOS/macOS: https://stackoverflow.com/a/21247262/10128987 */}
-      <div tw="absolute inset-0 overflow-auto bg-gray-yellow-100">
+      <div tw="absolute inset-0 overflow-auto bg-gray-yellow-100 text-gray-yellow-600">
         <AuthProvider>
           <AppBar />
           {
