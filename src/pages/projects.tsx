@@ -12,12 +12,17 @@ import type { ProjectsData } from './api/projects'
 export default function Projects() {
   const { status, data } = useQuery('projects', fetchProjects)
 
+  // TODO: figure out the loading state
   if (status === 'loading') {
-    return <p>It's loading</p>
+    return null
   }
 
   if (status === 'error') {
-    return <p>It's error'</p>
+    return (
+      <h1 tw="mt-10 bl-text-3xl max-w-prose text-center text-matisse-red-200">
+        Something went wrong
+      </h1>
+    )
   }
 
   const projects = data ?? []
