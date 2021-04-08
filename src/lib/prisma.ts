@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client'
+
+export { prisma }
 declare global {
   var prismaClient: PrismaClient
 }
@@ -13,5 +15,3 @@ if (process.env.NODE_ENV === 'production') {
   }
   prisma = global.prismaClient
 }
-
-export default prisma

@@ -1,7 +1,3 @@
-const sm = '360px'
-const md = '720px'
-const lg = '1440px'
-
 module.exports = {
   purge: ['./src/**/*.{js,ts,jsx,tsx}', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
