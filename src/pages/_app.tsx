@@ -24,16 +24,18 @@ function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
       <div tw="absolute inset-0 overflow-auto bg-gray-yellow-100 text-gray-yellow-600">
         <AuthProvider>
           <AppBar />
-          {
-            // get a page root if one was set
-            Component.PageLayout ? (
-              <Component.PageLayout>
+          <main tw="pt-10">
+            {
+              // get a page root if one was set
+              Component.PageLayout ? (
+                <Component.PageLayout>
+                  <Component {...pageProps} />
+                </Component.PageLayout>
+              ) : (
                 <Component {...pageProps} />
-              </Component.PageLayout>
-            ) : (
-              <Component {...pageProps} />
-            )
-          }
+              )
+            }
+          </main>
         </AuthProvider>
       </div>
     </QueryClientProvider>

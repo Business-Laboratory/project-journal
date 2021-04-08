@@ -53,12 +53,12 @@ type MainProps = {
 }
 function Main({ className, children }: MainProps) {
   return (
-    <main
+    <div
       tw="max-w-max mx-auto space-y-8 overflow-x-hidden overflow-y-auto"
       className={className}
     >
       {children}
-    </main>
+    </div>
   )
 }
 

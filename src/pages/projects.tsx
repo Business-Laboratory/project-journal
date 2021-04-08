@@ -78,9 +78,9 @@ type MainProps = {
 }
 function Main({ className, children }: MainProps) {
   return (
-    <main tw="w-9/12 mx-auto" className={className}>
+    <div tw="w-9/12 mx-auto" className={className}>
       {children}
-    </main>
+    </div>
   )
 }
 
