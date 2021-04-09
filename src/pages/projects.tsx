@@ -65,7 +65,7 @@ export default function Projects() {
 }
 
 const fetchProjects: QueryFunction<ProjectsData> = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL}/api/projects`)
+  const res = await fetch(`/api/projects`)
   if (!res.ok) {
     throw new Error(`Something went wrong`)
   }

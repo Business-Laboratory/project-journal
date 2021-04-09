@@ -92,7 +92,7 @@ function UserMenu({ imageUrl }: MenuProps) {
           css={menuItemTw}
           onSelect={() => {
             signOut({
-              callbackUrl: `${process.env.NEXT_PUBLIC_VERCEL_URL}/login`,
+              callbackUrl: `/login`,
             })
           }}
         >
