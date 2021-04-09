@@ -4,8 +4,25 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { PlusIcon, EditIcon } from 'icons'
 import { Fragment } from 'react'
+import { QueryFunction, useQuery } from 'react-query'
+import { ClientsData } from './api/clients'
 
 export default function Clients() {
+  const { status, data } = useQuery('clients', fetchClients)
+
+  // TODO: figure out the loading state
+  if (status === 'loading') {
+    return null
+  }
+
+  if (status === 'error') {
+    return (
+      <h1 tw="bl-text-3xl max-w-prose text-center text-matisse-red-200">
+        Something went wrong
+      </h1>
+    )
+  }
+
   return (
     <div>
       <Head>
@@ -20,7 +37,7 @@ export default function Clients() {
             </div>
           </a>
         </Link>
-        {CLIENTS.map(({ id, name, employees }: ClientProps) => (
+        {data?.map(({ id, name, employees }) => (
           <div key={id} tw="space-y-4">
             <div tw="inline-flex items-center space-x-2">
               <EditIcon tw="cursor-pointer w-7 h-7" />
@@ -30,18 +47,16 @@ export default function Clients() {
               <span tw="col-span-1">Name</span>
               <span tw="col-span-1">Email</span>
               <span tw="col-span-1">Role</span>
-              {employees.map(
-                ({ id: eId, name, email, role }: EmployeeProps) => (
-                  <Fragment key={eId}>
-                    <span tw="bl-text-base col-span-1">{name}</span>
-                    <span tw="bl-text-base col-span-1">{email}</span>
-                    <span tw="bl-text-base col-span-1">{role}</span>
-                  </Fragment>
-                )
-              )}
+              {employees.map(({ id: eId, title, user }) => (
+                <Fragment key={eId}>
+                  <span tw="bl-text-base col-span-1">{user.name}</span>
+                  <span tw="bl-text-base col-span-1">{user.email}</span>
+                  <span tw="bl-text-base col-span-1">{title}</span>
+                </Fragment>
+              ))}
             </div>
           </div>
-        ))}
+        )) ?? null}
       </Main>
     </div>
   )
@@ -62,70 +77,10 @@ function Main({ className, children }: MainProps) {
   )
 }
 
-type ClientProps = {
-  id: number
-  name: string
-  employees: EmployeeProps[]
+const fetchClients: QueryFunction<ClientsData> = async () => {
+  const res = await fetch(`/api/clients`)
+  if (!res.ok) {
+    throw new Error(`Something went wrong fetching clients`)
+  }
+  return res.json()
 }
-type EmployeeProps = {
-  id: number
-  name: string
-  email: string
-  role: string
-}
-const CLIENTS = [
-  {
-    id: 1,
-    name: 'Kaneka',
-    employees: [
-      {
-        id: 1,
-        name: 'Tove Jansson',
-        email: 'tv@lit.com',
-        role: 'Fiction Writer',
-      },
-      {
-        id: 2,
-        name: 'B.H. Fairchild',
-        email: 'midwest@lit.com',
-        role: 'Poet',
-      },
-      {
-        id: 3,
-        name: 'James Wood',
-        email: 'forestlover@lit.com',
-        role: 'Critic',
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Chevron',
-    employees: [
-      {
-        id: 1,
-        name: 'Gunter Grass',
-        email: 'german@lit.com',
-        role: 'Fiction Writer',
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: 'Calumet',
-    employees: [
-      {
-        id: 1,
-        name: 'Marilynne Robinson',
-        email: 'lila@lit.com',
-        role: 'Essayist',
-      },
-      {
-        id: 2,
-        name: 'Mary Ruffle',
-        email: 'honey@lit.com',
-        role: 'Poet',
-      },
-    ],
-  },
-]
