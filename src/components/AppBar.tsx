@@ -1,8 +1,14 @@
-import tw from 'twin.macro'
+import tw, { css, theme } from 'twin.macro'
 import Link from 'next/link'
 import { signOut } from 'next-auth/client'
 import { useRouter } from 'next/router'
-import { Menu, MenuButton, MenuList, MenuItem } from '@reach/menu-button'
+import {
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  MenuLink,
+} from '@reach/menu-button'
 
 import { useAuth } from '@components/auth-context'
 import { LogoIcon } from 'icons'
@@ -74,6 +80,7 @@ type MenuProps = {
   imageUrl?: string
 }
 function UserMenu({ imageUrl }: MenuProps) {
+  const user = useAuth()
   return (
     <Menu>
       <MenuButton>
@@ -82,12 +89,27 @@ function UserMenu({ imageUrl }: MenuProps) {
         </div>
       </MenuButton>
       <MenuList
-        tw="
-          mt-4 py-1 flex flex-col items-center bg-gray-yellow-600
-          border-solid border border-copper-300
-          rounded
-        "
+        css={[
+          tw`
+            mt-4 py-1 flex flex-col items-center bg-gray-yellow-600
+            border-solid border border-copper-300
+            rounded
+          `,
+          css`
+            [data-reach-menu-item][data-selected] {
+              background-color: ${theme('colors[gray-yellow].100')};
+              color: ${theme('colors[gray-yellow].600')};
+            }
+          `,
+        ]}
       >
+        {user?.role === 'ADMIN' && (
+          <Link href="/edit-admins" passHref>
+            <MenuLink css={menuItemTw} as="a">
+              EDIT ADMINS
+            </MenuLink>
+          </Link>
+        )}
         <MenuItem
           css={menuItemTw}
           onSelect={() => {
@@ -103,4 +125,4 @@ function UserMenu({ imageUrl }: MenuProps) {
   )
 }
 
-const menuItemTw = tw`flex w-full px-3 py-1 text-xs uppercase cursor-pointer text-gray-yellow-200 hover:bg-gray-yellow-200 hover:text-gray-yellow-600`
+const menuItemTw = tw`flex w-full px-3 py-1 text-xs uppercase cursor-pointer text-gray-yellow-200 hover:bg-gray-yellow-200 hover:text-gray-yellow-600 focus:bg-gray-yellow-200 focus:text-gray-yellow-600`
