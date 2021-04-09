@@ -12,8 +12,8 @@ function Login() {
       <Header>
         <title>Login | Project Journal</title>
       </Header>
-      <div tw="mx-auto px-4 max-w-max my-10 text-gray-yellow-600">
-        <main tw="flex flex-col space-y-9">
+      <div tw="mx-auto px-4 max-w-max">
+        <div tw="flex flex-col space-y-9">
           <h1 tw="bl-text-4xl text-center">Log in</h1>
           <Button
             onClick={() => {
@@ -31,7 +31,7 @@ function Login() {
           </Button>
           <hr tw="w-full h-0 border-t border-gray-yellow-300 border-dashed" />
           <EmailLogin />
-        </main>
+        </div>
       </div>
     </>
   )
