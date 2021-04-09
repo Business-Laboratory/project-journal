@@ -142,10 +142,10 @@ module.exports = {
         black: '#000000',
         white: '#FFFFFF',
       },
-    },
-    boxShadow: {
-      bl: '0 4px 4px rgba(0, 0, 0, .25)',
-      'bl-lg': '0 5px 5px rgba(0, 0, 0, .5)',
+      boxShadow: {
+        bl: '0 4px 4px rgba(0, 0, 0, .25)',
+        'bl-lg': '0 5px 5px rgba(0, 0, 0, .5)',
+      },
     },
   },
   variants: {},
