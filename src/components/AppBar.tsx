@@ -1,8 +1,14 @@
-import tw, { css } from 'twin.macro'
+import tw, { css, theme } from 'twin.macro'
 import Link from 'next/link'
 import { signOut } from 'next-auth/client'
 import { useRouter } from 'next/router'
-import { Menu, MenuButton, MenuList, MenuItem } from '@reach/menu-button'
+import {
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  MenuLink,
+} from '@reach/menu-button'
 
 import { useAuth } from '@components/auth-context'
 import { LogoIcon } from 'icons'
@@ -74,7 +80,7 @@ type MenuProps = {
   imageUrl?: string
 }
 function UserMenu({ imageUrl }: MenuProps) {
-  const router = useRouter()
+  const user = useAuth()
   return (
     <Menu>
       <MenuButton>
@@ -90,22 +96,20 @@ function UserMenu({ imageUrl }: MenuProps) {
             rounded
           `,
           css`
-            // #FFFEFD is gray-yellow-100 and #2C2925 is gray-yellow-600
             [data-reach-menu-item][data-selected] {
-              background-color: #fffefd;
-              color: #2c2925;
+              background-color: ${theme('colors[gray-yellow].100')};
+              color: ${theme('colors[gray-yellow].600')};
             }
           `,
         ]}
       >
-        <MenuItem
-          css={menuItemTw}
-          onSelect={() => {
-            router.push('/edit-admins')
-          }}
-        >
-          EDIT ADMINS
-        </MenuItem>
+        {user?.role === 'ADMIN' && (
+          <Link href="/edit-admins" passHref>
+            <MenuLink css={menuItemTw} as="a">
+              EDIT ADMINS
+            </MenuLink>
+          </Link>
+        )}
         <MenuItem
           css={menuItemTw}
           onSelect={() => {
