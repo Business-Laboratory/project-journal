@@ -1,4 +1,4 @@
-import tw from 'twin.macro'
+import tw, { css } from 'twin.macro'
 import Link from 'next/link'
 import { signOut } from 'next-auth/client'
 import { useRouter } from 'next/router'
@@ -74,6 +74,7 @@ type MenuProps = {
   imageUrl?: string
 }
 function UserMenu({ imageUrl }: MenuProps) {
+  const router = useRouter()
   return (
     <Menu>
       <MenuButton>
@@ -82,12 +83,29 @@ function UserMenu({ imageUrl }: MenuProps) {
         </div>
       </MenuButton>
       <MenuList
-        tw="
-          mt-4 py-1 flex flex-col items-center bg-gray-yellow-600
-          border-solid border border-copper-300
-          rounded
-        "
+        css={[
+          tw`
+            mt-4 py-1 flex flex-col items-center bg-gray-yellow-600
+            border-solid border border-copper-300
+            rounded
+          `,
+          css`
+            // #FFFEFD is gray-yellow-100 and #2C2925 is gray-yellow-600
+            [data-reach-menu-item][data-selected] {
+              background-color: #fffefd;
+              color: #2c2925;
+            }
+          `,
+        ]}
       >
+        <MenuItem
+          css={menuItemTw}
+          onSelect={() => {
+            router.push('/edit-admins')
+          }}
+        >
+          EDIT ADMINS
+        </MenuItem>
         <MenuItem
           css={menuItemTw}
           onSelect={() => {
@@ -103,4 +121,4 @@ function UserMenu({ imageUrl }: MenuProps) {
   )
 }
 
-const menuItemTw = tw`flex w-full px-3 py-1 text-xs uppercase cursor-pointer text-gray-yellow-200 hover:bg-gray-yellow-200 hover:text-gray-yellow-600`
+const menuItemTw = tw`flex w-full px-3 py-1 text-xs uppercase cursor-pointer text-gray-yellow-200 hover:bg-gray-yellow-200 hover:text-gray-yellow-600 focus:bg-gray-yellow-200 focus:text-gray-yellow-600`
