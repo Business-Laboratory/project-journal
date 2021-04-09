@@ -14,7 +14,7 @@ export default function Clients() {
       <Main>
         <Link href={'#'} passHref>
           <a>
-            <div tw="inline-flex space-x-4 items-center hover:text-copper-300">
+            <div tw="inline-flex space-x-2 items-center hover:text-copper-300">
               <PlusIcon tw="w-6 h-6" />
               <span tw="bl-text-2xl">Add client</span>
             </div>
