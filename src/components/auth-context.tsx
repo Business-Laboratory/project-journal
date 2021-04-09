@@ -112,7 +112,7 @@ const fetchUser: QueryFunction<UserData, UserQueryKey> = async ({
     throw new Error(`No email provided`)
   }
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL}/api/user`, {
+  const res = await fetch(`/api/user`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email }),

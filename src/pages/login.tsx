@@ -5,7 +5,7 @@ import { signIn } from 'next-auth/client'
 
 import { Button } from '@components/button'
 
-const callbackUrl = `${process.env.NEXT_PUBLIC_VERCEL_URL}/`
+const callbackUrl = `/`
 function Login() {
   return (
     <>
