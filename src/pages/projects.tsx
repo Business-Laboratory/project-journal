@@ -1,5 +1,5 @@
 // Client/Admin Home that displays project cards
-import tw from 'twin.macro'
+import tw, { css, theme } from 'twin.macro'
 import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -78,7 +78,10 @@ type MainProps = {
 }
 function Main({ className, children }: MainProps) {
   return (
-    <div tw="w-9/12 space-y-8 mx-auto max-w-lg lg:max-w-none" className={className}>
+    <div
+      tw="w-9/12 space-y-8 mx-auto max-w-lg lg:max-w-none"
+      className={className}
+    >
       {children}
     </div>
   )
@@ -94,8 +97,16 @@ function Card({ name, description, imageUrl }: CardProps) {
     <Link href={'#'} passHref>
       <a
         css={[
-          tw`grid grid-cols-3 col-auto border-2 rounded border-copper-300 shadow-bl overflow-hidden`,
-          tw`transition duration-300 ease-in-out transform hover:shadow-bl-lg hover:-translate-y-1 hover:-translate-x-1`,
+          tw`grid grid-cols-3 col-auto overflow-hidden border-2 rounded border-copper-300 shadow-bl`,
+          tw`transition duration-300 ease-in-out hover:shadow-bl-lg`,
+          css`
+            :hover {
+              transform: translate(
+                -${theme('spacing.1')},
+                -${theme('spacing.1')}
+              );
+            }
+          `,
         ]}
       >
         <div tw="col-span-2 border-r border-gray-yellow-300">
