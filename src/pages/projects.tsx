@@ -87,8 +87,6 @@ function Main({ className, children }: MainProps) {
   )
 }
 
-console.log()
-
 type CardProps = {
   name: string
   description: string | null
