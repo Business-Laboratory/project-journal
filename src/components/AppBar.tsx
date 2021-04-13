@@ -19,14 +19,14 @@ export default function AppBar() {
   const { pathname } = useRouter()
   // Will pull auth and projects/clients from context once implemented
   const user = useAuth()
-  console.log(pathname)
+
   return (
     <Header>
       <nav tw="inline-flex">
         <Link href="/" passHref>
           <a
             tw="bl-text-3xl font-bold text-gray-yellow-100 hover:text-copper-300
-                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-400"
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-copper-400"
           >
             Project Journal
           </a>
@@ -126,7 +126,7 @@ function NavLink({ pathName, linkName, linkDisplay }: NavLinkProps) {
     <Link href={linkName} passHref>
       <a
         css={[
-          tw`bl-text-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-400`,
+          tw`bl-text-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-copper-400`,
           pathName === linkName
             ? tw`text-gray-yellow-100 hover:underline`
             : tw`text-gray-yellow-300 hover:underline`,

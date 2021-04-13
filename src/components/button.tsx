@@ -14,7 +14,7 @@ function Button({ disabled, ...props }: ButtonProps) {
         disabled
           ? tw`cursor-not-allowed bg-gray-yellow-300 bg-opacity-60 text-gray-yellow-600 text-opacity-60`
           : tw`hover:bg-copper-400 hover:text-gray-yellow-100
-          focus:outline-none focus:ring-2 focus:ring-copper-400`,
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-copper-400`,
       ]}
       disabled={disabled}
       {...props}
