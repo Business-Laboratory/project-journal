@@ -2,6 +2,6 @@ import 'twin.macro'
 
 export function Timeline() {
   return (
-    <div tw="w-20 h-full overflow-hidden bg-gray-yellow-600 fixed left-0 -mt-10"></div>
+    <nav tw="w-20 h-full overflow-hidden bg-gray-yellow-600 border-r-2 border-gray-yellow-300"></nav>
   )
 }

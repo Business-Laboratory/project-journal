@@ -19,24 +19,24 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const user = await checkAuthentication(req, res)
-  const { projectId } = req.body
+  const { id } = req.body
   // bail if there's no user
   if (!user) return
 
   try {
-    const project = await getProject(user, projectId)
+    const project = await getProject(user, id)
     res.status(200).json(project)
   } catch (error) {
     res.status(501).json({ error })
   }
 }
 
-async function getProject(user: User, projectId: number) {
+async function getProject(user: User, id: number) {
   const userId = user.id
   const userRole = user.role
   const project = await prisma.project.findUnique({
     where: {
-      id: projectId,
+      id,
     },
     select: {
       name: true,
@@ -55,10 +55,13 @@ async function getProject(user: User, projectId: number) {
       updates: true,
     },
   })
-  const projectHasUser = project?.client?.employees?.find(
-    ({ userId: id }) => id === userId
-  )
-  if (userRole === 'USER' && !projectHasUser) return
+
+  if (userRole === 'USER') {
+    const projectHasUser = project?.client?.employees?.find(
+      ({ userId: id }) => id === userId
+    )
+    if (!projectHasUser) return
+  }
 
   return project
 }

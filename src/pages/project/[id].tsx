@@ -1,14 +1,12 @@
 // Client/Admin Project
-import 'twin.macro'
+import { css } from 'twin.macro'
 import { useQuery } from 'react-query'
 
 import type { QueryFunction } from 'react-query'
 import type { ProjectData } from '../api/project'
 import { useRouter } from 'next/router'
 
-import { Timeline } from '@components/project/timeline'
-import { WeeklyUpdates } from '@components/project/weekly-updates'
-import { Summary } from '@components/project/summary'
+import { Timeline, ProjectInformation, Summary } from '@components/project'
 
 export default function Project() {
   const { query } = useRouter()
@@ -39,13 +37,17 @@ export default function Project() {
   if (!project) return null
 
   return (
-    <>
+    <div
+      tw="fixed overflow-hidden h-full w-full -mt-10"
+      css={css`
+        display: grid;
+        grid-template-columns: 80px auto 500px;
+      `}
+    >
       <Timeline />
-      <div tw="grid grid-cols-3 col-auto -mt-10">
-        <WeeklyUpdates />
-        <Summary name={project?.name ?? ''} />
-      </div>
-    </>
+      <ProjectInformation />
+      <Summary name={project?.name ?? ''} />
+    </div>
   )
 }
 
@@ -62,7 +64,7 @@ const fetchProject: QueryFunction<ProjectData, ProjectQueryKey> = async ({
   const res = await fetch(`/api/project`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ projectId: id }),
+    body: JSON.stringify({ id }),
   })
   if (!res.ok) {
     throw new Error(`Something went wrong`)

@@ -6,8 +6,8 @@ type SummaryProps = {
 
 export function Summary({ name }: SummaryProps) {
   return (
-    <div tw="col-span-1 mx-auto pt-10">
+    <aside tw="relative h-full py-10 px-14 overflow-y-auto">
       <div tw="bl-text-4xl">{name}</div>
-    </div>
+    </aside>
   )
 }
