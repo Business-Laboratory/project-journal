@@ -145,6 +145,7 @@ class MyDocument extends Document {
             type="font/woff2"
             crossOrigin=""
           />
+          <script src="/node_modules/focus-visible/dist/focus-visible.min.js"></script>
         </Head>
         <body>
           <Main />
