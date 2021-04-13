@@ -32,7 +32,8 @@ function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
 
   const [imageData, setImageData] = useState<null | {
     name: string
-    data: string
+    contentType: string
+    dataUrl: string
   }>(null)
 
   return (
@@ -59,7 +60,6 @@ function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
             tw="flex flex-col w-80 space-y-4"
             onSubmit={(e) => {
               e.preventDefault()
-              console.log('right here', imageData)
               if (imageData === null) return
               fetch('/api/blob', {
                 method: 'POST',
@@ -67,7 +67,7 @@ function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
                 body: JSON.stringify(imageData),
               })
                 .then((res) => res.json())
-                .then(({ message }) => console.log(message))
+                .then((data) => console.log(data))
             }}
           >
             <label htmlFor="img">Select image:</label>
@@ -94,7 +94,8 @@ function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
                   if (!result) return
                   setImageData({
                     name: file.name,
-                    data: result,
+                    contentType: file.type,
+                    dataUrl: result,
                   })
                 })
               }}
@@ -123,23 +124,3 @@ function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
 }
 
 export default App
-
-function b64toBlob(byteCharacters: string, contentType = '', sliceSize = 512) {
-  const byteArrays = []
-
-  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-    const slice = byteCharacters.slice(offset, offset + sliceSize)
-
-    const byteNumbers = new Array(slice.length)
-    for (let i = 0; i < slice.length; i++) {
-      byteNumbers[i] = slice.charCodeAt(i)
-    }
-
-    const byteArray = new Uint8Array(byteNumbers)
-    byteArrays.push(byteArray)
-  }
-
-  const blob = new Blob(byteArrays, { type: contentType })
-  console.log('creating the blob', blob)
-  return blob
-}
