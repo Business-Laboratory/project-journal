@@ -97,7 +97,8 @@ function Card({ name, description, imageUrl }: CardProps) {
     <Link href={'#'} passHref>
       <a
         css={[
-          tw`grid grid-cols-3 col-auto overflow-hidden border-2 rounded border-copper-300 shadow-bl`,
+          tw`grid grid-cols-3 col-auto overflow-hidden border-2 rounded border-copper-300 shadow-bl
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-copper-400`,
           tw`transition duration-300 ease-in-out hover:shadow-bl-lg`,
           css`
             :hover {
