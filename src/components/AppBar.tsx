@@ -26,7 +26,7 @@ export default function AppBar() {
         <Link href="/" passHref>
           <a
             tw="bl-text-3xl font-bold text-gray-yellow-100 hover:text-copper-300
-                focus:outline-none focus-visible:ring-2 focus-visible:ring-copper-400"
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-copper-100"
           >
             Project Journal
           </a>
@@ -74,8 +74,8 @@ function UserMenu({ imageUrl }: MenuProps) {
   const user = useAuth()
   return (
     <Menu>
-      <MenuButton>
-        <div tw="w-6 h-6 rounded-full overflow-hidden">
+      <MenuButton tw=" focus:outline-none focus:ring-2 focus:ring-copper-100">
+        <div tw="w-6 h-6 rounded-full overflow-hidden hover:ring-2 hover:ring-copper-300">
           {imageUrl ? <img src={imageUrl} alt="" /> : <LogoIcon />}
         </div>
       </MenuButton>
@@ -126,7 +126,7 @@ function NavLink({ pathName, linkName, linkDisplay }: NavLinkProps) {
     <Link href={linkName} passHref>
       <a
         css={[
-          tw`bl-text-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-copper-400`,
+          tw`bl-text-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-copper-100`,
           pathName === linkName
             ? tw`text-gray-yellow-100 hover:underline`
             : tw`text-gray-yellow-300 hover:underline`,
