@@ -19,40 +19,31 @@ export default function AppBar() {
   const { pathname } = useRouter()
   // Will pull auth and projects/clients from context once implemented
   const user = useAuth()
-
+  console.log(pathname)
   return (
     <Header>
       <nav tw="inline-flex">
         <Link href="/" passHref>
-          <a tw="bl-text-3xl font-bold text-gray-yellow-100">Project Journal</a>
+          <a
+            tw="bl-text-3xl font-bold text-gray-yellow-100 hover:text-copper-300
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-400"
+          >
+            Project Journal
+          </a>
         </Link>
         {user?.role === 'ADMIN' &&
         (pathname === '/projects' || pathname === '/clients') ? (
           <div tw="ml-12 space-x-4">
-            <Link href="/projects" passHref>
-              <a
-                css={[
-                  tw`bl-text-3xl`,
-                  pathname === '/projects'
-                    ? tw`underline text-gray-yellow-100`
-                    : tw`text-gray-yellow-300`,
-                ]}
-              >
-                Projects
-              </a>
-            </Link>
-            <Link href="/clients" passHref>
-              <a
-                css={[
-                  tw`bl-text-3xl`,
-                  pathname === '/clients'
-                    ? tw`underline text-gray-yellow-100`
-                    : tw`text-gray-yellow-300`,
-                ]}
-              >
-                Clients
-              </a>
-            </Link>
+            <NavLink
+              pathName={pathname}
+              linkName={'/projects'}
+              linkDisplay={'Projects'}
+            />
+            <NavLink
+              pathName={pathname}
+              linkName={'/clients'}
+              linkDisplay={'Clients'}
+            />
           </div>
         ) : null}
       </nav>
@@ -122,6 +113,28 @@ function UserMenu({ imageUrl }: MenuProps) {
         </MenuItem>
       </MenuList>
     </Menu>
+  )
+}
+
+type NavLinkProps = {
+  pathName: string
+  linkName: string
+  linkDisplay: string
+}
+function NavLink({ pathName, linkName, linkDisplay }: NavLinkProps) {
+  return (
+    <Link href={linkName} passHref>
+      <a
+        css={[
+          tw`bl-text-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-400`,
+          pathName === linkName
+            ? tw`text-gray-yellow-100 hover:underline`
+            : tw`text-gray-yellow-300 hover:underline`,
+        ]}
+      >
+        {linkDisplay}
+      </a>
+    </Link>
   )
 }
 
