@@ -82,13 +82,13 @@ function UserMenu({ imageUrl }: MenuProps) {
       <MenuList
         css={[
           tw`
-            mt-4 py-1 flex flex-col items-center bg-gray-yellow-600
+            mt-4 py-1 flex flex-col items-center text-gray-yellow-200 bg-gray-yellow-600
             border-solid border border-copper-300
             rounded
           `,
           css`
             [data-reach-menu-item][data-selected] {
-              background-color: ${theme('colors[gray-yellow].100')};
+              background-color: ${theme('colors[gray-yellow].200')};
               color: ${theme('colors[gray-yellow].600')};
             }
           `,
