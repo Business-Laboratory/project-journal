@@ -85,6 +85,7 @@ function UserMenu({ imageUrl }: MenuProps) {
             mt-4 py-1 flex flex-col items-center text-gray-yellow-200 bg-gray-yellow-600
             border-solid border border-copper-300
             rounded
+            focus:outline-none
           `,
           css`
             [data-reach-menu-item][data-selected] {
