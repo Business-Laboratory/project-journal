@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { PlusIcon } from 'icons'
 import { useQuery } from 'react-query'
 import { useAuth } from '@components/auth-context'
+import { NavLink } from '@components/nav-link'
 
 import type { QueryFunction } from 'react-query'
 import type { ProjectsData } from './api/projects'
@@ -36,12 +37,10 @@ export default function Projects() {
       </Head>
       <Main>
         {user?.role === 'ADMIN' ? (
-          <Link href={'#'} passHref>
-            <a tw="inline-flex space-x-2 items-center hover:text-copper-300">
-              <PlusIcon tw="w-6 h-6" />
-              <span tw="bl-text-2xl">Add project</span>
-            </a>
-          </Link>
+          <NavLink pathName="#">
+            <PlusIcon tw="w-6 h-6" />
+            <span tw="bl-text-2xl">Add project</span>
+          </NavLink>
         ) : null}
         {projects.length > 0 ? (
           <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
