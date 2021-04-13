@@ -30,14 +30,6 @@ export default function Clients() {
         <title>Clients | Project Journal</title>
       </Head>
       <Main>
-        {/* <Link href={'#'} passHref>
-          <a>
-            <div tw="inline-flex space-x-2 items-center hover:text-copper-300">
-              <PlusIcon tw="w-6 h-6" />
-              <span tw="bl-text-2xl">Add client</span>
-            </div>
-          </a>
-        </Link> */}
         <NavLink pathName="#">
           <PlusIcon tw="w-6 h-6" />
           <span tw="bl-text-2xl">Add client</span>
@@ -73,7 +65,7 @@ type MainProps = {
 }
 function Main({ className, children }: MainProps) {
   return (
-    <div tw="max-w-max mx-auto space-y-8 " className={className}>
+    <div tw="max-w-max mx-auto space-y-8" className={className}>
       {children}
     </div>
   )
