@@ -43,7 +43,7 @@ export default function Project() {
       <Timeline />
       <div tw="grid grid-cols-3 col-auto -mt-10">
         <WeeklyUpdates />
-        <Summary />
+        <Summary name={project?.name ?? ''} />
       </div>
     </>
   )
