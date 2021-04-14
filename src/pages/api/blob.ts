@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { BlobServiceClient, ContainerSASPermissions } from '@azure/storage-blob'
+import { ContainerSASPermissions } from '@azure/storage-blob'
+import { blobServiceClient } from '@lib/azure-storage-blob'
 
 export default async function handler(
   req: NextApiRequest,
@@ -28,10 +29,6 @@ export async function uploadImage(
   contentType: string,
   dataUrl: string
 ) {
-  const blobServiceClient = BlobServiceClient.fromConnectionString(
-    process.env.STORAGE_CONNECTION_STRING ?? ''
-  )
-
   const containerClient = blobServiceClient.getContainerClient('test')
   const blockBlobClient = containerClient.getBlockBlobClient(name)
 
@@ -47,14 +44,14 @@ export async function uploadImage(
 }
 
 export async function downloadImage() {
-  const blobServiceClient = BlobServiceClient.fromConnectionString(
-    process.env.STORAGE_CONNECTION_STRING ?? ''
-  )
-
   const containerClient = blobServiceClient.getContainerClient('test')
   const blockBlobClient = containerClient.getBlockBlobClient(
     'calumet_optimizer.png'
   )
+
+  const url = blockBlobClient.url
+  console.log({ url })
+  containerClient.generateSasUrl
 
   const expiresOn = new Date()
   expiresOn.setMinutes(expiresOn.getMinutes() + 5)
