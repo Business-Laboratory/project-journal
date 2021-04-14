@@ -1,6 +1,6 @@
 import { BlobServiceClient, ContainerSASPermissions } from '@azure/storage-blob'
 
-export { blobServiceClient, generateSasUrl }
+export { blobServiceClient, generateSasUrl, uploadImage }
 
 declare global {
   var blobServiceClientGlobal: BlobServiceClient
@@ -80,4 +80,20 @@ function isSasUrlExpired(sasUrl: string) {
   const timeLeft = new Date(expiration).valueOf() - Date.now()
 
   return Number.isNaN(timeLeft) || timeLeft <= 0
+}
+
+// TODO: Update to not require a base64 dataURL
+async function uploadImage(name: string, contentType: string, dataUrl: string) {
+  const containerClient = blobServiceClient.getContainerClient('test')
+  const blockBlobClient = containerClient.getBlockBlobClient(name)
+
+  // remove the the Data-URL declaration if it was passed along https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL
+  let base64Image = dataUrl.replace(/^data:.+;base64?,/, '')
+  const buffer = Buffer.from(base64Image, 'base64')
+  const uploadBlobResponse = await blockBlobClient.uploadData(buffer, {
+    blobHTTPHeaders: {
+      blobContentType: contentType,
+    },
+  })
+  return uploadBlobResponse
 }
