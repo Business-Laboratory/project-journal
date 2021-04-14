@@ -2,6 +2,7 @@ import React from 'react'
 import type { AppProps } from 'next/app'
 import { GlobalStyles } from 'twin.macro'
 import { QueryClient, QueryClientProvider } from 'react-query'
+import 'focus-visible'
 
 import { AuthProvider } from '@components/auth-context'
 import AppBar from '@components/AppBar'
