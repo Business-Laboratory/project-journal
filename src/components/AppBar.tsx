@@ -67,7 +67,7 @@ function UserMenu({ imageUrl }: MenuProps) {
   const user = useAuth()
   return (
     <Menu>
-      <MenuButton tw=" focus:outline-none focus:ring-2 focus:ring-copper-100">
+      <MenuButton tw="focus:outline-none focus:ring-2 focus:ring-copper-100 ">
         <div tw="w-6 h-6 rounded-full overflow-hidden hover:ring-2 hover:ring-copper-300">
           {imageUrl ? <img src={imageUrl} alt="" /> : <LogoIcon />}
         </div>
