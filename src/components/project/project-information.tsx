@@ -5,11 +5,13 @@ import Link from 'next/link'
 import { PlusIcon, EditIcon } from 'icons'
 import { Update } from '@prisma/client'
 import { format } from 'date-fns'
+import { useAuth } from '@components/auth-context'
 
 type ProjectInformationProps = {
   updates: Update[]
 }
 export function ProjectInformation({ updates }: ProjectInformationProps) {
+  const user = useAuth()
   return (
     <article
       css={[
@@ -25,17 +27,21 @@ export function ProjectInformation({ updates }: ProjectInformationProps) {
     >
       <div tw="w-8/12 mx-auto space-y-8">
         <Select />
-        <Link href={'#'} passHref>
-          <a tw="inline-flex space-x-2 items-center hover:text-copper-300">
-            <PlusIcon tw="w-6 h-6" />
-            <span tw="bl-text-2xl">Add update</span>
-          </a>
-        </Link>
+        {user?.role === 'ADMIN' && (
+          <Link href={'#'} passHref>
+            <a tw="inline-flex space-x-2 items-center hover:text-copper-300">
+              <PlusIcon tw="w-6 h-6" />
+              <span tw="bl-text-2xl">Add update</span>
+            </a>
+          </Link>
+        )}
         <div tw="space-y-12">
           {updates.map(({ title, body, createdAt }) => (
             <div tw="space-y-6">
               <div tw="inline-flex items-center space-x-2">
-                <EditIcon tw="cursor-pointer w-7 h-7" />
+                {user?.role === 'ADMIN' && (
+                  <EditIcon tw="cursor-pointer w-7 h-7" />
+                )}
                 <span tw="bl-text-3xl">{title}</span>
                 <span tw="bl-text-sm">{format(createdAt, 'M/d/yy')}</span>
               </div>
