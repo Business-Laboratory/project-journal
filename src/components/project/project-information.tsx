@@ -43,11 +43,16 @@ export function ProjectInformation({
           {updates.map(({ title, body, createdAt }, index) => (
             <div key={index} tw="space-y-6">
               <div tw="inline-flex items-center space-x-2">
-                {user?.role === 'ADMIN' && (
-                  <EditIcon tw="cursor-pointer w-7 h-7" />
+                {user?.role === 'ADMIN' ? (
+                  <IconLink pathName={`/project/${projectId}/#`}>
+                    <EditIcon tw="cursor-pointer w-7 h-7" />
+                    <span tw="bl-text-3xl">{title}</span>
+                  </IconLink>
+                ) : (
+                  <span tw="bl-text-3xl">{title}</span>
                 )}
-                <span tw="bl-text-3xl">{title}</span>
-                <span tw="bl-text-sm self-end">
+
+                <span tw="bl-text-sm self-end pb-2">
                   {format(new Date(createdAt), 'M/d/yy')}
                 </span>
               </div>
