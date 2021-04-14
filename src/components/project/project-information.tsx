@@ -1,6 +1,5 @@
 import tw, { css } from 'twin.macro'
 import React from 'react'
-import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
 
 import { SearchBar } from './index'
@@ -8,11 +7,16 @@ import { PlusIcon, EditIcon } from 'icons'
 import { Update } from '@prisma/client'
 import { format } from 'date-fns'
 import { useAuth } from '@components/auth-context'
+import { IconLink } from '@components/icon-link'
 
 type ProjectInformationProps = {
+  projectId: number
   updates: Update[]
 }
-export function ProjectInformation({ updates }: ProjectInformationProps) {
+export function ProjectInformation({
+  projectId,
+  updates,
+}: ProjectInformationProps) {
   const user = useAuth()
   return (
     <article
@@ -30,19 +34,17 @@ export function ProjectInformation({ updates }: ProjectInformationProps) {
       <div tw="w-8/12 mx-auto space-y-8">
         <SearchBar />
         {user?.role === 'ADMIN' && (
-          <Link href={'#'} passHref>
-            <a tw="inline-flex space-x-2 items-center hover:text-copper-300">
-              <PlusIcon tw="w-6 h-6" />
-              <span tw="bl-text-2xl">Add update</span>
-            </a>
-          </Link>
+          <IconLink pathName={`/project/${projectId}/#`}>
+            <PlusIcon tw="w-6 h-6" />
+            <span tw="bl-text-2xl">Add update</span>
+          </IconLink>
         )}
         <div tw="space-y-12">
           {updates.map(({ title, body, createdAt }, index) => (
             <div key={index} tw="space-y-6">
               <div tw="inline-flex items-center space-x-2">
                 {user?.role === 'ADMIN' && (
-                  <EditIcon tw="cursor-pointer w-7 h-7 self-center" />
+                  <EditIcon tw="cursor-pointer w-7 h-7" />
                 )}
                 <span tw="bl-text-3xl">{title}</span>
                 <span tw="bl-text-sm self-end">
