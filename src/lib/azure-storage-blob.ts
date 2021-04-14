@@ -1,6 +1,6 @@
-import { BlobServiceClient } from '@azure/storage-blob'
+import { BlobServiceClient, ContainerSASPermissions } from '@azure/storage-blob'
 
-export { blobServiceClient }
+export { blobServiceClient, generateSasUrl }
 
 declare global {
   var blobServiceClientGlobal: BlobServiceClient
@@ -21,4 +21,63 @@ function createBlobServiceClient() {
   return BlobServiceClient.fromConnectionString(
     process.env.STORAGE_CONNECTION_STRING ?? ''
   )
+}
+
+/**
+ * Generates a SAS url for a default of 1 day. Returns the existing url if it is not expired
+ * @param url
+ * @param storageBlobUrl
+ * @param maxAge
+ * @returns
+ */
+async function generateSasUrl(
+  url: string | null,
+  storageBlobUrl: string,
+  maxAge = 60 * 60 * 24
+) {
+  // return the url if it's not expired
+  if (url !== null && !isSasUrlExpired(url)) {
+    return url
+  }
+
+  // otherwise create a new url
+
+  // remove the beginning of the url to get the path
+  const storageBlobSegments = storageBlobUrl
+    .replace(blobServiceClient.url, '')
+    .split('/')
+  if (storageBlobSegments.length !== 2) {
+    throw new Error(
+      `Invalid URL: ${storageBlobUrl}. Must contain only 2 segments, contained ${storageBlobSegments.length}`
+    )
+  }
+  const [containerName, blockBlobName] = storageBlobSegments
+
+  const containerClient = blobServiceClient.getContainerClient(containerName)
+  const blockBlobClient = containerClient.getBlockBlobClient(blockBlobName)
+
+  const expiresOn = new Date(Date.now() + maxAge * 1000)
+
+  return await blockBlobClient.generateSasUrl({
+    permissions: ContainerSASPermissions.parse('r'),
+    expiresOn,
+    cacheControl: `public, max-age=${maxAge}, immutable`,
+  })
+}
+
+/**
+ * Checks whether or not a SAS url is expire
+ * @param sasUrl
+ */
+function isSasUrlExpired(sasUrl: string) {
+  const params = new URLSearchParams(sasUrl)
+  const expiration = params.get('se')
+  // if there is no expiration stamp, assume it is expired so a new url will be generated
+  if (expiration === null) {
+    return true
+  }
+
+  const timeLeft = new Date(expiration).valueOf() - Date.now()
+
+  return Number.isNaN(timeLeft) || timeLeft <= 0
 }

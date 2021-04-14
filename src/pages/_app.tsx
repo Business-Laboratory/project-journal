@@ -20,16 +20,6 @@ type ComponentWithPageLayout = {
 const queryClient = new QueryClient()
 
 function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
-  const [imageUrl, setImageUrl] = useState('')
-  useEffect(() => {
-    fetch('/api/blob')
-      .then((res) => res.json())
-      .then(({ image }) => {
-        console.log(image)
-        setImageUrl(image)
-      })
-  }, [])
-
   const [imageData, setImageData] = useState<null | {
     name: string
     contentType: string
@@ -43,19 +33,6 @@ function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
       <div tw="absolute inset-0 overflow-auto bg-gray-yellow-100 text-gray-yellow-600">
         <AuthProvider>
           <AppBar />
-          {imageUrl ? (
-            <div
-              tw="relative mt-4 ml-4"
-              css={css`
-                width: 170px;
-                height: 210px;
-              `}
-            >
-              <Image tw="object-cover" layout="fill" src={imageUrl} alt="" />
-              {/* <img tw="object-cover" src={imageUrl} alt="" /> */}
-            </div>
-          ) : null}
-
           <form
             tw="flex flex-col w-80 space-y-4"
             onSubmit={(e) => {

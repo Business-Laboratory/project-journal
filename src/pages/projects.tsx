@@ -28,6 +28,9 @@ export default function Projects() {
   }
 
   const projects = data ?? []
+  const params = new URLSearchParams(projects[0].imageUrl ?? '')
+  const expiration = params.get('se')
+  console.log({ expiration })
 
   return (
     <>
