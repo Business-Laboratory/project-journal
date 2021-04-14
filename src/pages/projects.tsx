@@ -47,6 +47,7 @@ export default function Projects() {
             {projects.map((project, idx) => (
               <Card
                 key={project.id}
+                id={project.id}
                 name={project.name ?? `Untitled Project (${idx + 1})`}
                 description={project.summary?.description ?? null}
                 imageUrl={project.imageUrl}
@@ -87,14 +88,16 @@ function Main({ className, children }: MainProps) {
 }
 
 type CardProps = {
+  id: number
   name: string
   description: string | null
   imageUrl: string | null
 }
-function Card({ name, description, imageUrl }: CardProps) {
+
+function Card({ id, name, description, imageUrl }: CardProps) {
   //Ring color is copper-400
   return (
-    <Link href={'#'} passHref>
+    <Link href={`/project/${id}`} passHref>
       <a
         css={[
           tw`grid grid-cols-3 col-auto overflow-hidden border-2 rounded border-copper-300 shadow-bl
