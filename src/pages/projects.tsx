@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { PlusIcon } from 'icons'
 import { useQuery } from 'react-query'
 import { useAuth } from '@components/auth-context'
+import { IconLink } from '@components/icon-link'
 
 import type { QueryFunction } from 'react-query'
 import type { ProjectsData } from './api/projects'
@@ -36,12 +37,10 @@ export default function Projects() {
       </Head>
       <Main>
         {user?.role === 'ADMIN' ? (
-          <Link href={'#'} passHref>
-            <a tw="inline-flex space-x-2 items-center hover:text-copper-300">
-              <PlusIcon tw="w-6 h-6" />
-              <span tw="bl-text-2xl">Add project</span>
-            </a>
-          </Link>
+          <IconLink pathName="#">
+            <PlusIcon tw="w-6 h-6" />
+            <span tw="bl-text-2xl">Add project</span>
+          </IconLink>
         ) : null}
         {projects.length > 0 ? (
           <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
@@ -94,12 +93,15 @@ type CardProps = {
   description: string | null
   imageUrl: string | null
 }
+
 function Card({ id, name, description, imageUrl }: CardProps) {
+  //Ring color is copper-400
   return (
     <Link href={`/project/${id}`} passHref>
       <a
         css={[
-          tw`grid grid-cols-3 col-auto overflow-hidden border-2 rounded border-copper-300 shadow-bl`,
+          tw`grid grid-cols-3 col-auto overflow-hidden border-2 rounded border-copper-300 shadow-bl
+          focus:outline-none`,
           tw`transition duration-300 ease-in-out hover:shadow-bl-lg`,
           css`
             :hover {
@@ -107,6 +109,16 @@ function Card({ id, name, description, imageUrl }: CardProps) {
                 -${theme('spacing.1')},
                 -${theme('spacing.1')}
               );
+            }
+            &.focus-visible {
+              --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
+                var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+              --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
+                calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+              box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+                var(--tw-shadow, 0 0 #0000);
+              --tw-ring-opacity: 1;
+              --tw-ring-color: rgba(171, 133, 94, var(--tw-ring-opacity));
             }
           `,
         ]}
