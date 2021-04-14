@@ -23,14 +23,7 @@ export default function AppBar() {
   return (
     <Header>
       <nav tw="inline-flex">
-        <Link href="/" passHref>
-          <a
-            tw="bl-text-3xl font-bold text-gray-yellow-100 hover:text-copper-300
-                focus:outline-none focus-visible:ring-2 focus-visible:ring-copper-100"
-          >
-            Project Journal
-          </a>
-        </Link>
+        <NavHome linkDisplay={'Project Journal'} />
         {user?.role === 'ADMIN' &&
         (pathname === '/projects' || pathname === '/clients') ? (
           <div tw="ml-12 space-x-4">
@@ -117,20 +110,64 @@ function UserMenu({ imageUrl }: MenuProps) {
   )
 }
 
+type NavHomeProps = {
+  linkDisplay: string
+}
+function NavHome({ linkDisplay }: NavHomeProps) {
+  //Ring color is copper-100
+  return (
+    <Link href="/" passHref>
+      <a
+        css={[
+          tw`bl-text-3xl font-bold text-gray-yellow-100 hover:text-copper-300
+        focus:outline-none`,
+          css`
+            &.focus-visible {
+              --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
+                var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+              --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
+                calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+              box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+                var(--tw-shadow, 0 0 #0000);
+              --tw-ring-opacity: 1;
+              --tw-ring-color: rgba(251, 215, 183, var(--tw-ring-opacity));
+            }
+          `,
+        ]}
+      >
+        {linkDisplay}
+      </a>
+    </Link>
+  )
+}
+
 type NavLinkProps = {
   pathName: string
   linkName: string
   linkDisplay: string
 }
 function NavLink({ pathName, linkName, linkDisplay }: NavLinkProps) {
+  //Ring color is copper-100
   return (
     <Link href={linkName} passHref>
       <a
         css={[
-          tw`bl-text-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-copper-100`,
+          tw`bl-text-3xl focus:outline-none`,
           pathName === linkName
             ? tw`text-gray-yellow-100 hover:underline`
             : tw`text-gray-yellow-300 hover:underline`,
+          css`
+            &.focus-visible {
+              --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
+                var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+              --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
+                calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+              box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+                var(--tw-shadow, 0 0 #0000);
+              --tw-ring-opacity: 1;
+              --tw-ring-color: rgba(251, 215, 183, var(--tw-ring-opacity));
+            }
+          `,
         ]}
       >
         {linkDisplay}
