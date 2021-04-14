@@ -1,7 +1,9 @@
 import tw, { css } from 'twin.macro'
-import Select from 'react-select'
 import React from 'react'
 import Link from 'next/link'
+import ReactMarkdown from 'react-markdown'
+
+import { SearchBar } from './index'
 import { PlusIcon, EditIcon } from 'icons'
 import { Update } from '@prisma/client'
 import { format } from 'date-fns'
@@ -26,7 +28,7 @@ export function ProjectInformation({ updates }: ProjectInformationProps) {
       ]}
     >
       <div tw="w-8/12 mx-auto space-y-8">
-        <Select />
+        <SearchBar />
         {user?.role === 'ADMIN' && (
           <Link href={'#'} passHref>
             <a tw="inline-flex space-x-2 items-center hover:text-copper-300">
@@ -36,16 +38,18 @@ export function ProjectInformation({ updates }: ProjectInformationProps) {
           </Link>
         )}
         <div tw="space-y-12">
-          {updates.map(({ title, body, createdAt }) => (
-            <div tw="space-y-6">
+          {updates.map(({ title, body, createdAt }, index) => (
+            <div key={index} tw="space-y-6">
               <div tw="inline-flex items-center space-x-2">
                 {user?.role === 'ADMIN' && (
-                  <EditIcon tw="cursor-pointer w-7 h-7" />
+                  <EditIcon tw="cursor-pointer w-7 h-7 self-center" />
                 )}
                 <span tw="bl-text-3xl">{title}</span>
-                <span tw="bl-text-sm">{format(createdAt, 'M/d/yy')}</span>
+                <span tw="bl-text-sm self-end">
+                  {format(new Date(createdAt), 'M/d/yy')}
+                </span>
               </div>
-              <div>{body}</div>
+              <ReactMarkdown>{body}</ReactMarkdown>
             </div>
           ))}
         </div>
