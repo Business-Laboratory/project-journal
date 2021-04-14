@@ -23,4 +23,7 @@ module.exports = withBundleAnalyzer({
 
     return config
   },
+  images: {
+    domains: ['projectjournalassets.blob.core.windows.net'],
+  },
 })

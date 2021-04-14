@@ -49,7 +49,17 @@ export default function Project() {
         projectId={Number(id)}
         updates={project?.updates ?? []}
       />
-      <Summary name={project.name ?? ''} />
+      <Summary
+        projectId={Number(id)}
+        name={project.name ?? ''}
+        imageUrl={project.imageUrl ?? ''}
+        summary={project.summary}
+        clientName={project.client?.name ?? ''}
+        clientEmployees={
+          project.client?.employees.map(({ user }) => user) ?? []
+        }
+        team={project.team}
+      />
     </div>
   )
 }

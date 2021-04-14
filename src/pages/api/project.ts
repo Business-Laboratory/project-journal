@@ -43,9 +43,10 @@ async function getProject(user: User, id: number) {
       imageUrl: true,
       client: {
         select: {
+          name: true,
           employees: {
             select: {
-              userId: true,
+              user: true,
             },
           },
         },
@@ -58,7 +59,7 @@ async function getProject(user: User, id: number) {
 
   if (userRole === 'USER') {
     const projectHasUser = project?.client?.employees?.find(
-      ({ userId: id }) => id === userId
+      ({ user }) => user.id === userId
     )
     if (!projectHasUser) return
   }
