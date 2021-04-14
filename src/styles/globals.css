@@ -3,6 +3,9 @@ html, body {
   overflow: hidden;
 }
 
+.js-focus-visible :focus:not(.focus-visible) {
+  outline: none;
+}
 
 /* @font-face and Poppin's woff2 files generated from https://google-webfonts-helper.herokuapp.com/fonts */
 /* Poppins is not a variable font */

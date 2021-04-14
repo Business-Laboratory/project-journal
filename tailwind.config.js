@@ -148,7 +148,6 @@ module.exports = {
       },
     },
   },
-  variants: {},
   plugins: [blTextUtilities],
 }
 
