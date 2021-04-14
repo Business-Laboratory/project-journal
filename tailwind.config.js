@@ -151,11 +151,6 @@ module.exports = {
   variants: {
     extend: {
       textDecoration: ['focus-visible'],
-      ringWidth: ['focus-visible'],
-      ringColor: ['focus-visible'],
-      ringOffsetWidth: ['focus-visible'],
-      ringOffsetColor: ['focus-visible'],
-      outline: ['focus-visible'],
     },
   },
   plugins: [blTextUtilities],

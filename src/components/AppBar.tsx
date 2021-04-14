@@ -23,20 +23,16 @@ export default function AppBar() {
   return (
     <Header>
       <nav tw="inline-flex">
-        <NavHome linkDisplay={'Project Journal'} />
+        <NavHome>Project Journal</NavHome>
         {user?.role === 'ADMIN' &&
         (pathname === '/projects' || pathname === '/clients') ? (
           <div tw="ml-12 space-x-4">
-            <NavLink
-              pathName={pathname}
-              linkName={'/projects'}
-              linkDisplay={'Projects'}
-            />
-            <NavLink
-              pathName={pathname}
-              linkName={'/clients'}
-              linkDisplay={'Clients'}
-            />
+            <NavLink pathName={pathname} href={'/projects'}>
+              Projects
+            </NavLink>
+            <NavLink pathName={pathname} href={'/clients'}>
+              Clients
+            </NavLink>
           </div>
         ) : null}
       </nav>
@@ -111,9 +107,9 @@ function UserMenu({ imageUrl }: MenuProps) {
 }
 
 type NavHomeProps = {
-  linkDisplay: string
+  children: React.ReactNode
 }
-function NavHome({ linkDisplay }: NavHomeProps) {
+function NavHome({ children }: NavHomeProps) {
   //Ring color is copper-100
   return (
     <Link href="/" passHref>
@@ -121,21 +117,10 @@ function NavHome({ linkDisplay }: NavHomeProps) {
         css={[
           tw`bl-text-3xl font-bold text-gray-yellow-100 hover:text-copper-300
         focus:outline-none`,
-          css`
-            &.focus-visible {
-              --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
-                var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-              --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
-                calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-              box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
-                var(--tw-shadow, 0 0 #0000);
-              --tw-ring-opacity: 1;
-              --tw-ring-color: rgba(251, 215, 183, var(--tw-ring-opacity));
-            }
-          `,
+          appbarElementRingCss,
         ]}
       >
-        {linkDisplay}
+        {children}
       </a>
     </Link>
   )
@@ -143,37 +128,39 @@ function NavHome({ linkDisplay }: NavHomeProps) {
 
 type NavLinkProps = {
   pathName: string
-  linkName: string
-  linkDisplay: string
+  href: string
+  children: React.ReactNode
 }
-function NavLink({ pathName, linkName, linkDisplay }: NavLinkProps) {
+function NavLink({ pathName, href, children }: NavLinkProps) {
   //Ring color is copper-100
   return (
-    <Link href={linkName} passHref>
+    <Link href={href} passHref>
       <a
         css={[
           tw`bl-text-3xl focus:outline-none`,
-          pathName === linkName
+          pathName === href
             ? tw`text-gray-yellow-100 hover:underline`
             : tw`text-gray-yellow-300 hover:underline`,
-          css`
-            &.focus-visible {
-              --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
-                var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-              --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
-                calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-              box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
-                var(--tw-shadow, 0 0 #0000);
-              --tw-ring-opacity: 1;
-              --tw-ring-color: rgba(251, 215, 183, var(--tw-ring-opacity));
-            }
-          `,
+          appbarElementRingCss,
         ]}
       >
-        {linkDisplay}
+        {children}
       </a>
     </Link>
   )
 }
 
 const menuItemTw = tw`flex w-full px-3 py-1 text-xs uppercase cursor-pointer text-gray-yellow-200 hover:bg-gray-yellow-200 hover:text-gray-yellow-600 focus:bg-gray-yellow-200 focus:text-gray-yellow-600`
+
+const appbarElementRingCss = css`
+  &.focus-visible {
+    --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
+      var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+    --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
+      calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+    box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+      var(--tw-shadow, 0 0 #0000);
+    --tw-ring-opacity: 1;
+    --tw-ring-color: rgba(251, 215, 183, var(--tw-ring-opacity));
+  }
+`

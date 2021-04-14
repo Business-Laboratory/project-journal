@@ -1,18 +1,20 @@
 import tw, { css } from 'twin.macro'
 import Link from 'next/link'
 
-export { NavLink }
-export type { NavLinkChildren }
+export { IconLink }
+export type { IconLinkProps }
 
-type NavLinkChildren = {
-  children: React.ReactNode
+type IconLinkProps = {
   pathName: string
+  className: string
+  children: React.ReactNode
 }
-function NavLink({ pathName, children }: NavLinkChildren) {
+function IconLink({ pathName, className, children }: IconLinkProps) {
   //Ring color is copper-400
   return (
     <Link href={pathName} passHref>
       <a
+        className={className}
         css={[
           tw`inline-flex space-x-2 items-center hover:text-copper-300
             focus:outline-none`,

@@ -6,7 +6,7 @@ import { PlusIcon, EditIcon } from 'icons'
 import { Fragment } from 'react'
 import { QueryFunction, useQuery } from 'react-query'
 import { ClientsData } from './api/clients'
-import { NavLink } from '@components/nav-link'
+import { IconLink } from '@components/icon-link'
 
 export default function Clients() {
   const { status, data } = useQuery('clients', fetchClients)
@@ -30,10 +30,10 @@ export default function Clients() {
         <title>Clients | Project Journal</title>
       </Head>
       <Main>
-        <NavLink pathName="#">
+        <IconLink pathName="#">
           <PlusIcon tw="w-6 h-6" />
           <span tw="bl-text-2xl">Add client</span>
-        </NavLink>
+        </IconLink>
         {data?.map(({ id, name, employees }) => (
           <div key={id} tw="space-y-4">
             <div tw="inline-flex items-center space-x-2">
