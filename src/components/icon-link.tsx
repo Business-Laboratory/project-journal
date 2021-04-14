@@ -6,7 +6,7 @@ export type { IconLinkProps }
 
 type IconLinkProps = {
   pathName: string
-  className: string
+  className?: string
   children: React.ReactNode
 }
 function IconLink({ pathName, className, children }: IconLinkProps) {
