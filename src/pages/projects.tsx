@@ -92,12 +92,13 @@ type CardProps = {
   imageUrl: string | null
 }
 function Card({ name, description, imageUrl }: CardProps) {
+  //Ring color is copper-400
   return (
     <Link href={'#'} passHref>
       <a
         css={[
           tw`grid grid-cols-3 col-auto overflow-hidden border-2 rounded border-copper-300 shadow-bl
-          focus:outline-none focus-visible:ring-2 focus-visible:ring-copper-400`,
+          focus:outline-none`,
           tw`transition duration-300 ease-in-out hover:shadow-bl-lg`,
           css`
             :hover {
@@ -105,6 +106,16 @@ function Card({ name, description, imageUrl }: CardProps) {
                 -${theme('spacing.1')},
                 -${theme('spacing.1')}
               );
+            }
+            &.focus-visible {
+              --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
+                var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+              --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
+                calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+              box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+                var(--tw-shadow, 0 0 #0000);
+              --tw-ring-opacity: 1;
+              --tw-ring-color: rgba(171, 133, 94, var(--tw-ring-opacity));
             }
           `,
         ]}
