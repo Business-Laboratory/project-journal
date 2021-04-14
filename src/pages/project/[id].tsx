@@ -45,7 +45,7 @@ export default function Project() {
       `}
     >
       <Timeline />
-      <ProjectInformation />
+      <ProjectInformation updates={project?.updates ?? []} />
       <Summary name={project?.name ?? ''} />
     </div>
   )
