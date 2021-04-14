@@ -76,26 +76,28 @@ enum Role {
 }
 
 model Client {
-  id        Int        @id @default(autoincrement())
-  name      String
-  projects  Project[]
-  employees Employee[]
-  logoUrl   String?    @map(name: "logo_url")
-  createdAt DateTime   @default(now()) @map(name: "created_at")
-  updatedAt DateTime   @default(now()) @map(name: "updated_at")
+  id                 Int        @id @default(autoincrement())
+  name               String
+  projects           Project[]
+  employees          Employee[]
+  logoUrl            String?    @map(name: "logo_url")
+  logoStorageBlobUrl String?    @map(name: "log_storage_blob_url")
+  createdAt          DateTime   @default(now()) @map(name: "created_at")
+  updatedAt          DateTime   @default(now()) @map(name: "updated_at")
 
   @@map(name: "clients")
 }
 
 model Project {
-  id       Int      @id @default(autoincrement())
-  name     String?
-  imageUrl String?  @map(name: "image_url")
-  client   Client?  @relation(fields: [clientId], references: [id])
-  clientId Int?     @map(name: "client_id")
-  team     User[]
-  summary  Summary?
-  updates  Update[]
+  id                  Int      @id @default(autoincrement())
+  name                String?
+  imageUrl            String?  @map(name: "image_url")
+  imageStorageBlobUrl String?  @map(name: "image_storage_blob_url")
+  client              Client?  @relation(fields: [clientId], references: [id])
+  clientId            Int?     @map(name: "client_id")
+  team                User[]
+  summary             Summary?
+  updates             Update[]
 
   @@map(name: "projects")
 }
