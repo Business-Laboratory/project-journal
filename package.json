@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "prisma generate",
     "dev": "next dev",
+    "prebuild": "prisma generate",
     "build": "next build",
     "start": "next start",
     "lint": "eslint --ignore-path .gitignore --ext .js,.ts,.tsx .",
@@ -17,6 +19,7 @@
     }
   },
   "dependencies": {
+    "@azure/storage-blob": "^12.5.0",
     "@emotion/react": "^11.1.5",
     "@prisma/client": "^2.20.1",
     "@reach/menu-button": "^0.14.0",
