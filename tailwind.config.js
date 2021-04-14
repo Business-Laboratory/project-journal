@@ -148,11 +148,6 @@ module.exports = {
       },
     },
   },
-  variants: {
-    extend: {
-      textDecoration: ['focus-visible'],
-    },
-  },
   plugins: [blTextUtilities],
 }
 
