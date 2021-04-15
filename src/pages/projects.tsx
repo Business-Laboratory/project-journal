@@ -39,8 +39,7 @@ export default function Projects() {
       <Head>
         <title>Projects | Project Journal</title>
       </Head>
-
-      <div tw="w-9/12 space-y-8 mx-auto max-w-lg lg:max-w-none">
+      <main tw="pt-10 w-9/12 space-y-8 mx-auto max-w-lg lg:max-w-none">
         {user?.role === 'ADMIN' ? (
           <IconLink pathName="#">
             <PlusIcon tw="w-6 h-6" />
@@ -49,7 +48,7 @@ export default function Projects() {
         ) : null}
 
         <CardGrid status={status} data={data} />
-      </div>
+      </main>
     </>
   )
 }
@@ -74,8 +73,7 @@ function Card({ id, name, description, imageUrl }: CardProps) {
     <Link href={`/project/${id}`} passHref>
       <a
         css={[
-          tw`grid grid-cols-3 col-auto overflow-hidden border-2 rounded border-copper-300 shadow-bl
-          focus:outline-none`,
+          tw`grid grid-cols-3 col-auto overflow-hidden border-2 rounded border-copper-300 shadow-bl focus:outline-none`,
           tw`transition duration-300 ease-in-out hover:shadow-bl-lg`,
           css`
             :hover {
