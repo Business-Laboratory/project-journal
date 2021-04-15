@@ -12,7 +12,7 @@ function Login() {
       <Header>
         <title>Login | Project Journal</title>
       </Header>
-      <div tw="mx-auto px-4 max-w-max">
+      <main tw="py-10 mx-auto px-4 max-w-max">
         <div tw="flex flex-col space-y-9">
           <h1 tw="bl-text-4xl text-center">Log in</h1>
           <Button
@@ -32,7 +32,7 @@ function Login() {
           <hr tw="w-full h-0 border-t border-gray-yellow-300 border-dashed" />
           <EmailLogin />
         </div>
-      </div>
+      </main>
     </>
   )
 }

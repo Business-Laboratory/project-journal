@@ -4,6 +4,9 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 module.exports = withBundleAnalyzer({
   disDir: '.next',
+  images: {
+    domains: ['projectjournalassets.blob.core.windows.net'],
+  },
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,

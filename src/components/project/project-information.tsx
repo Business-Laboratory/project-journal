@@ -1,6 +1,7 @@
 import tw, { css } from 'twin.macro'
 import React from 'react'
 import ReactMarkdown from 'react-markdown'
+import gfm from 'remark-gfm'
 
 import { SearchBar } from './index'
 import { PlusIcon, EditIcon } from 'icons'
@@ -21,7 +22,7 @@ export function ProjectInformation({
   return (
     <article
       css={[
-        tw`h-full flex-grow overflow-y-auto py-10 border-r-2 border-gray-yellow-300`,
+        tw`h-full overflow-y-auto border-r-2 border-gray-yellow-300`,
         css`
           ::-webkit-scrollbar {
             display: none;
@@ -31,7 +32,7 @@ export function ProjectInformation({
         `,
       ]}
     >
-      <div tw="w-8/12 mx-auto space-y-8">
+      <div tw="w-9/12 mx-auto py-10 space-y-8">
         <SearchBar />
         {user?.role === 'ADMIN' && (
           <IconLink pathName={`/project/${projectId}/#`}>
@@ -45,7 +46,7 @@ export function ProjectInformation({
               <div tw="inline-flex items-center space-x-2">
                 {user?.role === 'ADMIN' ? (
                   <IconLink pathName={`/project/${projectId}/#`}>
-                    <EditIcon tw="cursor-pointer w-7 h-7" />
+                    <EditIcon tw="cursor-pointer w-6 h-6" />
                     <span tw="bl-text-3xl">{title}</span>
                   </IconLink>
                 ) : (
@@ -56,7 +57,7 @@ export function ProjectInformation({
                   {format(new Date(createdAt), 'M/d/yy')}
                 </span>
               </div>
-              <ReactMarkdown>{body}</ReactMarkdown>
+              <ReactMarkdown plugins={[gfm]}>{body}</ReactMarkdown>
             </div>
           ))}
         </div>
