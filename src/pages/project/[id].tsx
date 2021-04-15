@@ -37,8 +37,8 @@ export default function Project() {
   if (!project) return null
 
   return (
-    <div
-      tw="fixed overflow-hidden h-full w-full -mt-10"
+    <main
+      tw="fixed overflow-hidden h-full w-full"
       css={css`
         display: grid;
         grid-template-columns: 80px auto 500px;
@@ -47,7 +47,7 @@ export default function Project() {
       <Timeline />
       <ProjectInformation />
       <Summary name={project?.name ?? ''} />
-    </div>
+    </main>
   )
 }
 

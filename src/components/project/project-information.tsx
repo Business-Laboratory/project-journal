@@ -4,7 +4,7 @@ export function ProjectInformation() {
   return (
     <article
       css={[
-        tw`h-full flex-grow overflow-y-auto border-r-2 border-gray-yellow-300`,
+        tw`flex-grow h-full overflow-y-auto border-r-2 border-gray-yellow-300`,
         css`
           ::-webkit-scrollbar {
             display: none;
@@ -13,6 +13,27 @@ export function ProjectInformation() {
           scrollbar-width: none;
         `,
       ]}
-    ></article>
+    >
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+      <div tw="bl-text-4xl m-4">Content</div>
+    </article>
   )
 }
