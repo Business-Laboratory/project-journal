@@ -15,51 +15,41 @@ export default function Projects() {
   const user = useAuth()
   const { status, data } = useQuery('projects', fetchProjects)
 
-  // TODO: figure out the loading state
-  if (status === 'loading') {
-    return null
-  }
-
   if (status === 'error') {
     return (
-      <h1 tw="bl-text-3xl max-w-prose text-center text-matisse-red-200">
-        Something went wrong
-      </h1>
+      <div tw="space-y-6">
+        <h1 tw="bl-text-3xl text-center text-matisse-red-200 uppercase">
+          Unable to load projects
+        </h1>
+        <div tw="max-w-max mx-auto">
+          <p tw="bl-text-2xl text-center">If the issue continues email</p>
+          <a
+            href="mailto:help@business-laboratory.com"
+            tw="bl-text-2xl text-copper-300"
+          >
+            help@business-laboratory.com
+          </a>
+        </div>
+      </div>
     )
   }
-
-  const projects = data ?? []
 
   return (
     <>
       <Head>
         <title>Projects | Project Journal</title>
       </Head>
-      <Main>
+
+      <div tw="w-9/12 space-y-8 mx-auto max-w-lg lg:max-w-none">
         {user?.role === 'ADMIN' ? (
           <IconLink pathName="#">
             <PlusIcon tw="w-6 h-6" />
             <span tw="bl-text-2xl">Add project</span>
           </IconLink>
         ) : null}
-        {projects.length > 0 ? (
-          <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
-            {projects.map((project, idx) => (
-              <Card
-                key={project.id}
-                id={project.id}
-                name={project.name ?? `Untitled Project (${idx + 1})`}
-                description={project.summary?.description ?? null}
-                imageUrl={project.imageUrl}
-              />
-            ))}
-          </div>
-        ) : (
-          <h1 tw="bl-text-3xl max-w-prose text-center">
-            There are currently no projects assigned to you
-          </h1>
-        )}
-      </Main>
+
+        <CardGrid status={status} data={data} />
+      </div>
     </>
   )
 }
@@ -72,28 +62,12 @@ const fetchProjects: QueryFunction<ProjectsData> = async () => {
   return res.json()
 }
 
-type MainProps = {
-  className?: string
-  children?: React.ReactNode
-}
-function Main({ className, children }: MainProps) {
-  return (
-    <div
-      tw="w-9/12 space-y-8 mx-auto max-w-lg lg:max-w-none"
-      className={className}
-    >
-      {children}
-    </div>
-  )
-}
-
 type CardProps = {
   id: number
   name: string
   description: string | null
   imageUrl: string | null
 }
-
 function Card({ id, name, description, imageUrl }: CardProps) {
   //Ring color is copper-400
   return (
@@ -134,5 +108,73 @@ function Card({ id, name, description, imageUrl }: CardProps) {
         </div>
       </a>
     </Link>
+  )
+}
+
+type Project = {
+  name: string | null
+  imageUrl: string | null
+  summary: {
+    description: string | null
+  } | null
+  id: number
+}
+
+type CardGridProps = {
+  status: string
+  data:
+    | {
+        id: number
+        name: string | null
+        imageUrl: string | null
+        summary: {
+          description: string | null
+        } | null
+      }[]
+    | undefined
+}
+function CardGrid({ status, data }: CardGridProps) {
+  if (status === 'loading') {
+    return <p>ToDo: spinner</p>
+  }
+
+  //const projects = data ?? []
+  const projects = [
+    {
+      clientId: null,
+      id: 2,
+      imageUrl:
+        'https://projectjournalassets.blob.core.windows.net/project-images/project_tracker.png?sv=2020-06-12&se=2021-04-15T21%3A08%3A55Z&sr=b&sp=r&sig=raBPY7YzcXwyeS5koabseruCBbNKIEzTFtIjuhCjqvk%3D&rscc=public%2C%20max-age%3D86400%2C%20immutable',
+      name: 'Project Tracker 2.1',
+      summary: null,
+    },
+    {
+      clientId: 3,
+      id: 1,
+      imageUrl: null,
+      name: 'Calumet Optimizer',
+      summary: {
+        description:
+          'Optimization of a lubrication plant schedule that …evenue + plant value change for a given scenario.',
+      },
+    },
+  ]
+
+  return projects.length > 0 ? (
+    <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
+      {projects.map((project: Project, idx) => (
+        <Card
+          key={project.id}
+          id={project.id}
+          name={project.name ?? `Untitled Project (${idx + 1})`}
+          description={project.summary?.description ?? null}
+          imageUrl={project.imageUrl}
+        />
+      ))}
+    </div>
+  ) : (
+    <h1 tw="bl-text-3xl max-w-prose text-center">
+      There are currently no projects assigned to you
+    </h1>
   )
 }
