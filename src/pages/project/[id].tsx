@@ -35,7 +35,7 @@ export default function Project() {
 
   const project = data ?? null
 
-  if (!project) return null
+  if (project === null) return null
 
   console.log(project.updates)
 
@@ -49,8 +49,11 @@ export default function Project() {
       `}
     >
       <Timeline />
-      <ProjectInformation />
-      <Summary name={project?.name ?? ''} />
+      <ProjectInformation
+        projectId={Number(id)}
+        updates={project?.updates ?? []}
+      />
+      <Summary name={project.name ?? ''} />
     </main>
   )
 }
