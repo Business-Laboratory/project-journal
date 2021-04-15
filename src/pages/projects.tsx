@@ -13,6 +13,26 @@ import type { ProjectsData } from './api/projects'
 
 export default function Projects() {
   const user = useAuth()
+
+  return (
+    <>
+      <Head>
+        <title>Projects | Project Journal</title>
+      </Head>
+      <Main>
+        {user?.role === 'ADMIN' ? (
+          <IconLink pathName="#">
+            <PlusIcon tw="w-6 h-6" />
+            <span tw="bl-text-2xl">Add project</span>
+          </IconLink>
+        ) : null}
+        <ProjectsCards />
+      </Main>
+    </>
+  )
+}
+
+function ProjectsCards() {
   const { status, data } = useQuery('projects', fetchProjects)
 
   // TODO: figure out the loading state
@@ -32,34 +52,23 @@ export default function Projects() {
 
   return (
     <>
-      <Head>
-        <title>Projects | Project Journal</title>
-      </Head>
-      <Main>
-        {user?.role === 'ADMIN' ? (
-          <IconLink pathName="#">
-            <PlusIcon tw="w-6 h-6" />
-            <span tw="bl-text-2xl">Add project</span>
-          </IconLink>
-        ) : null}
-        {projects.length > 0 ? (
-          <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
-            {projects.map((project, idx) => (
-              <Card
-                key={project.id}
-                id={project.id}
-                name={project.name ?? `Untitled Project (${idx + 1})`}
-                description={project.summary?.description ?? null}
-                imageUrl={project.imageUrl}
-              />
-            ))}
-          </div>
-        ) : (
-          <h1 tw="bl-text-3xl max-w-prose text-center">
-            There are currently no projects assigned to you
-          </h1>
-        )}
-      </Main>
+      {projects.length > 0 ? (
+        <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
+          {projects.map((project, idx) => (
+            <Card
+              key={project.id}
+              id={project.id}
+              name={project.name ?? `Untitled Project (${idx + 1})`}
+              description={project.summary?.description ?? null}
+              imageUrl={project.imageUrl}
+            />
+          ))}
+        </div>
+      ) : (
+        <h1 tw="bl-text-3xl max-w-prose text-center">
+          There are currently no projects assigned to you
+        </h1>
+      )}
     </>
   )
 }
@@ -100,8 +109,7 @@ function Card({ id, name, description, imageUrl }: CardProps) {
     <Link href={`/project/${id}`} passHref>
       <a
         css={[
-          tw`grid grid-cols-3 col-auto overflow-hidden border-2 rounded border-copper-300 shadow-bl
-          focus:outline-none`,
+          tw`grid grid-cols-3 col-auto overflow-hidden border-2 rounded border-copper-300 shadow-bl focus:outline-none`,
           tw`transition duration-300 ease-in-out hover:shadow-bl-lg`,
           css`
             :hover {

@@ -36,17 +36,24 @@ export default function Project() {
 
   if (!project) return null
 
+  console.log(project.updates)
+
   return (
-    <div
-      tw="fixed overflow-hidden h-full w-full -mt-10"
-      css={css`
-        display: grid;
-        grid-template-columns: 80px auto 500px;
-      `}
-    >
-      <Timeline />
-      <ProjectInformation />
-      <Summary name={project?.name ?? ''} />
+    <div tw="relative w-full h-full">
+      <main
+        // tw="fixed overflow-hidden h-full w-full -mt-10"
+        tw="absolute overflow-hidden w-full"
+        css={css`
+          height: 100%;
+          /* height: calc(100% - 48px); */
+          display: grid;
+          grid-template-columns: 80px auto 500px;
+        `}
+      >
+        <Timeline />
+        <ProjectInformation />
+        <Summary name={project?.name ?? ''} />
+      </main>
     </div>
   )
 }
