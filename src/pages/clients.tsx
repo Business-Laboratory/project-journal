@@ -1,7 +1,6 @@
 // Alternate Admin Home view that displays clients
 import 'twin.macro'
 import Head from 'next/head'
-import Link from 'next/link'
 import { PlusIcon, EditIcon } from 'icons'
 import { Fragment } from 'react'
 import { QueryFunction, useQuery } from 'react-query'
@@ -36,10 +35,10 @@ export default function Clients() {
         </IconLink>
         {data?.map(({ id, name, employees }) => (
           <div key={id} tw="space-y-4">
-            <div tw="inline-flex items-center space-x-2">
-              <EditIcon tw="cursor-pointer w-7 h-7" />
+            <IconLink pathName="#">
+              <EditIcon tw="w-6 h-6" />
               <span tw="bl-text-3xl">{name}</span>
-            </div>
+            </IconLink>
             <div tw="grid grid-cols-3 gap-x-3 gap-y-2 bl-text-lg">
               <span tw="col-span-1">Name</span>
               <span tw="col-span-1">Email</span>
