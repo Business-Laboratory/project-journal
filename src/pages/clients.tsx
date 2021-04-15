@@ -29,7 +29,7 @@ export default function Clients() {
       <Head>
         <title>Clients | Project Journal</title>
       </Head>
-      <Main>
+      <main tw="pt-10 max-w-max mx-auto space-y-8">
         <IconLink pathName="#">
           <PlusIcon tw="w-6 h-6" />
           <span tw="bl-text-2xl">Add client</span>
@@ -54,20 +54,8 @@ export default function Clients() {
             </div>
           </div>
         )) ?? null}
-      </Main>
+      </main>
     </>
-  )
-}
-
-type MainProps = {
-  className?: string
-  children?: React.ReactNode
-}
-function Main({ className, children }: MainProps) {
-  return (
-    <div tw="max-w-max mx-auto space-y-8" className={className}>
-      {children}
-    </div>
   )
 }
 

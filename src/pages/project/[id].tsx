@@ -7,6 +7,7 @@ import type { ProjectData } from '../api/project'
 import { useRouter } from 'next/router'
 
 import { Timeline, ProjectInformation, Summary } from '@components/project'
+import { appBarHeight } from '@components/app-bar'
 
 export default function Project() {
   const { query } = useRouter()
@@ -39,22 +40,18 @@ export default function Project() {
   console.log(project.updates)
 
   return (
-    <div tw="relative w-full h-full">
-      <main
-        // tw="fixed overflow-hidden h-full w-full -mt-10"
-        tw="absolute overflow-hidden w-full"
-        css={css`
-          height: 100%;
-          /* height: calc(100% - 48px); */
-          display: grid;
-          grid-template-columns: 80px auto 500px;
-        `}
-      >
-        <Timeline />
-        <ProjectInformation />
-        <Summary name={project?.name ?? ''} />
-      </main>
-    </div>
+    <main
+      tw="fixed overflow-hidden h-full w-full"
+      css={css`
+        height: calc(100% - ${appBarHeight});
+        display: grid;
+        grid-template-columns: 80px auto 500px;
+      `}
+    >
+      <Timeline />
+      <ProjectInformation />
+      <Summary name={project?.name ?? ''} />
+    </main>
   )
 }
 
