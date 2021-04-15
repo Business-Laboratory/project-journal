@@ -13,27 +13,6 @@ export function ProjectInformation() {
           scrollbar-width: none;
         `,
       ]}
-    >
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-      <div tw="bl-text-4xl m-4">Content</div>
-    </article>
+    ></article>
   )
 }
