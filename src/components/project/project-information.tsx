@@ -46,7 +46,7 @@ export function ProjectInformation({
               <div tw="inline-flex items-center space-x-2">
                 {user?.role === 'ADMIN' ? (
                   <IconLink pathName={`/project/${projectId}/#`}>
-                    <EditIcon tw="cursor-pointer w-6 h-6" />
+                    <EditIcon tw="w-6 h-6" />
                     <span tw="bl-text-3xl">{title}</span>
                   </IconLink>
                 ) : (

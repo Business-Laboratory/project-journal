@@ -37,7 +37,7 @@ export default function Clients() {
         {data?.map(({ id, name, employees }) => (
           <div key={id} tw="space-y-4">
             <div tw="inline-flex items-center space-x-2">
-              <EditIcon tw="cursor-pointer w-7 h-7" />
+              <EditIcon tw="w-6 h-6" />
               <span tw="bl-text-3xl">{name}</span>
             </div>
             <div tw="grid grid-cols-3 gap-x-3 gap-y-2 bl-text-lg">
