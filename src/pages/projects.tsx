@@ -35,7 +35,7 @@ export default function Projects() {
       <Head>
         <title>Projects | Project Journal</title>
       </Head>
-      <Main>
+      <main tw="pt-10 w-9/12 space-y-8 mx-auto max-w-lg lg:max-w-none">
         {user?.role === 'ADMIN' ? (
           <IconLink pathName="#">
             <PlusIcon tw="w-6 h-6" />
@@ -59,7 +59,7 @@ export default function Projects() {
             There are currently no projects assigned to you
           </h1>
         )}
-      </Main>
+      </main>
     </>
   )
 }
@@ -70,21 +70,6 @@ const fetchProjects: QueryFunction<ProjectsData> = async () => {
     throw new Error(`Something went wrong`)
   }
   return res.json()
-}
-
-type MainProps = {
-  className?: string
-  children?: React.ReactNode
-}
-function Main({ className, children }: MainProps) {
-  return (
-    <div
-      tw="w-9/12 space-y-8 mx-auto max-w-lg lg:max-w-none"
-      className={className}
-    >
-      {children}
-    </div>
-  )
 }
 
 type CardProps = {
@@ -100,8 +85,7 @@ function Card({ id, name, description, imageUrl }: CardProps) {
     <Link href={`/project/${id}`} passHref>
       <a
         css={[
-          tw`grid grid-cols-3 col-auto overflow-hidden border-2 rounded border-copper-300 shadow-bl
-          focus:outline-none`,
+          tw`grid grid-cols-3 col-auto overflow-hidden border-2 rounded border-copper-300 shadow-bl focus:outline-none`,
           tw`transition duration-300 ease-in-out hover:shadow-bl-lg`,
           css`
             :hover {
