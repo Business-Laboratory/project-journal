@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from 'react-query'
 import 'focus-visible'
 
 import { AuthProvider } from '@components/auth-context'
-import AppBar from '@components/AppBar'
+import { AppBar } from '@components/app-bar'
 
 import '../styles/globals.css'
 

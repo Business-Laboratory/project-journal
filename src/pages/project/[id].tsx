@@ -7,6 +7,7 @@ import type { ProjectData } from '../api/project'
 import { useRouter } from 'next/router'
 
 import { Timeline, ProjectInformation, Summary } from '@components/project'
+import { appBarHeight } from '@components/app-bar'
 
 export default function Project() {
   const { query } = useRouter()
@@ -40,6 +41,7 @@ export default function Project() {
     <main
       tw="fixed overflow-hidden h-full w-full"
       css={css`
+        height: calc(100% - ${appBarHeight});
         display: grid;
         grid-template-columns: 80px auto 500px;
       `}

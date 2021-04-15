@@ -15,13 +15,22 @@ import { LogoIcon } from 'icons'
 
 import '@reach/menu-button/styles.css'
 
-export default function AppBar() {
+const appBarHeight = theme('spacing.12')
+
+export { AppBar, appBarHeight }
+
+function AppBar() {
   const { pathname } = useRouter()
   // Will pull auth and projects/clients from context once implemented
   const user = useAuth()
 
   return (
-    <Header>
+    <header
+      tw="sticky w-screen px-4 flex flex-row items-center justify-between bg-gray-yellow-500 top-0 z-10"
+      css={css`
+        height: ${appBarHeight};
+      `}
+    >
       <nav tw="inline-flex">
         <NavHome>Project Journal</NavHome>
         {user?.role === 'ADMIN' &&
@@ -37,21 +46,6 @@ export default function AppBar() {
         ) : null}
       </nav>
       {user ? <UserMenu imageUrl={user.image ?? undefined} /> : null}
-    </Header>
-  )
-}
-
-type HeaderProps = {
-  className?: string
-  children?: React.ReactNode
-}
-function Header({ className, children }: HeaderProps) {
-  return (
-    <header
-      tw="w-screen h-12 px-4 flex flex-row items-center justify-between bg-gray-yellow-500 top-0 sticky z-10"
-      className={className}
-    >
-      {children}
     </header>
   )
 }
@@ -70,12 +64,7 @@ function UserMenu({ imageUrl }: MenuProps) {
       </MenuButton>
       <MenuList
         css={[
-          tw`
-            mt-4 py-1 flex flex-col items-center text-gray-yellow-200 bg-gray-yellow-600
-            border-solid border border-copper-300
-            rounded
-            focus:outline-none
-          `,
+          tw`flex flex-col items-center py-1 mt-4 border border-solid rounded text-gray-yellow-200 bg-gray-yellow-600 border-copper-300 focus:outline-none`,
           css`
             [data-reach-menu-item][data-selected] {
               background-color: ${theme('colors[gray-yellow].200')};
@@ -115,8 +104,7 @@ function NavHome({ children }: NavHomeProps) {
     <Link href="/" passHref>
       <a
         css={[
-          tw`bl-text-3xl font-bold text-gray-yellow-100 hover:text-copper-300
-        focus:outline-none`,
+          tw`font-bold bl-text-3xl text-gray-yellow-100 hover:text-copper-300 focus:outline-none`,
           appbarElementRingCss,
         ]}
       >
