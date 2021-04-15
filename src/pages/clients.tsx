@@ -1,7 +1,6 @@
 // Alternate Admin Home view that displays clients
 import 'twin.macro'
 import Head from 'next/head'
-import Link from 'next/link'
 import { PlusIcon, EditIcon } from 'icons'
 import { Fragment } from 'react'
 import { QueryFunction, useQuery } from 'react-query'

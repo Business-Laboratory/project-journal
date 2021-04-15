@@ -31,54 +31,53 @@ export function Summary({
   const user = useAuth()
   return (
     <aside tw="relative h-full px-14 overflow-y-auto">
-      <div tw="w-full mx-auto py-10 space-y-8">
+      <div tw="space-y-8 py-10">
         {user?.role === 'ADMIN' ? (
           <IconLink pathName={`/project/${projectId}/#`}>
             <GearIcon tw="h-6 w-6" />
-            <span tw="bl-text-4xl">{name}</span>
+            <h1 tw="bl-text-4xl inline">{name}</h1>
           </IconLink>
         ) : (
-          <div tw="bl-text-4xl">{name}</div>
+          <h1 tw="bl-text-4xl">{name}</h1>
         )}
         <div tw="relative h-60 w-full">
           {imageUrl ? (
-            <Image tw="object-fill" layout="fill" src={imageUrl} alt={name} />
+            <Image
+              tw="object-contain"
+              layout="fill"
+              src={imageUrl}
+              alt={name}
+            />
           ) : null}
         </div>
         <div tw="space-y-2">
           {user?.role === 'ADMIN' ? (
             <IconLink pathName={`/project/${projectId}/#`}>
               <EditIcon tw="h-6 w-6" />
-              <span tw="bl-text-3xl">Project Description</span>
+              <h2 tw="bl-text-3xl inline">Project Description</h2>
             </IconLink>
           ) : (
-            <div tw="bl-text-3xl">Project Description</div>
+            <h2 tw="bl-text-3xl">Project Description</h2>
           )}
           {summary?.description ? (
-            <MarkdownWrapper>
-              <ReactMarkdown plugins={[gfm]}>
-                {summary.description}
-              </ReactMarkdown>
-            </MarkdownWrapper>
+            <MarkdownWrapper>{summary.description}</MarkdownWrapper>
           ) : null}
         </div>
         <div tw="space-y-2">
           {user?.role === 'ADMIN' ? (
             <IconLink pathName={`/project/${projectId}/#`}>
               <EditIcon tw="h-6 w-6" />
-              <span tw="bl-text-3xl">Project Roadmap</span>
+              <h2 tw="bl-text-3xl inline">Project Roadmap</h2>
             </IconLink>
           ) : (
-            <div tw="bl-text-3xl">Project Roadmap</div>
+            <h2 tw="bl-text-3xl">Project Roadmap</h2>
           )}
           {summary?.roadmap ? (
-            <MarkdownWrapper>
-              <ReactMarkdown plugins={[gfm]}>{summary.roadmap}</ReactMarkdown>
-            </MarkdownWrapper>
+            <MarkdownWrapper>{summary.roadmap}</MarkdownWrapper>
           ) : null}
         </div>
         <div tw="space-y-6">
-          <span tw="bl-text-3xl">Project Personnel</span>
+          <h3 tw="bl-text-3xl">Project Personnel</h3>
           <ClientSection>
             <div tw="bl-text-2xl">Client</div>
             <div tw="bl-text-base">{clientName}</div>
@@ -87,7 +86,7 @@ export function Summary({
             <div tw="bl-text-2xl">Client Team</div>
             {clientEmployees.map(({ id, name, email }) => (
               <span key={id}>
-                <div tw="bl-text-xl">{name}</div>
+                <div tw="bl-text-lg">{name}</div>
                 <div tw="bl-text-base">{email}</div>
               </span>
             ))}
@@ -96,7 +95,7 @@ export function Summary({
             <div tw="bl-text-2xl">Project Team</div>
             {team.map(({ id, name, email }) => (
               <span key={id}>
-                <div tw="bl-text-xl">{name}</div>
+                <div tw="bl-text-lg">{name}</div>
                 <div tw="bl-text-base">{email}</div>
               </span>
             ))}
@@ -107,7 +106,7 @@ export function Summary({
   )
 }
 
-function MarkdownWrapper({ children }: { children: React.ReactNode }) {
+function MarkdownWrapper({ children }: { children: string }) {
   return (
     // took list styling from here https://stackoverflow.com/questions/11737266/what-is-default-list-styling-css
     <div
@@ -137,7 +136,7 @@ function MarkdownWrapper({ children }: { children: React.ReactNode }) {
         `,
       ]}
     >
-      {children}
+      <ReactMarkdown plugins={[gfm]}>{children}</ReactMarkdown>
     </div>
   )
 }
