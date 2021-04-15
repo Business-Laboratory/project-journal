@@ -31,7 +31,7 @@ export function ProjectInformation({
         `,
       ]}
     >
-      <div tw="w-8/12 mx-auto space-y-8">
+      <div tw="w-9/12 mx-auto space-y-8">
         <SearchBar />
         {user?.role === 'ADMIN' && (
           <IconLink pathName={`/project/${projectId}/#`}>
@@ -45,7 +45,7 @@ export function ProjectInformation({
               <div tw="inline-flex items-center space-x-2">
                 {user?.role === 'ADMIN' ? (
                   <IconLink pathName={`/project/${projectId}/#`}>
-                    <EditIcon tw="cursor-pointer w-7 h-7" />
+                    <EditIcon tw="cursor-pointer w-6 h-6" />
                     <span tw="bl-text-3xl">{title}</span>
                   </IconLink>
                 ) : (
