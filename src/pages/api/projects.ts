@@ -1,4 +1,5 @@
 import { prisma } from '@lib/prisma'
+import { generateSasUrl } from '@lib/azure-storage-blob'
 import { checkAuthentication } from '@utils/api/check-authentication'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -56,12 +57,9 @@ async function getProjects(user: User) {
   }
 
   // get the project data
-  return prisma.project.findMany({
+  const projects = await prisma.project.findMany({
     where,
-    select: {
-      id: true,
-      name: true,
-      imageUrl: true,
+    include: {
       summary: {
         select: {
           description: true,
@@ -69,4 +67,31 @@ async function getProjects(user: User) {
       },
     },
   })
+
+  const projectsWithImageUrls = projects.map(
+    async ({ imageStorageBlobUrl, ...project }) => {
+      const { imageUrl } = project
+
+      // if there's no storage blob we can just continue
+      if (imageStorageBlobUrl === null) {
+        return project
+      }
+
+      // create a sas url, this will just return the existing one if it's valid
+      const newImageUrl = await generateSasUrl(imageUrl, imageStorageBlobUrl)
+      // if the imageUrl changed the database needs to be updated
+      if (imageUrl !== newImageUrl) {
+        await prisma.project.update({
+          where: { id: project.id },
+          data: {
+            imageUrl: newImageUrl,
+          },
+        })
+      }
+
+      return { ...project, imageUrl: newImageUrl }
+    }
+  )
+
+  return Promise.all(projectsWithImageUrls)
 }
