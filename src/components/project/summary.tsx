@@ -1,4 +1,4 @@
-import 'twin.macro'
+import tw, { css } from 'twin.macro'
 import Image from 'next/image'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
@@ -30,8 +30,8 @@ export function Summary({
 }: SummaryProps) {
   const user = useAuth()
   return (
-    <aside tw="relative h-full py-10 px-14 overflow-y-auto">
-      <div tw="w-full mx-auto space-y-8">
+    <aside tw="relative h-full px-14 overflow-y-auto">
+      <div tw="w-full mx-auto py-10 space-y-8">
         {user?.role === 'ADMIN' ? (
           <IconLink pathName={`/project/${projectId}/#`}>
             <GearIcon tw="h-6 w-6" />
@@ -40,9 +40,9 @@ export function Summary({
         ) : (
           <div tw="bl-text-4xl">{name}</div>
         )}
-        <div tw="relative">
+        <div tw="relative h-60 w-full">
           {imageUrl ? (
-            <Image tw="object-cover" layout="fill" src={imageUrl} alt={name} />
+            <Image tw="object-fill" layout="fill" src={imageUrl} alt={name} />
           ) : null}
         </div>
         <div tw="space-y-2">
@@ -55,7 +55,11 @@ export function Summary({
             <div tw="bl-text-3xl">Project Description</div>
           )}
           {summary?.description ? (
-            <ReactMarkdown plugins={[gfm]}>{summary.description}</ReactMarkdown>
+            <MarkdownWrapper>
+              <ReactMarkdown plugins={[gfm]}>
+                {summary.description}
+              </ReactMarkdown>
+            </MarkdownWrapper>
           ) : null}
         </div>
         <div tw="space-y-2">
@@ -68,20 +72,9 @@ export function Summary({
             <div tw="bl-text-3xl">Project Roadmap</div>
           )}
           {summary?.roadmap ? (
-            <div tw="bl-text-base">
-              <ReactMarkdown plugins={[gfm]}>
-                {`## Prep
-    1. ~~Test versus HVM1 — because we want to see that the old/new versions of the generator work on that problem~~
-    2. Move the block length correction out of the simulation — because our algorithm will otherwise give uncorrected block lengths
-    3. Write a test for schedule format — to make sure the new stuff is generating the correct format for the simulator
-    4. Modify optimization code and deploy
-    5. Build lookups to make accessing data more straightforward
-## Write Algorithm
-    1. Run tree class on actual data to generate tree of units
-    2. Trace the unit alignment forward using the tiers of the tree
-    3. Trace the unit alignment backward using the tiers of the tree`}
-              </ReactMarkdown>
-            </div>
+            <MarkdownWrapper>
+              <ReactMarkdown plugins={[gfm]}>{summary.roadmap}</ReactMarkdown>
+            </MarkdownWrapper>
           ) : null}
         </div>
         <div tw="space-y-6">
@@ -111,6 +104,41 @@ export function Summary({
         </div>
       </div>
     </aside>
+  )
+}
+
+function MarkdownWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    // took list styling from here https://stackoverflow.com/questions/11737266/what-is-default-list-styling-css
+    <div
+      css={[
+        tw`bl-text-base`,
+        css`
+          ul {
+            list-style-type: disc;
+            list-style-position: inside;
+          }
+          ol {
+            list-style-type: decimal;
+            list-style-position: inside;
+          }
+          ul ul,
+          ol ul {
+            list-style-type: circle;
+            list-style-position: inside;
+            margin-left: 1rem;
+          }
+          ol ol,
+          ul ol {
+            list-style-type: lower-latin;
+            list-style-position: inside;
+            margin-left: 1rem;
+          }
+        `,
+      ]}
+    >
+      {children}
+    </div>
   )
 }
 
