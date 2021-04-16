@@ -3,7 +3,7 @@ import tw, { css, theme } from 'twin.macro'
 import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
-import { PlusIcon } from 'icons'
+import { PlusIcon, SpinnerIcon } from 'icons'
 import { useQuery } from 'react-query'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
@@ -149,7 +149,12 @@ type CardGridProps = {
 }
 function CardGrid({ status, data }: CardGridProps) {
   if (status === 'loading') {
-    return <p>ToDo: spinner</p>
+    return (
+      <div tw="space-y-4">
+        <SpinnerIcon tw="animate-spin w-20 h-20 max-w-max mx-auto" />
+        <p tw="bl-text-sm text-center">Loading projects</p>
+      </div>
+    )
   }
 
   //const projects = data ?? []
@@ -158,7 +163,7 @@ function CardGrid({ status, data }: CardGridProps) {
       clientId: null,
       id: 2,
       imageUrl:
-        'https://projectjournalassets.blob.core.windows.net/project-images/project_tracker.png?sv=2020-06-12&se=2021-04-15T21%3A08%3A55Z&sr=b&sp=r&sig=raBPY7YzcXwyeS5koabseruCBbNKIEzTFtIjuhCjqvk%3D&rscc=public%2C%20max-age%3D86400%2C%20immutable',
+        'https://projectjournalassets.blob.core.windows.net/project-images/project_tracker.png?sv=2020-06-12&se=2021-04-16T21%3A42%3A39Z&sr=b&sp=r&sig=QMlj93ewLGMSy0iGu%2BXZnAZnVEzFXlKdU3Lq82VNpss%3D&rscc=public%2C%20max-age%3D86400%2C%20immutable',
       name: 'Project Tracker 2.1',
       summary: null,
     },
