@@ -11,8 +11,8 @@ import {
   addWeeks,
   addQuarters,
 } from 'date-fns'
-import type { Interval } from 'date-fns'
 
+import type { Interval } from 'date-fns'
 import type { Update } from '@prisma/client'
 
 type TimelineProps = {
@@ -35,18 +35,20 @@ export function Timeline({ updates }: TimelineProps) {
           />
         ))}
       </FlexWrapper>
-      <FlexWrapper>
+      <FlexWrapper
+        // add this padding and gap so that the circles are evenly spaced between the delineators
+        css={css`
+          padding-top: ${dateDelineatorHeight};
+          padding-bottom: ${dateDelineatorHeight};
+          gap: ${dateDelineatorHeight};
+        `}
+      >
         <CircleWrapper>
           <UpdateCircle />
           <UpdateCircle />
           <UpdateCircle />
         </CircleWrapper>
         <CircleWrapper>
-          <UpdateCircle />
-          <UpdateCircle />
-        </CircleWrapper>
-        <CircleWrapper>
-          <UpdateCircle />
           <UpdateCircle />
           <UpdateCircle />
         </CircleWrapper>
@@ -71,17 +73,16 @@ function Bar() {
   )
 }
 
-function FlexWrapper({ children }: { children: React.ReactNode }) {
+function FlexWrapper(props: React.ComponentPropsWithoutRef<'div'>) {
   return (
     <div
       css={[absoluteCenterCss, tw`flex flex-col items-center justify-between`]}
-    >
-      {children}
-    </div>
+      {...props}
+    />
   )
 }
 
-// There is like a better, but more complicated to figure this out, but this is the height
+// There is likely a better, but more complicated to figure this out, but this is the height
 // of these elements when the text is bl-text-xs
 const dateDelineatorHeight = theme('height.5')
 type DateDelineatorProps = {
@@ -103,36 +104,9 @@ function DateDelineator({ date, format }: DateDelineatorProps) {
   )
 }
 
-function formatDate(date: Date, format: DelineatorType) {
-  switch (format) {
-    case 'weeks': {
-      return dateFnsFormat(date, 'MM/dd/yy')
-    }
-    case 'months': {
-      return dateFnsFormat(date, 'MM/yyyy')
-    }
-    case 'quarters': {
-      return dateFnsFormat(date, 'MM/yyyy')
-    }
-  }
-}
-
 function CircleWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      css={[
-        tw`flex flex-col items-center flex-grow justify-evenly`,
-        // add this padding so that the circles are evenly spaced between the delineators
-        css`
-          padding-top: calc(${updateCirclePadding} + ${dateDelineatorHeight});
-          padding-bottom: calc(
-            ${updateCirclePadding} + ${dateDelineatorHeight}
-          );
-        `,
-      ]}
-    >
-      {children}
-    </div>
+    <div tw="flex flex-col items-center flex-1 justify-evenly">{children}</div>
   )
 }
 
@@ -172,6 +146,20 @@ function UpdateCircle() {
 const absoluteCenterCss = tw`absolute left-0 right-0 mx-auto top-10 bottom-10`
 
 type DelineatorType = 'weeks' | 'months' | 'quarters'
+
+function formatDate(date: Date, format: DelineatorType) {
+  switch (format) {
+    case 'weeks': {
+      return dateFnsFormat(date, 'MM/dd/yy')
+    }
+    case 'months': {
+      return dateFnsFormat(date, 'MM/yyyy')
+    }
+    case 'quarters': {
+      return dateFnsFormat(date, 'MM/yyyy')
+    }
+  }
+}
 
 // pick the first interval that has between 2-4 dates, defaulting to quarters
 function pickDateDelineators(updates: Update[]) {
