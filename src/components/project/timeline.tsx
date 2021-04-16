@@ -1,16 +1,39 @@
 import tw, { css, theme } from 'twin.macro'
 import React from 'react'
-import { format as dateFnsFormat } from 'date-fns'
+import {
+  format as dateFnsFormat,
+  eachWeekOfInterval,
+  eachMonthOfInterval,
+  eachQuarterOfInterval,
+  addMonths,
+  min as minDate,
+  max as maxDate,
+  addWeeks,
+  addQuarters,
+} from 'date-fns'
+import type { Interval } from 'date-fns'
 
-export function Timeline() {
+import type { Update } from '@prisma/client'
+
+type TimelineProps = {
+  updates: Update[]
+}
+export function Timeline({ updates }: TimelineProps) {
+  const datesDelineators = pickDateDelineators(updates)
+
+  console.log(datesDelineators)
+
   return (
     <nav tw="relative w-20 h-full overflow-hidden bg-gray-yellow-600 border-r-2 border-gray-yellow-300">
       <Bar />
       <FlexWrapper>
-        <DateDelineator date={new Date('04/01/2021')} format="month" />
-        <DateDelineator date={new Date('03/01/2021')} format="month" />
-        <DateDelineator date={new Date('02/01/2021')} format="month" />
-        <DateDelineator date={new Date('01/01/2021')} format="month" />
+        {datesDelineators.dates.map((date) => (
+          <DateDelineator
+            key={date.valueOf()}
+            date={date}
+            format={datesDelineators.type}
+          />
+        ))}
       </FlexWrapper>
       <FlexWrapper>
         <CircleWrapper>
@@ -58,15 +81,13 @@ function FlexWrapper({ children }: { children: React.ReactNode }) {
   )
 }
 
-type DateFormat = 'week' | 'month'
-type DateDelineatorProps = {
-  date: Date
-  format: DateFormat
-}
-
 // There is like a better, but more complicated to figure this out, but this is the height
 // of these elements when the text is bl-text-xs
 const dateDelineatorHeight = theme('height.5')
+type DateDelineatorProps = {
+  date: Date
+  format: DelineatorType
+}
 function DateDelineator({ date, format }: DateDelineatorProps) {
   return (
     <div
@@ -82,12 +103,15 @@ function DateDelineator({ date, format }: DateDelineatorProps) {
   )
 }
 
-function formatDate(date: Date, format: DateFormat) {
+function formatDate(date: Date, format: DelineatorType) {
   switch (format) {
-    case 'week': {
+    case 'weeks': {
       return dateFnsFormat(date, 'MM/dd/yy')
     }
-    case 'month': {
+    case 'months': {
+      return dateFnsFormat(date, 'MM/yyyy')
+    }
+    case 'quarters': {
       return dateFnsFormat(date, 'MM/yyyy')
     }
   }
@@ -146,3 +170,77 @@ function UpdateCircle() {
 // hooks/logic/styles
 
 const absoluteCenterCss = tw`absolute left-0 right-0 mx-auto top-10 bottom-10`
+
+type DelineatorType = 'weeks' | 'months' | 'quarters'
+
+// pick the first interval that has between 2-4 dates, defaulting to quarters
+function pickDateDelineators(updates: Update[]) {
+  const intervals = getDateIntervals(updates)
+  let type: DelineatorType =
+    intervals.weeks.length <= 4
+      ? 'weeks'
+      : intervals.months.length <= 4
+      ? 'months'
+      : 'quarters'
+  return { dates: intervals[type], type }
+}
+
+function getDateIntervals(updates: Update[]) {
+  let dates = updates.map(({ createdAt }) => {
+    return new Date(createdAt)
+  })
+  if (dates.length <= 0) {
+    dates = [new Date()]
+  }
+
+  const interval = { start: minDate(dates), end: maxDate(dates) }
+
+  return {
+    weeks: eachDateOfInterval(interval, 'weeks'),
+    months: eachDateOfInterval(interval, 'months'),
+    quarters: eachDateOfInterval(interval, 'quarters'),
+  } as const
+}
+
+/**
+ * Gets the dates in an interval, specified by the type. Dates are returned in descending order
+ * @param interval
+ * @param type
+ * @returns
+ */
+function eachDateOfInterval(interval: Interval, type: DelineatorType) {
+  // get the correct date-fns utilities
+  let intervalFunction
+  let addDateFunction
+  switch (type) {
+    case 'weeks': {
+      intervalFunction = eachWeekOfInterval
+      addDateFunction = addWeeks
+      break
+    }
+    case 'months': {
+      intervalFunction = eachMonthOfInterval
+      addDateFunction = addMonths
+      break
+    }
+    case 'quarters': {
+      intervalFunction = eachQuarterOfInterval
+      addDateFunction = addQuarters
+      break
+    }
+  }
+
+  // find the dates in the interval depending on the type
+  const dates = intervalFunction(interval).sort(
+    (a, b) => b.valueOf() - a.valueOf()
+  )
+  if (dates.length > 1) {
+    return dates
+  }
+
+  const firstDate = dates[0]
+  if (dates === undefined) {
+    throw new Error(`No interval dates found for the interval ${interval}`)
+  }
+  return [addDateFunction(firstDate, 1), firstDate]
+}
