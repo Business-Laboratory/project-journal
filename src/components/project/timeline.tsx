@@ -1,5 +1,5 @@
 import tw, { css, theme } from 'twin.macro'
-import React from 'react'
+import { useEffect, useRef, forwardRef, useState } from 'react'
 import {
   format as dateFnsFormat,
   eachWeekOfInterval,
@@ -18,50 +18,61 @@ import type { Update } from '@prisma/client'
 type TimelineProps = {
   updates: Update[]
 }
+
 export function Timeline({ updates }: TimelineProps) {
   updates = [
     {
       id: 0,
       title: '',
       body: '',
-      createdAt: new Date('01/13/2020'),
-      updatedAt: new Date('01/04/2020'),
+      createdAt: new Date('01/13/2021'),
+      updatedAt: new Date('01/04/2021'),
       projectId: null,
     },
     {
       id: 0,
       title: '',
       body: '',
-      createdAt: new Date('01/14/2020'),
-      updatedAt: new Date('01/04/2020'),
+      createdAt: new Date('01/14/2021'),
+      updatedAt: new Date('01/04/2021'),
       projectId: null,
     },
     {
       id: 0,
       title: '',
       body: '',
-      createdAt: new Date('01/24/2020'),
-      updatedAt: new Date('01/04/2020'),
+      createdAt: new Date('01/24/2021'),
+      updatedAt: new Date('01/04/2021'),
       projectId: null,
     },
     {
       id: 0,
       title: '',
       body: '',
-      createdAt: new Date('02/01/2020'),
-      updatedAt: new Date('01/04/2020'),
+      createdAt: new Date('02/01/2021'),
+      updatedAt: new Date('01/04/2021'),
       projectId: null,
     },
   ]
 
-  const datesDelineators = pickDateDelineators(updates)
+  const datesContainerRef = useRef<null | HTMLDivElement>(null)
+  const height = useObserverHeight(datesContainerRef)
 
+  const delineatorHeight = parseFloat(theme('spacing.5')) * 16
+  const maxNumberOfDelineators =
+    height !== null
+      ? Math.floor((height - delineatorHeight) / (delineatorHeight + 48))
+      : 4
+
+  const datesDelineators = pickDateDelineators(updates, maxNumberOfDelineators)
   const groupedUpdateDates = groupUpdates(updates, datesDelineators.dates)
+
+  console.log(maxNumberOfDelineators, datesDelineators)
 
   return (
     <nav tw="relative w-20 h-full overflow-hidden bg-gray-yellow-600 border-r-2 border-gray-yellow-300">
       <Bar />
-      <FlexWrapper>
+      <FlexWrapper ref={datesContainerRef}>
         {datesDelineators.dates.map((date) => (
           <DateDelineator
             key={date.valueOf()}
@@ -72,7 +83,7 @@ export function Timeline({ updates }: TimelineProps) {
       </FlexWrapper>
       <FlexWrapper
         // add this padding and gap so that the circles are evenly spaced between the delineators
-        css={tw`py-5 space-y-5`}
+        tw="py-5 space-y-5"
       >
         {groupedUpdateDates.map((dates, idx) => (
           <CircleWrapper key={idx}>
@@ -102,14 +113,18 @@ function Bar() {
   )
 }
 
-function FlexWrapper(props: React.ComponentPropsWithoutRef<'div'>) {
+const FlexWrapper = forwardRef<
+  HTMLDivElement,
+  React.ComponentPropsWithoutRef<'div'>
+>((props, ref) => {
   return (
     <div
+      ref={ref}
       css={[absoluteCenterCss, tw`flex flex-col items-center justify-between`]}
       {...props}
     />
   )
-}
+})
 
 type DateDelineatorProps = {
   date: Date
@@ -161,6 +176,28 @@ function UpdateCircle() {
 }
 
 // hooks/logic/styles
+
+function useObserverHeight(ref: React.MutableRefObject<HTMLElement | null>) {
+  const [height, setHeight] = useState<null | number>(null)
+  useEffect(() => {
+    const node = ref.current
+    if (node === null) return
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      const [entry] = entries
+      if (entry === undefined) {
+        throw new Error('No entry found in resize observer')
+      }
+      setHeight(entry.contentRect.height)
+    })
+    resizeObserver.observe(node)
+    return () => {
+      resizeObserver.unobserve(node)
+    }
+  }, [ref])
+
+  return height
+}
 
 const absoluteCenterCss = tw`absolute left-0 right-0 mx-auto top-10 bottom-10`
 
@@ -219,16 +256,31 @@ function formatDate(date: Date, format: DelineatorType) {
   }
 }
 
-// pick the first interval that has between 2-4 dates, defaulting to quarters
-function pickDateDelineators(updates: Update[]) {
+/**
+ * pick the first interval that has between 2-4 dates, defaulting to quarters
+ * @param updates
+ * @param maxNumberOfDelineators
+ * @returns
+ */
+function pickDateDelineators(
+  updates: Update[],
+  maxNumberOfDelineators: number
+) {
   const intervals = getDateIntervals(updates)
   let type: DelineatorType =
     intervals.weeks.length <= 4
       ? 'weeks'
       : intervals.months.length <= 4
       ? 'months'
-      : 'quarters'
-  return { dates: intervals[type], type }
+      : // TODO: handle when there are more than for quarters
+        'quarters'
+  let dates = intervals[type]
+  // if the number of delineators can't fit we only show the first and last one
+  const numberOfDates = dates.length
+  if (numberOfDates > maxNumberOfDelineators) {
+    dates = [dates[0], dates[numberOfDates - 1]]
+  }
+  return { dates, type }
 }
 
 function getDateIntervals(updates: Update[]) {
