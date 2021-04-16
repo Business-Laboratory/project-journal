@@ -20,54 +20,65 @@ type TimelineProps = {
 }
 
 export function Timeline({ updates }: TimelineProps) {
-  updates = [
-    {
-      id: 0,
-      title: '',
-      body: '',
-      createdAt: new Date('01/13/2021'),
-      updatedAt: new Date('01/04/2021'),
-      projectId: null,
-    },
-    {
-      id: 0,
-      title: '',
-      body: '',
-      createdAt: new Date('01/14/2021'),
-      updatedAt: new Date('01/04/2021'),
-      projectId: null,
-    },
-    {
-      id: 0,
-      title: '',
-      body: '',
-      createdAt: new Date('01/24/2021'),
-      updatedAt: new Date('01/04/2021'),
-      projectId: null,
-    },
-    {
-      id: 0,
-      title: '',
-      body: '',
-      createdAt: new Date('02/01/2021'),
-      updatedAt: new Date('01/04/2021'),
-      projectId: null,
-    },
-  ]
+  // updates = [
+  //   {
+  //     id: 0,
+  //     title: '',
+  //     body: '',
+  //     createdAt: new Date('01/13/2021'),
+  //     updatedAt: new Date('01/04/2021'),
+  //     projectId: null,
+  //   },
+  //   {
+  //     id: 0,
+  //     title: '',
+  //     body: '',
+  //     createdAt: new Date('01/14/2021'),
+  //     updatedAt: new Date('01/04/2021'),
+  //     projectId: null,
+  //   },
+  //   {
+  //     id: 0,
+  //     title: '',
+  //     body: '',
+  //     createdAt: new Date('01/24/2021'),
+  //     updatedAt: new Date('01/04/2021'),
+  //     projectId: null,
+  //   },
+  //   {
+  //     id: 0,
+  //     title: '',
+  //     body: '',
+  //     createdAt: new Date('02/01/2021'),
+  //     updatedAt: new Date('01/04/2021'),
+  //     projectId: null,
+  //   },
+  // ]
 
   const datesContainerRef = useRef<null | HTMLDivElement>(null)
   const height = useObserverHeight(datesContainerRef)
 
+  // some things that need to be backed out
   const delineatorHeight = parseFloat(theme('spacing.5')) * 16
+  const circleHeight = 48
+
   const maxNumberOfDelineators =
     height !== null
-      ? Math.floor((height - delineatorHeight) / (delineatorHeight + 48))
+      ? Math.floor(
+          (height - delineatorHeight) / (delineatorHeight + circleHeight)
+        )
       : 4
 
   const datesDelineators = pickDateDelineators(updates, maxNumberOfDelineators)
   const groupedUpdateDates = groupUpdates(updates, datesDelineators.dates)
 
-  console.log(maxNumberOfDelineators, datesDelineators)
+  const segmentHeight =
+    height !== null
+      ? (height - delineatorHeight * datesDelineators.dates.length) /
+        groupedUpdateDates.length
+      : 0
+
+  const maxNumberOfCircles = Math.floor(segmentHeight / circleHeight)
 
   return (
     <nav tw="relative w-20 h-full overflow-hidden bg-gray-yellow-600 border-r-2 border-gray-yellow-300">
@@ -87,7 +98,7 @@ export function Timeline({ updates }: TimelineProps) {
       >
         {groupedUpdateDates.map((dates, idx) => (
           <CircleWrapper key={idx}>
-            {dates.map((date) => (
+            {shortenArray(dates, maxNumberOfCircles).map((date) => (
               <UpdateCircle key={date.valueOf()} />
             ))}
           </CircleWrapper>
@@ -95,6 +106,28 @@ export function Timeline({ updates }: TimelineProps) {
       </FlexWrapper>
     </nav>
   )
+}
+
+/**
+ * filters the array to the size of the target length by applying a naive algorithm
+ * @param array
+ * @param targetLength
+ * @returns
+ */
+function shortenArray<T>(array: T[], targetLength: number) {
+  const arrayLength = array.length
+  // return the original array if it doesn't need to be shortened
+  if (targetLength >= arrayLength) {
+    return array
+  }
+  const chunkSize = arrayLength / targetLength
+  const midChunkSize = chunkSize / 2
+  const indexes = Array.from({ length: targetLength }).map((_, idx) => {
+    const middleOfChunk = idx * chunkSize + midChunkSize
+    return Math.floor(middleOfChunk)
+  })
+
+  return indexes.map((idx) => array[idx])
 }
 
 // components
@@ -224,14 +257,19 @@ function groupUpdates(updates: Update[], dates: Date[]) {
 
   let groups: Date[][] = Array.from({ length: intervals.length }).map(() => [])
   for (const update of updates) {
-    const createdAtValue = update.createdAt.valueOf()
+    // TODO: Fix in database... this is supposed to be a date
+    const createdAtValue = new Date(update.createdAt).valueOf()
     // find which two dates the update was created between
     const intervalIndex = intervals.findIndex(([laterDate, earlierDate]) => {
       return earlierDate <= createdAtValue && createdAtValue <= laterDate
     })
     if (intervalIndex === -1) {
       throw new Error(
-        `Date ${update.createdAt} does not exist in one of the intervals ${intervals}`
+        `Date ${
+          update.createdAt
+        } does not exist in one of the intervals ${intervals.map((dates) =>
+          dates.map((d) => new Date(d)).join('\n')
+        )}`
       )
     }
     groups[intervalIndex].push(update.createdAt)
