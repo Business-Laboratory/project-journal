@@ -11,7 +11,7 @@ let blobServiceClient: BlobServiceClient
 if (process.env.NODE_ENV === 'production') {
   blobServiceClient = createBlobServiceClient()
 } else {
-  if (!global.prismaClient) {
+  if (!global.blobServiceClientGlobal) {
     global.blobServiceClientGlobal = createBlobServiceClient()
   }
   blobServiceClient = global.blobServiceClientGlobal
