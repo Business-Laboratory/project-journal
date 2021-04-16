@@ -78,28 +78,12 @@ export function Summary({
         </div>
         <div tw="space-y-6">
           <h3 tw="bl-text-3xl">Project Personnel</h3>
-          <ClientSection>
+          <div>
             <div tw="bl-text-2xl">Client</div>
             <div tw="bl-text-base">{clientName}</div>
-          </ClientSection>
-          <ClientSection>
-            <div tw="bl-text-2xl">Client Team</div>
-            {clientEmployees.map(({ id, name, email }) => (
-              <span key={id}>
-                <div tw="bl-text-lg">{name}</div>
-                <div tw="bl-text-base">{email}</div>
-              </span>
-            ))}
-          </ClientSection>
-          <ClientSection>
-            <div tw="bl-text-2xl">Project Team</div>
-            {team.map(({ id, name, email }) => (
-              <span key={id}>
-                <div tw="bl-text-lg">{name}</div>
-                <div tw="bl-text-base">{email}</div>
-              </span>
-            ))}
-          </ClientSection>
+          </div>
+          <TeamSection title="Client Team" team={clientEmployees} />
+          <TeamSection title="Project Team" team={team} />
         </div>
       </div>
     </aside>
@@ -141,6 +125,20 @@ function MarkdownWrapper({ children }: { children: string }) {
   )
 }
 
-function ClientSection({ children }: { children: React.ReactNode }) {
-  return <div>{children}</div>
+type TeamSectionProps = {
+  title: string
+  team: User[]
+}
+function TeamSection({ title, team }: TeamSectionProps) {
+  return (
+    <div>
+      <div tw="bl-text-2xl">{title}</div>
+      {team.map(({ id, name, email }) => (
+        <span key={id}>
+          <div tw="bl-text-lg">{name}</div>
+          <div tw="bl-text-base">{email}</div>
+        </span>
+      ))}
+    </div>
+  )
 }
