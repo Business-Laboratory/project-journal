@@ -72,11 +72,7 @@ export function Timeline({ updates }: TimelineProps) {
       </FlexWrapper>
       <FlexWrapper
         // add this padding and gap so that the circles are evenly spaced between the delineators
-        css={css`
-          padding-top: ${dateDelineatorHeight};
-          padding-bottom: ${dateDelineatorHeight};
-          gap: ${dateDelineatorHeight};
-        `}
+        css={tw`py-5 space-y-5`}
       >
         {groupedUpdateDates.map((dates, idx) => (
           <CircleWrapper key={idx}>
@@ -115,23 +111,13 @@ function FlexWrapper(props: React.ComponentPropsWithoutRef<'div'>) {
   )
 }
 
-// There is likely a better, but more complicated to figure this out, but this is the height
-// of these elements when the text is bl-text-xs
-const dateDelineatorHeight = theme('height.5')
 type DateDelineatorProps = {
   date: Date
   format: DelineatorType
 }
 function DateDelineator({ date, format }: DateDelineatorProps) {
   return (
-    <div
-      css={[
-        tw`text-center border rounded w-14 bg-gray-yellow-100 border-copper-300 bl-text-xs`,
-        css`
-          height: ${dateDelineatorHeight};
-        `,
-      ]}
-    >
+    <div tw="h-5 text-center border rounded w-14 bg-gray-yellow-100 border-copper-300 bl-text-xs">
       {formatDate(date, format)}
     </div>
   )
