@@ -19,9 +19,44 @@ type TimelineProps = {
   updates: Update[]
 }
 export function Timeline({ updates }: TimelineProps) {
+  updates = [
+    {
+      id: 0,
+      title: '',
+      body: '',
+      createdAt: new Date('01/13/2020'),
+      updatedAt: new Date('01/04/2020'),
+      projectId: null,
+    },
+    {
+      id: 0,
+      title: '',
+      body: '',
+      createdAt: new Date('01/14/2020'),
+      updatedAt: new Date('01/04/2020'),
+      projectId: null,
+    },
+    {
+      id: 0,
+      title: '',
+      body: '',
+      createdAt: new Date('01/24/2020'),
+      updatedAt: new Date('01/04/2020'),
+      projectId: null,
+    },
+    {
+      id: 0,
+      title: '',
+      body: '',
+      createdAt: new Date('02/01/2020'),
+      updatedAt: new Date('01/04/2020'),
+      projectId: null,
+    },
+  ]
+
   const datesDelineators = pickDateDelineators(updates)
 
-  console.log(datesDelineators)
+  const groupedUpdateDates = groupUpdates(updates, datesDelineators.dates)
 
   return (
     <nav tw="relative w-20 h-full overflow-hidden bg-gray-yellow-600 border-r-2 border-gray-yellow-300">
@@ -43,15 +78,13 @@ export function Timeline({ updates }: TimelineProps) {
           gap: ${dateDelineatorHeight};
         `}
       >
-        <CircleWrapper>
-          <UpdateCircle />
-          <UpdateCircle />
-          <UpdateCircle />
-        </CircleWrapper>
-        <CircleWrapper>
-          <UpdateCircle />
-          <UpdateCircle />
-        </CircleWrapper>
+        {groupedUpdateDates.map((dates, idx) => (
+          <CircleWrapper key={idx}>
+            {dates.map((date) => (
+              <UpdateCircle key={date.valueOf()} />
+            ))}
+          </CircleWrapper>
+        ))}
       </FlexWrapper>
     </nav>
   )
@@ -145,6 +178,45 @@ function UpdateCircle() {
 
 const absoluteCenterCss = tw`absolute left-0 right-0 mx-auto top-10 bottom-10`
 
+/**
+ * group updates that occur in between every pair of dates
+ * @param updates
+ * @param dates
+ * @returns
+ */
+function groupUpdates(updates: Update[], dates: Date[]) {
+  if (dates.length < 2) {
+    throw new Error(
+      `dates must have at least 2 dates, only had ${dates.length} dates`
+    )
+  }
+
+  // ensure that the dates are sorted in descending order, as it affects the grouping
+  const sortedDates = [...dates].sort((a, b) => b.valueOf() - a.valueOf())
+  let intervals: [number, number][] = []
+  // create tuples of the dates
+  for (let i = 0; i < sortedDates.length - 1; i++) {
+    intervals.push([sortedDates[i].valueOf(), sortedDates[i + 1].valueOf()])
+  }
+
+  let groups: Date[][] = Array.from({ length: intervals.length }).map(() => [])
+  for (const update of updates) {
+    const createdAtValue = update.createdAt.valueOf()
+    // find which two dates the update was created between
+    const intervalIndex = intervals.findIndex(([laterDate, earlierDate]) => {
+      return earlierDate <= createdAtValue && createdAtValue <= laterDate
+    })
+    if (intervalIndex === -1) {
+      throw new Error(
+        `Date ${update.createdAt} does not exist in one of the intervals ${intervals}`
+      )
+    }
+    groups[intervalIndex].push(update.createdAt)
+  }
+
+  return groups
+}
+
 type DelineatorType = 'weeks' | 'months' | 'quarters'
 
 function formatDate(date: Date, format: DelineatorType) {
@@ -222,13 +294,10 @@ function eachDateOfInterval(interval: Interval, type: DelineatorType) {
   const dates = intervalFunction(interval).sort(
     (a, b) => b.valueOf() - a.valueOf()
   )
-  if (dates.length > 1) {
-    return dates
-  }
 
   const firstDate = dates[0]
   if (dates === undefined) {
     throw new Error(`No interval dates found for the interval ${interval}`)
   }
-  return [addDateFunction(firstDate, 1), firstDate]
+  return [addDateFunction(firstDate, 1), ...dates]
 }
