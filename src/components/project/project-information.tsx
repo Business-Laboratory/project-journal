@@ -1,7 +1,5 @@
 import tw, { css } from 'twin.macro'
 import React from 'react'
-import ReactMarkdown from 'react-markdown'
-import gfm from 'remark-gfm'
 
 import { SearchBar } from './index'
 import { PlusIcon, EditIcon } from 'icons'
@@ -9,6 +7,7 @@ import { Update } from '@prisma/client'
 import { format } from 'date-fns'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
+import { MarkdownWrapper } from '@components/markdown-wrapper'
 
 type ProjectInformationProps = {
   projectId: number
@@ -57,7 +56,7 @@ export function ProjectInformation({
                   {format(new Date(createdAt), 'M/d/yy')}
                 </span>
               </div>
-              <ReactMarkdown plugins={[gfm]}>{body}</ReactMarkdown>
+              <MarkdownWrapper>{body}</MarkdownWrapper>
             </div>
           ))}
         </div>
