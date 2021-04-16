@@ -10,7 +10,7 @@ export function MarkdownWrapper({ children }: { children: string }) {
         tw`bl-text-base`,
         css`
           h2 {
-            ${tw`bl-text-2xl`}
+            ${tw`bl-text-2xl py-2`}
           }
           strong {
             ${tw`bl-text-lg`}
