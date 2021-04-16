@@ -7,6 +7,7 @@ import { PlusIcon, SpinnerIcon } from 'icons'
 import { useQuery } from 'react-query'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
+import { useState, useEffect } from 'react'
 
 import type { QueryFunction } from 'react-query'
 import type { ProjectsData } from './api/projects'
@@ -148,7 +149,15 @@ type CardGridProps = {
     | undefined
 }
 function CardGrid({ status, data }: CardGridProps) {
-  if (status === 'loading') {
+  const [wait, setWait] = useState<'waiting' | 'finished'>('waiting')
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setWait('finished')
+    }, 1000)
+    return () => clearTimeout(id)
+  }, [])
+
+  if (wait === 'finished' && status === 'loading') {
     return (
       <div tw="space-y-4">
         <SpinnerIcon tw="animate-spin w-20 h-20 max-w-max mx-auto" />
