@@ -64,7 +64,7 @@ export default function Projects() {
           </IconLink>
         ) : null}
 
-        <CardGrid status={status} data={data} />
+        <CardGrid status={status} data={data} userName={user?.name} />
       </main>
     </>
   )
@@ -147,8 +147,9 @@ type CardGridProps = {
         } | null
       }[]
     | undefined
+  userName: string | undefined | null
 }
-function CardGrid({ status, data }: CardGridProps) {
+function CardGrid({ status, data, userName }: CardGridProps) {
   const [wait, setWait] = useState<'waiting' | 'finished'>('waiting')
   useEffect(() => {
     const id = setTimeout(() => {
@@ -188,6 +189,8 @@ function CardGrid({ status, data }: CardGridProps) {
     },
   ]
 
+  const userNameFormatted = userName ? userName : 'you'
+
   return projects.length > 0 ? (
     <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
       {projects.map((project: Project, idx) => (
@@ -202,7 +205,7 @@ function CardGrid({ status, data }: CardGridProps) {
     </div>
   ) : (
     <h1 tw="bl-text-3xl max-w-prose text-center">
-      There are currently no projects assigned to you
+      There are currently no projects assigned to {userNameFormatted}
     </h1>
   )
 }
