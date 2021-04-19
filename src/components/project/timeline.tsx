@@ -175,9 +175,7 @@ function useTimelineDates(
   const heightInPixels = useObserverHeight(containerRef)
   const height = heightInPixels ? heightInPixels / getDocumentFontSize() : null
 
-  // some things that need to be backed out
   const delineatorHeight = parseFloat(dateDelineatorHeight)
-  // we know this is 3 rem
   const circleHeight = parseFloat(circleSize)
 
   const maxNumberOfDelineators =
@@ -193,8 +191,7 @@ function useTimelineDates(
   const segmentHeight =
     height !== null
       ? (height - delineatorHeight * numberOfDelineators) /
-          numberOfDelineators -
-        1
+        (numberOfDelineators - 1)
       : 0
 
   const maxDatesInGroup = Math.floor(segmentHeight / circleHeight)
