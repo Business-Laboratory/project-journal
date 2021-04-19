@@ -125,6 +125,7 @@ function CircleWrapper({ children }: { children: React.ReactNode }) {
 const updateCirclePadding = theme('spacing.5')
 const circleSize = theme('width.12')
 function UpdateCircle({ href }: { href: string }) {
+  const highlight = false // TODO: figure out where this comes from
   return (
     <Link href={href} passHref>
       <a
@@ -135,21 +136,32 @@ function UpdateCircle({ href }: { href: string }) {
             width: ${circleSize};
             height: ${circleSize};
             padding: ${updateCirclePadding};
-            /* must subtract the border width so that the border is on the outside */
-            :hover,
-            :focus {
-              padding: calc(${updateCirclePadding} - ${theme('borderWidth.2')});
-            }
           `,
+          highlight
+            ? css`
+                padding: calc(
+                  ${updateCirclePadding} - ${theme('borderWidth.2')}
+                );
+              `
+            : css`
+                /* must subtract the border width so that the border is on the outside */
+                :hover,
+                :focus {
+                  padding: calc(
+                    ${updateCirclePadding} - ${theme('borderWidth.2')}
+                  );
+                }
+              `,
         ]}
       >
         <div
           // box-content makes the border on the outside
-          tw="
-          w-2 h-2 bg-gray-yellow-100 rounded-full box-content
-          group-hover:(border-2 border-matisse-blue-100)
-          group-focus:(border-2 border-matisse-blue-100)
-        "
+          css={[
+            tw`box-content w-2 h-2 rounded-full bg-gray-yellow-100`,
+            highlight
+              ? tw`border-2 bg-matisse-blue-100 border-matisse-blue-100`
+              : tw`group-hover:(border-2 border-matisse-blue-100) group-focus:(border-2 border-matisse-blue-100)`,
+          ]}
         />
       </a>
     </Link>
