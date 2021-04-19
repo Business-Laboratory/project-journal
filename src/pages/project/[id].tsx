@@ -38,8 +38,6 @@ export default function Project() {
 
   if (project === null) return null
 
-  console.log(project.updates)
-
   return (
     <>
       <Header>

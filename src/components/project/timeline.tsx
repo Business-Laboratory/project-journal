@@ -13,7 +13,6 @@ import {
 } from 'date-fns'
 
 import type { Interval } from 'date-fns'
-
 import type { ProjectData } from 'pages/api/project'
 
 type Updates = ProjectData['updates']
@@ -67,44 +66,24 @@ type TimelineProps = {
   updates: Updates
 }
 export function Timeline({ updates }: TimelineProps) {
+  // TODO: delete
   updates = useFakeUpdates(6, 'quarters')
 
-  // console.log(updates[0].createdAt)
-
   const datesContainerRef = useRef<null | HTMLDivElement>(null)
-  const height = useObserverHeight(datesContainerRef)
-
-  // some things that need to be backed out
-  const delineatorHeight = parseFloat(theme('spacing.5')) * 16
-  const circleHeight = 48
-
-  const maxNumberOfDelineators =
-    height !== null
-      ? Math.floor(
-          (height - delineatorHeight) / (delineatorHeight + circleHeight)
-        )
-      : 4
-
-  const datesDelineators = pickDateDelineators(updates, maxNumberOfDelineators)
-  const groupedUpdateDates = groupUpdates(updates, datesDelineators.dates)
-
-  const segmentHeight =
-    height !== null
-      ? (height - delineatorHeight * datesDelineators.dates.length) /
-        groupedUpdateDates.length
-      : 0
-
-  const maxNumberOfCircles = Math.floor(segmentHeight / circleHeight)
+  const { delineatorDates, groupedUpdateDates } = useTimelineDates(
+    updates,
+    datesContainerRef
+  )
 
   return (
     <nav tw="relative w-20 h-full overflow-hidden bg-gray-yellow-600 border-r-2 border-gray-yellow-300">
       <Bar />
       <FlexWrapper ref={datesContainerRef}>
-        {datesDelineators.dates.map((date) => (
+        {delineatorDates.dates.map((date) => (
           <DateDelineator
             key={date.valueOf()}
             date={date}
-            format={datesDelineators.type}
+            format={delineatorDates.type}
           />
         ))}
       </FlexWrapper>
@@ -114,7 +93,7 @@ export function Timeline({ updates }: TimelineProps) {
       >
         {groupedUpdateDates.map((dates, idx) => (
           <CircleWrapper key={idx}>
-            {shortenArray(dates, maxNumberOfCircles).map((date) => (
+            {dates.map((date) => (
               <UpdateCircle
                 aria-label={date.toLocaleDateString()}
                 key={date.valueOf()}
@@ -230,7 +209,56 @@ function UpdateCircle(
   )
 }
 
-// hooks/logic/styles
+// styles/constants
+
+const absoluteCenterCss = tw`absolute left-0 right-0 mx-auto top-10 bottom-10`
+const MAX_DELINEATORS = 4
+
+// hooks/logic
+
+/**
+ * Determine which dates should be used for the delineators as well as the circles in between
+ * based on the updates, their dates, and the height of the timeline (derived form the `containerRef`)
+ * @param updates
+ * @param containerRef
+ * @returns
+ */
+function useTimelineDates(
+  updates: Updates,
+  containerRef: React.MutableRefObject<HTMLElement | null>
+) {
+  const height = useObserverHeight(containerRef)
+
+  // some things that need to be backed out
+  const delineatorHeight = parseFloat(theme('spacing.5')) * 16
+  const circleHeight = 48
+
+  const maxNumberOfDelineators =
+    height !== null
+      ? Math.floor(
+          (height - delineatorHeight) / (delineatorHeight + circleHeight)
+        )
+      : MAX_DELINEATORS
+
+  const delineatorDates = useDelineatorDates(updates, maxNumberOfDelineators)
+
+  const numberOfDelineators = delineatorDates.dates.length
+  const segmentHeight =
+    height !== null
+      ? (height - delineatorHeight * numberOfDelineators) /
+          numberOfDelineators -
+        1
+      : 0
+
+  const maxDatesInGroup = Math.floor(segmentHeight / circleHeight)
+  const groupedUpdateDates = groupUpdates(
+    updates,
+    delineatorDates.dates,
+    maxDatesInGroup
+  )
+
+  return { delineatorDates, groupedUpdateDates }
+}
 
 function useObserverHeight(ref: React.MutableRefObject<HTMLElement | null>) {
   const [height, setHeight] = useState<null | number>(null)
@@ -254,15 +282,17 @@ function useObserverHeight(ref: React.MutableRefObject<HTMLElement | null>) {
   return height
 }
 
-const absoluteCenterCss = tw`absolute left-0 right-0 mx-auto top-10 bottom-10`
-
 /**
- * group updates that occur in between every pair of dates
+ * Group updates that occur between every pair of dates
  * @param updates
  * @param dates
  * @returns
  */
-function groupUpdates(updates: Updates, dates: Date[]) {
+function groupUpdates(
+  updates: Updates,
+  dates: Date[],
+  maxDatesInGroup: number
+) {
   if (dates.length < 2) {
     throw new Error(
       `dates must have at least 2 dates, only had ${dates.length} dates`
@@ -295,7 +325,8 @@ function groupUpdates(updates: Updates, dates: Date[]) {
     groups[intervalIndex].push(createdAtDate)
   }
 
-  return groups
+  // Shorten each of the groups if need be
+  return groups.map((group) => shortenArray(group, maxDatesInGroup))
 }
 
 type DelineatorType = 'weeks' | 'months' | 'quarters'
@@ -315,17 +346,17 @@ function formatDate(date: Date, format: DelineatorType) {
 }
 
 /**
- * pick the first interval that has between 2-4 dates, defaulting to quarters
+ * Pick the first interval that has less than 2-4s dates, defaulting to quarters
  * @param updates
  * @param maxNumberOfDelineators
  * @returns
  */
-function pickDateDelineators(updates: Updates, maxNumberOfDelineators: number) {
-  const intervals = getDateIntervals(updates)
+function useDelineatorDates(updates: Updates, maxNumberOfDelineators: number) {
+  const intervals = useDateIntervals(updates)
   let type: DelineatorType =
-    intervals.weeks.length <= 4
+    intervals.weeks.length <= MAX_DELINEATORS
       ? 'weeks'
-      : intervals.months.length <= 4
+      : intervals.months.length <= MAX_DELINEATORS
       ? 'months'
       : // TODO: handle when there are more than for quarters
         'quarters'
@@ -338,21 +369,24 @@ function pickDateDelineators(updates: Updates, maxNumberOfDelineators: number) {
   return { dates, type }
 }
 
-function getDateIntervals(updates: Updates) {
-  let dates = updates.map(({ createdAt }) => {
-    return new Date(createdAt)
-  })
-  if (dates.length <= 0) {
-    dates = [new Date()]
-  }
+function useDateIntervals(updates: Updates) {
+  // This is memoized to prevent it from rerendering when the height changes
+  return useMemo(() => {
+    let dates = updates.map(({ createdAt }) => {
+      return new Date(createdAt)
+    })
+    if (dates.length <= 0) {
+      dates = [new Date()]
+    }
 
-  const interval = { start: minDate(dates), end: maxDate(dates) }
+    const interval = { start: minDate(dates), end: maxDate(dates) }
 
-  return {
-    weeks: eachDateOfInterval(interval, 'weeks'),
-    months: eachDateOfInterval(interval, 'months'),
-    quarters: eachDateOfInterval(interval, 'quarters'),
-  } as const
+    return {
+      weeks: eachDateOfInterval(interval, 'weeks'),
+      months: eachDateOfInterval(interval, 'months'),
+      quarters: eachDateOfInterval(interval, 'quarters'),
+    } as const
+  }, [updates])
 }
 
 /**
