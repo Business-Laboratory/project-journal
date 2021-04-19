@@ -1,5 +1,7 @@
 import tw, { css, theme } from 'twin.macro'
-import React, { useEffect, useRef, forwardRef, useState, useMemo } from 'react'
+import { useEffect, useRef, forwardRef, useState, useMemo } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 import {
   format as dateFnsFormat,
   eachWeekOfInterval,
@@ -11,10 +13,10 @@ import {
   addWeeks,
   addQuarters,
 } from 'date-fns'
+import { getDocumentFontSize } from '@utils/get-document-font-size'
 
 import type { Interval } from 'date-fns'
 import type { ProjectData } from 'pages/api/project'
-import { getDocumentFontSize } from '@utils/get-document-font-size'
 
 type Updates = ProjectData['updates']
 type DelineatorType = 'weeks' | 'months' | 'quarters'
@@ -23,6 +25,7 @@ type TimelineProps = {
   updates: Updates
 }
 export function Timeline({ updates }: TimelineProps) {
+  const { query } = useRouter()
   const datesContainerRef = useRef<null | HTMLDivElement>(null)
   const { delineatorDates, groupedUpdateDates } = useTimelineDates(
     updates,
@@ -45,12 +48,13 @@ export function Timeline({ updates }: TimelineProps) {
         // add this padding and gap so that the circles are evenly spaced between the delineators
         tw="py-5 space-y-5"
       >
-        {groupedUpdateDates.map((dates, idx) => (
+        {groupedUpdateDates.map((updates, idx) => (
           <CircleWrapper key={idx}>
-            {dates.map((date) => (
+            {updates.map(({ id, title }) => (
               <UpdateCircle
-                aria-label={date.toLocaleDateString()}
-                key={date.valueOf()}
+                key={id}
+                href={`./${query.id}#update-${id}`}
+                aria-label={`Go to update ${title}`}
               />
             ))}
           </CircleWrapper>
@@ -121,36 +125,35 @@ function CircleWrapper({ children }: { children: React.ReactNode }) {
 // 2.5rem + 0.5rem = 3rem, which is the size of the touch area we want
 const updateCirclePadding = theme('spacing.5')
 const circleSize = theme('width.12')
-function UpdateCircle(
-  props: Omit<React.ComponentPropsWithoutRef<'button'>, 'children'>
-) {
+function UpdateCircle({ href }: { href: string }) {
   return (
-    <button
-      className="group"
-      css={[
-        tw`w-12`,
-        css`
-          width: ${circleSize};
-          height: ${circleSize};
-          padding: ${updateCirclePadding};
-          /* must subtract the border width so that the border is on the outside */
-          :hover,
-          :focus {
-            padding: calc(${updateCirclePadding} - ${theme('borderWidth.2')});
-          }
-        `,
-      ]}
-      {...props}
-    >
-      <div
-        // box-content makes the border on the outside
-        tw="
+    <Link href={href} passHref>
+      <a
+        className="group"
+        css={[
+          tw`w-12`,
+          css`
+            width: ${circleSize};
+            height: ${circleSize};
+            padding: ${updateCirclePadding};
+            /* must subtract the border width so that the border is on the outside */
+            :hover,
+            :focus {
+              padding: calc(${updateCirclePadding} - ${theme('borderWidth.2')});
+            }
+          `,
+        ]}
+      >
+        <div
+          // box-content makes the border on the outside
+          tw="
           w-2 h-2 bg-gray-yellow-100 rounded-full box-content
           group-hover:(border-2 border-matisse-blue-100)
           group-focus:(border-2 border-matisse-blue-100)
         "
-      />
-    </button>
+        />
+      </a>
+    </Link>
   )
 }
 
@@ -251,7 +254,7 @@ function groupUpdates(
     intervals.push([sortedDates[i].valueOf(), sortedDates[i + 1].valueOf()])
   }
 
-  let groups: Date[][] = Array.from({ length: intervals.length }).map(() => [])
+  let groups: Updates[] = Array.from({ length: intervals.length }).map(() => [])
   for (const update of updates) {
     const createdAtDate = new Date(update.createdAt)
     const createdAtValue = createdAtDate.valueOf()
@@ -266,7 +269,7 @@ function groupUpdates(
         )}`
       )
     }
-    groups[intervalIndex].push(createdAtDate)
+    groups[intervalIndex].push(update)
   }
 
   // Shorten each of the groups if need be

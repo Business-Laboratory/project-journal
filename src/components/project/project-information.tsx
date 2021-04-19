@@ -42,25 +42,27 @@ export function ProjectInformation({
           </IconLink>
         )}
         <div tw="space-y-12">
-          {updates.map(({ title, body, createdAt }, index) => (
-            <div key={index} tw="space-y-6">
-              <div tw="inline-flex items-center space-x-2">
-                {user?.role === 'ADMIN' ? (
-                  <IconLink pathName={`/project/${projectId}/#`}>
-                    <EditIcon tw="w-6 h-6" />
+          {updates.map(({ id, title, body, createdAt }, index) => {
+            return (
+              <div id={`update-${id}`} key={index} tw="space-y-6">
+                <div tw="inline-flex items-center space-x-2">
+                  {user?.role === 'ADMIN' ? (
+                    <IconLink pathName={`/project/${projectId}/#`}>
+                      <EditIcon tw="w-6 h-6" />
+                      <span tw="bl-text-3xl">{title}</span>
+                    </IconLink>
+                  ) : (
                     <span tw="bl-text-3xl">{title}</span>
-                  </IconLink>
-                ) : (
-                  <span tw="bl-text-3xl">{title}</span>
-                )}
+                  )}
 
-                <span tw="bl-text-sm self-end pb-2">
-                  {format(new Date(createdAt), 'M/d/yy')}
-                </span>
+                  <span tw="bl-text-sm self-end pb-2">
+                    {format(new Date(createdAt), 'M/d/yy')}
+                  </span>
+                </div>
+                <ReactMarkdown plugins={[gfm]}>{body}</ReactMarkdown>
               </div>
-              <ReactMarkdown plugins={[gfm]}>{body}</ReactMarkdown>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </article>
