@@ -17,58 +17,10 @@ import type { ProjectData } from 'pages/api/project'
 
 type Updates = ProjectData['updates']
 
-/**
- * Really rough function to simulate updates within a time frame
- * @param numberOfUpdates
- * @param type
- * @returns
- */
-function useFakeUpdates(
-  numberOfUpdates: number,
-  type: DelineatorType
-): Updates {
-  // using memo here so results don't get re-randomized all the time
-  return useMemo(() => {
-    const end = Date.now()
-    let start: number
-    const oneWeek = 7 * 24 * 60 * 60 * 1000
-    const oneMonth = oneWeek * 4
-    switch (type) {
-      case 'weeks': {
-        start = end - numberOfUpdates * oneWeek
-        break
-      }
-      case 'months': {
-        start = end - numberOfUpdates * oneMonth
-        break
-      }
-      case 'quarters': {
-        start = end - numberOfUpdates * 3 * oneMonth
-        break
-      }
-    }
-    const dateDiff = end - start
-    return Array.from({ length: numberOfUpdates }).map((_, idx) => {
-      const date = new Date(start + Math.random() * dateDiff).toISOString()
-      return {
-        id: idx,
-        title: `Title ${idx}`,
-        body: '',
-        createdAt: date,
-        updatedAt: date,
-        projectId: null,
-      }
-    })
-  }, [numberOfUpdates, type])
-}
-
 type TimelineProps = {
   updates: Updates
 }
 export function Timeline({ updates }: TimelineProps) {
-  // TODO: delete
-  updates = useFakeUpdates(6, 'quarters')
-
   const datesContainerRef = useRef<null | HTMLDivElement>(null)
   const { delineatorDates, groupedUpdateDates } = useTimelineDates(
     updates,
