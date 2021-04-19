@@ -195,9 +195,9 @@ function CardGrid({ status, data, userName }: CardGridProps) {
         />
       ))}
     </div>
-  ) : (
+  ) : status === 'success' ? (
     <h1 tw="bl-text-3xl max-w-prose text-center">
       There are currently no projects assigned to {userNameFormatted}
     </h1>
-  )
+  ) : null
 }
