@@ -16,9 +16,8 @@ import {
 import { getDocumentFontSize } from '@utils/get-document-font-size'
 
 import type { Interval } from 'date-fns'
-import type { ProjectData } from 'pages/api/project'
+import type { Updates } from 'pages/project/[id]'
 
-type Updates = ProjectData['updates']
 type DelineatorType = 'weeks' | 'months' | 'quarters'
 
 type TimelineProps = {
@@ -50,10 +49,10 @@ export function Timeline({ updates }: TimelineProps) {
       >
         {groupedUpdateDates.map((updates, idx) => (
           <CircleWrapper key={idx}>
-            {updates.map(({ id, title }) => (
+            {updates.map(({ id, title, hash }) => (
               <UpdateCircle
                 key={id}
-                href={`./${query.id}#update-${id}`}
+                href={`./${query.id}#${hash}`}
                 aria-label={`Go to update ${title}`}
               />
             ))}
@@ -256,16 +255,17 @@ function groupUpdates(
 
   let groups: Updates[] = Array.from({ length: intervals.length }).map(() => [])
   for (const update of updates) {
-    const createdAtDate = new Date(update.createdAt)
-    const createdAtValue = createdAtDate.valueOf()
+    const createdAtValue = update.createdAt.valueOf()
     // find which two dates the update was created between
     const intervalIndex = intervals.findIndex(([laterDate, earlierDate]) => {
       return earlierDate <= createdAtValue && createdAtValue <= laterDate
     })
     if (intervalIndex === -1) {
       throw new Error(
-        `Date ${createdAtDate} does not exist in one of the intervals ${intervals.map(
-          (dates) => dates.map((d) => new Date(d)).join('\n')
+        `Date ${
+          update.createdAt
+        } does not exist in one of the intervals ${intervals.map((dates) =>
+          dates.map((d) => new Date(d)).join('\n')
         )}`
       )
     }
@@ -339,9 +339,7 @@ function useDelineatorDates(updates: Updates, maxNumberOfDelineators: number) {
 function useDateIntervals(updates: Updates) {
   // This is memoized to prevent it from rerendering when the height changes
   return useMemo(() => {
-    let dates = updates.map(({ createdAt }) => {
-      return new Date(createdAt)
-    })
+    let dates = updates.map(({ createdAt }) => createdAt)
     if (dates.length <= 0) {
       dates = [new Date()]
     }

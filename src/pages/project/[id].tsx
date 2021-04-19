@@ -9,6 +9,9 @@ import { appBarHeight } from '@components/app-bar'
 
 import type { QueryFunction } from 'react-query'
 import type { ProjectData } from '../api/project'
+import type { Update } from '@prisma/client'
+
+export type Updates = Array<Update & { hash: string }>
 
 export default function Project() {
   const { query } = useRouter()
@@ -38,6 +41,14 @@ export default function Project() {
 
   if (project === null) return null
 
+  // convert the string dates to dates and add the hash for the links
+  const updates = project.updates.map((update) => ({
+    ...update,
+    createdAt: new Date(update.createdAt),
+    updatedAt: new Date(update.updatedAt),
+    hash: `update-${update.id}`,
+  }))
+
   return (
     <>
       <Header>
@@ -51,8 +62,8 @@ export default function Project() {
           grid-template-columns: 80px auto 500px;
         `}
       >
-        <Timeline updates={project.updates} />
-        <ProjectInformation projectId={Number(id)} updates={project.updates} />
+        <Timeline updates={updates} />
+        <ProjectInformation projectId={Number(id)} updates={updates} />
         <Summary
           projectId={Number(id)}
           name={project.name ?? ''}

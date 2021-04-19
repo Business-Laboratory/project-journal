@@ -9,11 +9,11 @@ import { format } from 'date-fns'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 
-import type { ProjectData } from 'pages/api/project'
+import type { Updates } from 'pages/project/[id]'
 
 type ProjectInformationProps = {
   projectId: number
-  updates: ProjectData['updates']
+  updates: Updates
 }
 export function ProjectInformation({
   projectId,
@@ -42,9 +42,9 @@ export function ProjectInformation({
           </IconLink>
         )}
         <div tw="space-y-12">
-          {updates.map(({ id, title, body, createdAt }, index) => {
+          {updates.map(({ hash, title, body, createdAt }, index) => {
             return (
-              <div id={`update-${id}`} key={index} tw="space-y-6">
+              <div id={hash} key={index} tw="space-y-6">
                 <div tw="inline-flex items-center space-x-2">
                   {user?.role === 'ADMIN' ? (
                     <IconLink pathName={`/project/${projectId}/#`}>
@@ -56,7 +56,7 @@ export function ProjectInformation({
                   )}
 
                   <span tw="bl-text-sm self-end pb-2">
-                    {format(new Date(createdAt), 'M/d/yy')}
+                    {format(createdAt, 'M/d/yy')}
                   </span>
                 </div>
                 <ReactMarkdown plugins={[gfm]}>{body}</ReactMarkdown>
