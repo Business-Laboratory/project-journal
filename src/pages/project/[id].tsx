@@ -1,11 +1,11 @@
 // Client/Admin Project
 import { css } from 'twin.macro'
 import { useQuery } from 'react-query'
-
+import Header from 'next/head'
 import type { QueryFunction } from 'react-query'
-import type { ProjectData } from '../api/project'
 import { useRouter } from 'next/router'
 
+import type { ProjectData } from '../api/project'
 import { Timeline, ProjectInformation, Summary } from '@components/project'
 import { appBarHeight } from '@components/app-bar'
 
@@ -38,21 +38,36 @@ export default function Project() {
   if (project === null) return null
 
   return (
-    <main
-      tw="fixed overflow-hidden h-full w-full"
-      css={css`
-        height: calc(100% - ${appBarHeight});
-        display: grid;
-        grid-template-columns: 80px auto 500px;
-      `}
-    >
-      <Timeline />
-      <ProjectInformation
-        projectId={Number(id)}
-        updates={project?.updates ?? []}
-      />
-      <Summary name={project.name ?? ''} />
-    </main>
+    <>
+      <Header>
+        <title>{project.name ?? 'New Project'} | Project Journal</title>
+      </Header>
+      <main
+        tw="fixed overflow-hidden h-full w-full"
+        css={css`
+          height: calc(100% - ${appBarHeight});
+          display: grid;
+          grid-template-columns: 80px auto 500px;
+        `}
+      >
+        <Timeline />
+        <ProjectInformation
+          projectId={Number(id)}
+          updates={project?.updates ?? []}
+        />
+        <Summary
+          projectId={Number(id)}
+          name={project.name ?? ''}
+          imageUrl={project.imageUrl ?? ''}
+          summary={project.summary}
+          clientName={project.client?.name ?? ''}
+          clientEmployees={
+            project.client?.employees.map(({ user }) => user) ?? []
+          }
+          team={project.team}
+        />
+      </main>
+    </>
   )
 }
 
