@@ -14,8 +14,10 @@ import {
 
 import type { Interval } from 'date-fns'
 import type { ProjectData } from 'pages/api/project'
+import { getDocumentFontSize } from '@utils/get-document-font-size'
 
 type Updates = ProjectData['updates']
+type DelineatorType = 'weeks' | 'months' | 'quarters'
 
 type TimelineProps = {
   updates: Updates
@@ -58,28 +60,6 @@ export function Timeline({ updates }: TimelineProps) {
   )
 }
 
-/**
- * filters the array to the size of the target length by applying a naive algorithm
- * @param array
- * @param targetLength
- * @returns
- */
-function shortenArray<T>(array: T[], targetLength: number) {
-  const arrayLength = array.length
-  // return the original array if it doesn't need to be shortened
-  if (targetLength >= arrayLength) {
-    return array
-  }
-  const chunkSize = arrayLength / targetLength
-  const midChunkSize = chunkSize / 2
-  const indexes = Array.from({ length: targetLength }).map((_, idx) => {
-    const middleOfChunk = idx * chunkSize + midChunkSize
-    return Math.floor(middleOfChunk)
-  })
-
-  return indexes.map((idx) => array[idx])
-}
-
 // components
 
 function Bar() {
@@ -109,13 +89,22 @@ const FlexWrapper = forwardRef<
   )
 })
 
+// this height needs to be a constant so it can be used in `useTimelineDates`
+const dateDelineatorHeight = theme('height.5')
 type DateDelineatorProps = {
   date: Date
   format: DelineatorType
 }
 function DateDelineator({ date, format }: DateDelineatorProps) {
   return (
-    <div tw="h-5 text-center border rounded w-14 bg-gray-yellow-100 border-copper-300 bl-text-xs">
+    <div
+      css={[
+        tw`text-center border rounded w-14 bg-gray-yellow-100 border-copper-300 bl-text-xs`,
+        css`
+          height: ${dateDelineatorHeight};
+        `,
+      ]}
+    >
       {formatDate(date, format)}
     </div>
   )
@@ -129,8 +118,9 @@ function CircleWrapper({ children }: { children: React.ReactNode }) {
 
 // A note on the padding/width and height. We need a touch area of 48px -> 3rem.
 // p-5 is 1.25 rem on each side, so 2.5rem. w-2 and h-2 are each 0.5rem
-// 2.5rem + 0.5rem = 3rem, which is the size of hte touch area we want
+// 2.5rem + 0.5rem = 3rem, which is the size of the touch area we want
 const updateCirclePadding = theme('spacing.5')
+const circleSize = theme('width.12')
 function UpdateCircle(
   props: Omit<React.ComponentPropsWithoutRef<'button'>, 'children'>
 ) {
@@ -138,7 +128,10 @@ function UpdateCircle(
     <button
       className="group"
       css={[
+        tw`w-12`,
         css`
+          width: ${circleSize};
+          height: ${circleSize};
           padding: ${updateCirclePadding};
           /* must subtract the border width so that the border is on the outside */
           :hover,
@@ -179,11 +172,13 @@ function useTimelineDates(
   updates: Updates,
   containerRef: React.MutableRefObject<HTMLElement | null>
 ) {
-  const height = useObserverHeight(containerRef)
+  const heightInPixels = useObserverHeight(containerRef)
+  const height = heightInPixels ? heightInPixels / getDocumentFontSize() : null
 
   // some things that need to be backed out
-  const delineatorHeight = parseFloat(theme('spacing.5')) * 16
-  const circleHeight = 48
+  const delineatorHeight = parseFloat(dateDelineatorHeight)
+  // we know this is 3 rem
+  const circleHeight = parseFloat(circleSize)
 
   const maxNumberOfDelineators =
     height !== null
@@ -281,7 +276,27 @@ function groupUpdates(
   return groups.map((group) => shortenArray(group, maxDatesInGroup))
 }
 
-type DelineatorType = 'weeks' | 'months' | 'quarters'
+/**
+ * Filters the array to the size of the target length by applying a naive algorithm
+ * @param array
+ * @param targetLength
+ * @returns
+ */
+function shortenArray<T>(array: T[], targetLength: number) {
+  const arrayLength = array.length
+  // return the original array if it doesn't need to be shortened
+  if (targetLength >= arrayLength) {
+    return array
+  }
+  const chunkSize = arrayLength / targetLength
+  const midChunkSize = chunkSize / 2
+  const indexes = Array.from({ length: targetLength }).map((_, idx) => {
+    const middleOfChunk = idx * chunkSize + midChunkSize
+    return Math.floor(middleOfChunk)
+  })
+
+  return indexes.map((idx) => array[idx])
+}
 
 function formatDate(date: Date, format: DelineatorType) {
   switch (format) {
