@@ -1,5 +1,5 @@
 import tw, { css, theme } from 'twin.macro'
-import { useEffect, useRef, forwardRef, useState } from 'react'
+import React, { useEffect, useRef, forwardRef, useState, useMemo } from 'react'
 import {
   format as dateFnsFormat,
   eachWeekOfInterval,
@@ -13,47 +13,63 @@ import {
 } from 'date-fns'
 
 import type { Interval } from 'date-fns'
-import type { Update } from '@prisma/client'
 
-type TimelineProps = {
-  updates: Update[]
+import type { ProjectData } from 'pages/api/project'
+
+type Updates = ProjectData['updates']
+
+/**
+ * Really rough function to simulate updates within a time frame
+ * @param numberOfUpdates
+ * @param type
+ * @returns
+ */
+function useFakeUpdates(
+  numberOfUpdates: number,
+  type: DelineatorType
+): Updates {
+  // using memo here so results don't get re-randomized all the time
+  return useMemo(() => {
+    const end = Date.now()
+    let start: number
+    const oneWeek = 7 * 24 * 60 * 60 * 1000
+    const oneMonth = oneWeek * 4
+    switch (type) {
+      case 'weeks': {
+        start = end - numberOfUpdates * oneWeek
+        break
+      }
+      case 'months': {
+        start = end - numberOfUpdates * oneMonth
+        break
+      }
+      case 'quarters': {
+        start = end - numberOfUpdates * 3 * oneMonth
+        break
+      }
+    }
+    const dateDiff = end - start
+    return Array.from({ length: numberOfUpdates }).map((_, idx) => {
+      const date = new Date(start + Math.random() * dateDiff).toISOString()
+      return {
+        id: idx,
+        title: `Title ${idx}`,
+        body: '',
+        createdAt: date,
+        updatedAt: date,
+        projectId: null,
+      }
+    })
+  }, [numberOfUpdates, type])
 }
 
+type TimelineProps = {
+  updates: Updates
+}
 export function Timeline({ updates }: TimelineProps) {
-  // updates = [
-  //   {
-  //     id: 0,
-  //     title: '',
-  //     body: '',
-  //     createdAt: new Date('01/13/2021'),
-  //     updatedAt: new Date('01/04/2021'),
-  //     projectId: null,
-  //   },
-  //   {
-  //     id: 0,
-  //     title: '',
-  //     body: '',
-  //     createdAt: new Date('01/14/2021'),
-  //     updatedAt: new Date('01/04/2021'),
-  //     projectId: null,
-  //   },
-  //   {
-  //     id: 0,
-  //     title: '',
-  //     body: '',
-  //     createdAt: new Date('01/24/2021'),
-  //     updatedAt: new Date('01/04/2021'),
-  //     projectId: null,
-  //   },
-  //   {
-  //     id: 0,
-  //     title: '',
-  //     body: '',
-  //     createdAt: new Date('02/01/2021'),
-  //     updatedAt: new Date('01/04/2021'),
-  //     projectId: null,
-  //   },
-  // ]
+  updates = useFakeUpdates(6, 'quarters')
+
+  // console.log(updates[0].createdAt)
 
   const datesContainerRef = useRef<null | HTMLDivElement>(null)
   const height = useObserverHeight(datesContainerRef)
@@ -99,7 +115,10 @@ export function Timeline({ updates }: TimelineProps) {
         {groupedUpdateDates.map((dates, idx) => (
           <CircleWrapper key={idx}>
             {shortenArray(dates, maxNumberOfCircles).map((date) => (
-              <UpdateCircle key={date.valueOf()} />
+              <UpdateCircle
+                aria-label={date.toLocaleDateString()}
+                key={date.valueOf()}
+              />
             ))}
           </CircleWrapper>
         ))}
@@ -181,7 +200,9 @@ function CircleWrapper({ children }: { children: React.ReactNode }) {
 // p-5 is 1.25 rem on each side, so 2.5rem. w-2 and h-2 are each 0.5rem
 // 2.5rem + 0.5rem = 3rem, which is the size of hte touch area we want
 const updateCirclePadding = theme('spacing.5')
-function UpdateCircle() {
+function UpdateCircle(
+  props: Omit<React.ComponentPropsWithoutRef<'button'>, 'children'>
+) {
   return (
     <button
       className="group"
@@ -195,6 +216,7 @@ function UpdateCircle() {
           }
         `,
       ]}
+      {...props}
     >
       <div
         // box-content makes the border on the outside
@@ -240,7 +262,7 @@ const absoluteCenterCss = tw`absolute left-0 right-0 mx-auto top-10 bottom-10`
  * @param dates
  * @returns
  */
-function groupUpdates(updates: Update[], dates: Date[]) {
+function groupUpdates(updates: Updates, dates: Date[]) {
   if (dates.length < 2) {
     throw new Error(
       `dates must have at least 2 dates, only had ${dates.length} dates`
@@ -257,22 +279,20 @@ function groupUpdates(updates: Update[], dates: Date[]) {
 
   let groups: Date[][] = Array.from({ length: intervals.length }).map(() => [])
   for (const update of updates) {
-    // TODO: Fix in database... this is supposed to be a date
-    const createdAtValue = new Date(update.createdAt).valueOf()
+    const createdAtDate = new Date(update.createdAt)
+    const createdAtValue = createdAtDate.valueOf()
     // find which two dates the update was created between
     const intervalIndex = intervals.findIndex(([laterDate, earlierDate]) => {
       return earlierDate <= createdAtValue && createdAtValue <= laterDate
     })
     if (intervalIndex === -1) {
       throw new Error(
-        `Date ${
-          update.createdAt
-        } does not exist in one of the intervals ${intervals.map((dates) =>
-          dates.map((d) => new Date(d)).join('\n')
+        `Date ${createdAtDate} does not exist in one of the intervals ${intervals.map(
+          (dates) => dates.map((d) => new Date(d)).join('\n')
         )}`
       )
     }
-    groups[intervalIndex].push(update.createdAt)
+    groups[intervalIndex].push(createdAtDate)
   }
 
   return groups
@@ -300,10 +320,7 @@ function formatDate(date: Date, format: DelineatorType) {
  * @param maxNumberOfDelineators
  * @returns
  */
-function pickDateDelineators(
-  updates: Update[],
-  maxNumberOfDelineators: number
-) {
+function pickDateDelineators(updates: Updates, maxNumberOfDelineators: number) {
   const intervals = getDateIntervals(updates)
   let type: DelineatorType =
     intervals.weeks.length <= 4
@@ -321,7 +338,7 @@ function pickDateDelineators(
   return { dates, type }
 }
 
-function getDateIntervals(updates: Update[]) {
+function getDateIntervals(updates: Updates) {
   let dates = updates.map(({ createdAt }) => {
     return new Date(createdAt)
   })

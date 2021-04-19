@@ -4,19 +4,21 @@ import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
 
 import { useAuth } from '@components/auth-context'
-import { Summary as SummaryModel, User } from '.prisma/client'
 import { IconLink } from '@components/icon-link'
 import { EditIcon, GearIcon } from 'icons'
-import React from 'react'
+
+import type { ProjectData } from 'pages/api/project'
+
+type Team = ProjectData['team']
 
 type SummaryProps = {
   projectId: number
   name: string
   imageUrl: string
-  summary: SummaryModel | null
+  summary: ProjectData['summary']
   clientName: string
-  clientEmployees: User[]
-  team: User[]
+  clientEmployees: Team // TODO: update this. There's probably a better way to do this, but I'm just replacing what was here
+  team: Team
 }
 
 export function Summary({
@@ -127,7 +129,7 @@ function MarkdownWrapper({ children }: { children: string }) {
 
 type TeamSectionProps = {
   title: string
-  team: User[]
+  team: Team
 }
 function TeamSection({ title, team }: TeamSectionProps) {
   return (

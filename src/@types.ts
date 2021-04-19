@@ -6,3 +6,9 @@ export type UnwrapPromise<T> = T extends Promise<infer U>
   : T extends (...args: any) => infer U
   ? U
   : T
+
+export type SerializeDates<T> = {
+  [P in keyof T]: T[P] extends Date ? string : SerializeDates<T[P]>
+}
+
+export type PrepareAPIData<T> = SerializeDates<UnwrapPromise<T>>

@@ -9,11 +9,11 @@ import { format } from 'date-fns'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 
-import type { Update } from '@prisma/client'
+import type { ProjectData } from 'pages/api/project'
 
 type ProjectInformationProps = {
   projectId: number
-  updates: Update[]
+  updates: ProjectData['updates']
 }
 export function ProjectInformation({
   projectId,
