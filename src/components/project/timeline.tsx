@@ -16,6 +16,8 @@ import type { Interval } from 'date-fns'
 import type { ProjectData } from 'pages/api/project'
 import { getDocumentFontSize } from '@utils/get-document-font-size'
 
+// types
+
 type Updates = ProjectData['updates']
 type DelineatorType = 'weeks' | 'months' | 'quarters'
 
@@ -32,6 +34,7 @@ export function Timeline({ updates }: TimelineProps) {
   return (
     <nav tw="relative w-20 h-full overflow-hidden bg-gray-yellow-600 border-r-2 border-gray-yellow-300">
       <Bar />
+
       <FlexWrapper ref={datesContainerRef}>
         {delineatorDates.dates.map((date) => (
           <DateDelineator
@@ -41,6 +44,7 @@ export function Timeline({ updates }: TimelineProps) {
           />
         ))}
       </FlexWrapper>
+
       <FlexWrapper
         // add this padding and gap so that the circles are evenly spaced between the delineators
         tw="py-5 space-y-5"
@@ -89,8 +93,6 @@ const FlexWrapper = forwardRef<
   )
 })
 
-// this height needs to be a constant so it can be used in `useTimelineDates`
-const dateDelineatorHeight = theme('height.5')
 type DateDelineatorProps = {
   date: Date
   format: DelineatorType
@@ -119,8 +121,6 @@ function CircleWrapper({ children }: { children: React.ReactNode }) {
 // A note on the padding/width and height. We need a touch area of 48px -> 3rem.
 // p-5 is 1.25 rem on each side, so 2.5rem. w-2 and h-2 are each 0.5rem
 // 2.5rem + 0.5rem = 3rem, which is the size of the touch area we want
-const updateCirclePadding = theme('spacing.5')
-const circleSize = theme('width.12')
 function UpdateCircle(
   props: Omit<React.ComponentPropsWithoutRef<'button'>, 'children'>
 ) {
@@ -156,8 +156,15 @@ function UpdateCircle(
 
 // styles/constants
 
+// TODO: add half years and years
+// TODO: focus: get rid of outline on circle buttons
+
 const absoluteCenterCss = tw`absolute left-0 right-0 mx-auto top-10 bottom-10`
 const MAX_DELINEATORS = 4
+// these values need to be a constant because they are used in some of the logic to calculate number of delineators and circles
+const updateCirclePadding = theme('spacing.5')
+const circleSize = theme('width.12')
+const dateDelineatorHeight = theme('height.5')
 
 // hooks/logic
 
