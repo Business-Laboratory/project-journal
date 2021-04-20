@@ -1,5 +1,5 @@
 import tw, { css } from 'twin.macro'
-import React from 'react'
+import React, { useLayoutEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
 
@@ -10,6 +10,8 @@ import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 
 import type { Updates } from 'pages/project/[id]'
+import { Role } from '@prisma/client'
+import { useCurrentHashLink } from './hash-link-context'
 
 type ProjectInformationProps = {
   projectId: number
@@ -42,29 +44,66 @@ export function ProjectInformation({
           </IconLink>
         )}
         <div tw="space-y-12">
-          {updates.map(({ hashLink, title, body, createdAt }, index) => {
+          {updates.map((update) => {
             return (
-              <div id={hashLink.replace('#', '')} key={index} tw="space-y-6">
-                <div tw="inline-flex items-center space-x-2">
-                  {user?.role === 'ADMIN' ? (
-                    <IconLink pathName={`/project/${projectId}/#`}>
-                      <EditIcon tw="w-6 h-6" />
-                      <span tw="bl-text-3xl">{title}</span>
-                    </IconLink>
-                  ) : (
-                    <span tw="bl-text-3xl">{title}</span>
-                  )}
-
-                  <span tw="bl-text-sm self-end pb-2">
-                    {format(createdAt, 'M/d/yy')}
-                  </span>
-                </div>
-                <ReactMarkdown plugins={[gfm]}>{body}</ReactMarkdown>
-              </div>
+              <Update
+                key={update.id}
+                {...update}
+                role={user?.role ?? 'USER'}
+                href={`/project/${projectId}/#`}
+              />
             )
           })}
         </div>
       </div>
     </article>
   )
+}
+
+type UpdateProps = Updates[0] &
+  (
+    | { role: Extract<Role, 'USER'> }
+    | { role: Extract<Role, 'ADMIN'>; href: string }
+  )
+function Update(props: UpdateProps) {
+  const { hashLink, title, body, createdAt } = props
+
+  const containerRef = useRef<HTMLElement | null>(null)
+  useImmediatelyScrollToHashLink(containerRef, hashLink)
+
+  return (
+    <section ref={containerRef} id={hashLink.replace('#', '')} tw="space-y-6">
+      <div tw="inline-flex items-center space-x-2">
+        {props.role === 'ADMIN' ? (
+          <IconLink pathName={props.href}>
+            <EditIcon tw="w-6 h-6" />
+            <span tw="bl-text-3xl">{title}</span>
+          </IconLink>
+        ) : (
+          <span tw="bl-text-3xl">{title}</span>
+        )}
+
+        <span tw="bl-text-sm self-end pb-2">{format(createdAt, 'M/d/yy')}</span>
+      </div>
+      <ReactMarkdown plugins={[gfm]}>{body}</ReactMarkdown>
+    </section>
+  )
+}
+
+function useImmediatelyScrollToHashLink(
+  containerRef: React.MutableRefObject<HTMLElement | null>,
+  hashLink: string
+) {
+  const currentHashLink = useCurrentHashLink()
+
+  const mounted = useRef(false)
+  useLayoutEffect(() => {
+    const node = containerRef.current
+    if (!mounted.current && node !== null) {
+      if (currentHashLink === hashLink) {
+        node.scrollIntoView()
+      }
+      mounted.current = true
+    }
+  }, [containerRef, currentHashLink, hashLink])
 }
