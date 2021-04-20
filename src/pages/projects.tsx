@@ -8,13 +8,15 @@ import { useQuery } from 'react-query'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { useState, useEffect } from 'react'
+import { LoadingSpinner } from '@components/loading-spinner'
+import { useWaitTimer } from '@utils/use-wait-timer'
 
 import type { QueryFunction } from 'react-query'
 import type { ProjectsData } from './api/projects'
 
 export default function Projects() {
   const user = useAuth()
-  const { status, data } = useQuery('projects', fetchProjects)
+  const { data, status } = useQuery('projects', fetchProjects)
 
   if (status === 'error') {
     //Ring color is copper-400
@@ -163,21 +165,10 @@ type CardGridProps = {
   userName: string | undefined | null
 }
 function CardGrid({ status, data, userName }: CardGridProps) {
-  const [wait, setWait] = useState<'waiting' | 'finished'>('waiting')
-  useEffect(() => {
-    const id = setTimeout(() => {
-      setWait('finished')
-    }, 1000)
-    return () => clearTimeout(id)
-  }, [])
+  const wait = useWaitTimer()
 
   if (wait === 'finished' && status === 'loading') {
-    return (
-      <div tw="space-y-4">
-        <SpinnerIcon tw="animate-spin w-20 h-20 max-w-max mx-auto" />
-        <p tw="bl-text-sm text-center">Loading projects</p>
-      </div>
-    )
+    return <LoadingSpinner loadingMessage="Loading projects" />
   }
 
   const projects = data ?? []
