@@ -14,6 +14,7 @@ import {
   addQuarters,
 } from 'date-fns'
 import { getDocumentFontSize } from '@utils/get-document-font-size'
+import { useCurrentHashLink } from './hash-link-context'
 
 import type { Interval } from 'date-fns'
 import type { Updates } from 'pages/project/[id]'
@@ -125,7 +126,8 @@ function CircleWrapper({ children }: { children: React.ReactNode }) {
 const updateCirclePadding = theme('spacing.5')
 const circleSize = theme('width.12')
 function UpdateCircle({ href }: { href: string }) {
-  const highlight = false // TODO: figure out where this comes from
+  const hashLink = useCurrentHashLink()
+  const highlight = href.endsWith(hashLink)
   return (
     <Link href={href} passHref>
       <a

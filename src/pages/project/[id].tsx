@@ -4,7 +4,12 @@ import { useQuery } from 'react-query'
 import Header from 'next/head'
 import { useRouter } from 'next/router'
 
-import { Timeline, ProjectInformation, Summary } from '@components/project'
+import {
+  Timeline,
+  ProjectInformation,
+  Summary,
+  HashLinkProvider,
+} from '@components/project'
 import { appBarHeight } from '@components/app-bar'
 
 import type { QueryFunction } from 'react-query'
@@ -62,8 +67,10 @@ export default function Project() {
           grid-template-columns: 80px auto 500px;
         `}
       >
-        <Timeline updates={updates} />
-        <ProjectInformation projectId={Number(id)} updates={updates} />
+        <HashLinkProvider>
+          <Timeline updates={updates} />
+          <ProjectInformation projectId={Number(id)} updates={updates} />
+        </HashLinkProvider>
         <Summary
           projectId={Number(id)}
           name={project.name ?? ''}
