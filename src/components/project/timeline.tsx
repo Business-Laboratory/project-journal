@@ -50,10 +50,10 @@ export function Timeline({ updates }: TimelineProps) {
       >
         {groupedUpdateDates.map((updates, idx) => (
           <CircleWrapper key={idx}>
-            {updates.map(({ id, title, hash }) => (
+            {updates.map(({ id, title, hashLink }) => (
               <UpdateCircle
                 key={id}
-                href={`./${query.id}#${hash}`}
+                href={`./${query.id}${hashLink}`}
                 aria-label={`Go to update ${title}`}
               />
             ))}
@@ -126,8 +126,8 @@ function CircleWrapper({ children }: { children: React.ReactNode }) {
 const updateCirclePadding = theme('spacing.5')
 const circleSize = theme('width.12')
 function UpdateCircle({ href }: { href: string }) {
-  const hashLink = useCurrentHashLink()
-  const highlight = href.endsWith(hashLink)
+  const currentHashLink = useCurrentHashLink()
+  const highlight = currentHashLink ? href.includes(currentHashLink) : false
   return (
     <Link href={href} passHref>
       <a

@@ -1,12 +1,24 @@
-import { createContext, useContext } from 'react'
+import { createContext, useContext, useState, useEffect, useRef } from 'react'
 
 export { HashLinkProvider, useCurrentHashLink }
 
-const HashLinkContext = createContext<string | undefined>(undefined)
+const HashLinkContext = createContext<string | null | undefined>(undefined)
 
 function HashLinkProvider({ children }: { children: React.ReactNode }) {
+  const [hashLink, setHashLink] = useState('')
+
+  let mounted = useRef(false)
+
+  useEffect(() => {
+    if (!mounted.current) {
+      const hash = window.location.hash
+      setHashLink(hash ?? null)
+    }
+    mounted.current = true
+  }, [])
+
   return (
-    <HashLinkContext.Provider value={'update-1'}>
+    <HashLinkContext.Provider value={hashLink}>
       {children}
     </HashLinkContext.Provider>
   )

@@ -16,7 +16,7 @@ import type { QueryFunction } from 'react-query'
 import type { ProjectData } from '../api/project'
 import type { Update } from '@prisma/client'
 
-export type Updates = Array<Update & { hash: string }>
+export type Updates = Array<Update & { hashLink: string }>
 
 export default function Project() {
   const { query } = useRouter()
@@ -51,7 +51,7 @@ export default function Project() {
     ...update,
     createdAt: new Date(update.createdAt),
     updatedAt: new Date(update.updatedAt),
-    hash: `update-${update.id}`,
+    hashLink: `#update-${update.id}`,
   }))
 
   return (

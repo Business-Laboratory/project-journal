@@ -42,9 +42,9 @@ export function ProjectInformation({
           </IconLink>
         )}
         <div tw="space-y-12">
-          {updates.map(({ hash, title, body, createdAt }, index) => {
+          {updates.map(({ hashLink, title, body, createdAt }, index) => {
             return (
-              <div id={hash} key={index} tw="space-y-6">
+              <div id={hashLink.replace('#', '')} key={index} tw="space-y-6">
                 <div tw="inline-flex items-center space-x-2">
                   {user?.role === 'ADMIN' ? (
                     <IconLink pathName={`/project/${projectId}/#`}>
