@@ -2,12 +2,13 @@
 import { css } from 'twin.macro'
 import { useQuery } from 'react-query'
 import Header from 'next/head'
-import type { QueryFunction } from 'react-query'
 import { useRouter } from 'next/router'
 
-import type { ProjectData } from '../api/project'
 import { Timeline, ProjectInformation, Summary } from '@components/project'
 import { appBarHeight } from '@components/app-bar'
+
+import type { QueryFunction } from 'react-query'
+import type { ProjectData } from '../api/project'
 
 export default function Project() {
   const { query } = useRouter()
@@ -50,11 +51,8 @@ export default function Project() {
           grid-template-columns: 80px auto 500px;
         `}
       >
-        <Timeline />
-        <ProjectInformation
-          projectId={Number(id)}
-          updates={project?.updates ?? []}
-        />
+        <Timeline updates={project.updates} />
+        <ProjectInformation projectId={Number(id)} updates={project.updates} />
         <Summary
           projectId={Number(id)}
           name={project.name ?? ''}

@@ -5,14 +5,15 @@ import gfm from 'remark-gfm'
 
 import { SearchBar } from './index'
 import { PlusIcon, EditIcon } from 'icons'
-import { Update } from '@prisma/client'
 import { format } from 'date-fns'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 
+import type { ProjectData } from 'pages/api/project'
+
 type ProjectInformationProps = {
   projectId: number
-  updates: Update[]
+  updates: ProjectData['updates']
 }
 export function ProjectInformation({
   projectId,
