@@ -1,4 +1,3 @@
-// Client/Admin Project
 import { css } from 'twin.macro'
 import { useQuery } from 'react-query'
 import Header from 'next/head'
