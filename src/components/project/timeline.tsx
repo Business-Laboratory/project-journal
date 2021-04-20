@@ -128,7 +128,7 @@ function UpdateCircle(
     <button
       className="group"
       css={[
-        tw`w-12`,
+        tw`w-12 focus:outline-none`,
         css`
           width: ${circleSize};
           height: ${circleSize};
@@ -157,7 +157,6 @@ function UpdateCircle(
 // styles/constants
 
 // TODO: add half years and years
-// TODO: focus: get rid of outline on circle buttons
 
 const absoluteCenterCss = tw`absolute left-0 right-0 mx-auto top-10 bottom-10`
 const MAX_DELINEATORS = 4
