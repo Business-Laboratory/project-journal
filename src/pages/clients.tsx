@@ -57,9 +57,11 @@ function ClientList({ clientData, status }: ClientListProps) {
     return <LoadingSpinner loadingMessage="Loading clients" />
   }
 
-  return (
+  const clients = clientData ?? []
+
+  return clients.length > 0 ? (
     <>
-      {clientData?.map(({ id, name, employees }) => (
+      {clients.map(({ id, name, employees }) => (
         <div key={id} tw="space-y-4">
           <IconLink pathName="#">
             <EditIcon tw="w-6 h-6" />
@@ -78,9 +80,11 @@ function ClientList({ clientData, status }: ClientListProps) {
             ))}
           </div>
         </div>
-      )) ?? null}
+      ))}
     </>
-  )
+  ) : status === 'success' ? (
+    <h1 tw="bl-text-3xl max-w-prose text-center">No clients are available</h1>
+  ) : null
 }
 
 const fetchClients: QueryFunction<ClientsData> = async () => {

@@ -141,9 +141,9 @@ function CardGrid({ status, data, userName }: CardGridProps) {
     return <LoadingSpinner loadingMessage="Loading projects" />
   }
 
-  const projects = data ?? []
-
   const userNameFormatted = userName ? userName : 'you'
+
+  const projects = data ?? []
 
   return projects.length > 0 ? (
     <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
