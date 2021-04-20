@@ -7,17 +7,14 @@ import { QueryFunction, useQuery } from 'react-query'
 import { ClientsData } from './api/clients'
 import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
+import { DataErrorMessage } from '@components/data-error-message'
 import { useWaitTimer } from '@utils/use-wait-timer'
 
 export default function Clients() {
   const { data, status } = useQuery('clients', fetchClients)
 
   if (status === 'error') {
-    return (
-      <h1 tw="bl-text-3xl max-w-prose text-center text-matisse-red-200">
-        Something went wrong
-      </h1>
-    )
+    return <DataErrorMessage errorMessage="Unable to load clients" />
   }
 
   return (
