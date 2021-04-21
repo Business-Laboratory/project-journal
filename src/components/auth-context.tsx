@@ -62,7 +62,7 @@ function useGetUser() {
   const [session, loading] = useSession()
   const routeCheck = useRedirect(session, loading)
 
-  const email = session?.user.email ?? ''
+  const email = session?.user?.email ?? ''
   const user = useQuery(['user', { email }], fetchUser, {
     enabled: Boolean(email), // only fetch the user's data if they're logged in with an email
   })
