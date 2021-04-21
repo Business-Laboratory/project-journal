@@ -17,9 +17,9 @@ import { PlusIcon, EditIcon } from 'icons'
 import { format } from 'date-fns'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
+import { useCurrentHashLink, useSetCurrentHashLink } from './hash-link-context'
 
 import type { Updates } from 'pages/project/[id]'
-import { useCurrentHashLink, useSetCurrentHashLink } from './hash-link-context'
 
 type ProjectInformationProps = {
   projectId: number

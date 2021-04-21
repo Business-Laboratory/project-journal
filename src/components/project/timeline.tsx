@@ -7,11 +7,14 @@ import {
   eachWeekOfInterval,
   eachMonthOfInterval,
   eachQuarterOfInterval,
+  eachYearOfInterval,
   addMonths,
   min as minDate,
   max as maxDate,
   addWeeks,
   addQuarters,
+  addYears,
+  getQuarter,
 } from 'date-fns'
 import { getDocumentFontSize } from '@utils/get-document-font-size'
 import { useCurrentHashLink } from './hash-link-context'
@@ -19,7 +22,9 @@ import { useCurrentHashLink } from './hash-link-context'
 import type { Interval } from 'date-fns'
 import type { Updates } from 'pages/project/[id]'
 
-type DelineatorType = 'weeks' | 'months' | 'quarters'
+// types
+
+type DelineatorType = 'weeks' | 'months' | 'quarters' | 'halfYears' | 'years'
 
 type TimelineProps = {
   updates: Updates
@@ -94,7 +99,6 @@ const FlexWrapper = forwardRef<
 })
 
 // this height needs to be a constant so it can be used in `useTimelineDates`
-const dateDelineatorHeight = theme('height.5')
 type DateDelineatorProps = {
   date: Date
   format: DelineatorType
@@ -123,8 +127,6 @@ function CircleWrapper({ children }: { children: React.ReactNode }) {
 // A note on the padding/width and height. We need a touch area of 48px -> 3rem.
 // p-5 is 1.25 rem on each side, so 2.5rem. w-2 and h-2 are each 0.5rem
 // 2.5rem + 0.5rem = 3rem, which is the size of the touch area we want
-const updateCirclePadding = theme('spacing.5')
-const circleSize = theme('width.12')
 function UpdateCircle({ href }: { href: string }) {
   const currentHashLink = useCurrentHashLink()
   const highlight = currentHashLink ? href.includes(currentHashLink) : false
@@ -174,6 +176,10 @@ function UpdateCircle({ href }: { href: string }) {
 
 const absoluteCenterCss = tw`absolute left-0 right-0 mx-auto top-10 bottom-10`
 const MAX_DELINEATORS = 4
+// these values need to be a constant because they are used in some of the logic to calculate number of delineators and circles
+const updateCirclePadding = theme('spacing.5')
+const circleSize = theme('width.12')
+const dateDelineatorHeight = theme('height.5')
 
 // hooks/logic
 
@@ -317,53 +323,56 @@ function formatDate(date: Date, format: DelineatorType) {
     case 'weeks': {
       return dateFnsFormat(date, 'MM/dd/yy')
     }
-    case 'months': {
-      return dateFnsFormat(date, 'MM/yyyy')
-    }
-    case 'quarters': {
+    // everything else shows the month and the year
+    default: {
       return dateFnsFormat(date, 'MM/yyyy')
     }
   }
 }
 
 /**
- * Pick the first interval that has less than 2-4s dates, defaulting to quarters
+ * Pick the first interval that has less than 2-4s dates, defaulting to years if nothing meets that criteria
  * @param updates
  * @param maxNumberOfDelineators
  * @returns
  */
 function useDelineatorDates(updates: Updates, maxNumberOfDelineators: number) {
   const intervals = useDateIntervals(updates)
-  let type: DelineatorType =
-    intervals.weeks.length <= MAX_DELINEATORS
-      ? 'weeks'
-      : intervals.months.length <= MAX_DELINEATORS
-      ? 'months'
-      : // TODO: handle when there are more than for quarters
-        'quarters'
+
+  const type =
+    (['weeks', 'months', 'quarters', 'halfYears'] as DelineatorType[]).find(
+      (type) => {
+        return intervals[type].length <= MAX_DELINEATORS
+      }
+    ) ?? 'years'
+
   let dates = intervals[type]
   // if the number of delineators can't fit we only show the first and last one
   const numberOfDates = dates.length
   if (numberOfDates > maxNumberOfDelineators) {
     dates = [dates[0], dates[numberOfDates - 1]]
   }
+
   return { dates, type }
 }
 
 function useDateIntervals(updates: Updates) {
   // This is memoized to prevent it from rerendering when the height changes
   return useMemo(() => {
-    let dates = updates.map(({ createdAt }) => createdAt)
+    let dates = updates.map(({ createdAt }) => {
+      return new Date(createdAt)
+    })
     if (dates.length <= 0) {
       dates = [new Date()]
     }
 
     const interval = { start: minDate(dates), end: maxDate(dates) }
-
     return {
       weeks: eachDateOfInterval(interval, 'weeks'),
       months: eachDateOfInterval(interval, 'months'),
       quarters: eachDateOfInterval(interval, 'quarters'),
+      halfYears: eachDateOfInterval(interval, 'halfYears'),
+      years: eachDateOfInterval(interval, 'years'),
     } as const
   }, [updates])
 }
@@ -394,6 +403,16 @@ function eachDateOfInterval(interval: Interval, type: DelineatorType) {
       addDateFunction = addQuarters
       break
     }
+    case 'halfYears': {
+      intervalFunction = eachHalfYearOfInterval
+      addDateFunction = addHalfYears
+      break
+    }
+    case 'years': {
+      intervalFunction = eachYearOfInterval
+      addDateFunction = addYears
+      break
+    }
   }
 
   // find the dates in the interval depending on the type
@@ -405,5 +424,45 @@ function eachDateOfInterval(interval: Interval, type: DelineatorType) {
   if (dates === undefined) {
     throw new Error(`No interval dates found for the interval ${interval}`)
   }
+
   return [addDateFunction(firstDate, 1), ...dates]
+}
+
+// these functions don't exist in date-fns, but we need them to match the logic we have in `eachDateOfInterval`
+function eachHalfYearOfInterval(interval: Interval) {
+  let quarters = eachQuarterOfInterval(interval)
+
+  // ensure that there is a half year at the beginning and end of the interval
+  // otherwise lookups will fail
+  const firstQuarter = quarters[0]
+  if (!isHalfYear(firstQuarter)) {
+    quarters.splice(0, 0, addQuarters(firstQuarter, -1))
+  }
+
+  const lastQuarter = quarters[quarters.length - 1]
+  if (!isHalfYear(lastQuarter)) {
+    const newEndQuarter = addQuarters(lastQuarter, 1)
+    // only add the new end if it's still within the interval
+    // note: this is not the case for the first date, because
+    // that date always needs to be less than the start
+    if (newEndQuarter < interval.end) {
+      quarters.push(addQuarters(lastQuarter, 1))
+    }
+  }
+
+  return quarters.filter((date) => isHalfYear(date))
+}
+
+function addHalfYears(date: Date | number, amount: number) {
+  return addMonths(date, amount * 6)
+}
+
+/**
+ * half years are the same as the start of the first or third quarter
+ * @param date
+ * @returns
+ */
+function isHalfYear(date: Date) {
+  const quarterNumber = getQuarter(date)
+  return quarterNumber === 1 || quarterNumber === 3
 }
