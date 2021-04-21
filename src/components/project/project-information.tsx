@@ -1,5 +1,5 @@
 import tw, { css } from 'twin.macro'
-import React, {
+import {
   useLayoutEffect,
   useRef,
   createRef,
@@ -83,10 +83,16 @@ function ProjectInformationContainer({
 
   useEffect(() => {
     const node = containerRef.current
-    const onScroll = onScrollRef.current
 
-    if (node === null || onScroll === null) {
+    if (node === null) {
       return
+    }
+
+    const onScroll = () => {
+      const onScrollFunction = onScrollRef.current
+      if (onScrollFunction) {
+        onScrollFunction()
+      }
     }
 
     const handleScroll = onScroll
@@ -165,6 +171,7 @@ function useUpdateHashLinkOnScroll(children: React.ReactNode) {
   }, [children])
 
   const setHashLink = useSetCurrentHashLink()
+
   // NOTE: This function assumes that the children are in layout order to check
   // which element is the first one whose top is >= 0
   useOnScroll(() => {

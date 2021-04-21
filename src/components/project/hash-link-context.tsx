@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router'
 import {
   createContext,
   useContext,
@@ -5,6 +6,7 @@ import {
   useRef,
   useLayoutEffect,
   useCallback,
+  useEffect,
 } from 'react'
 
 export { HashLinkProvider, useSetCurrentHashLink, useCurrentHashLink }
@@ -14,6 +16,7 @@ const SetHashLinkContext = createContext<SetHashLink | undefined>(undefined)
 const HashLinkContext = createContext<string | null | undefined>(undefined)
 
 function HashLinkProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter()
   const [hashLink, setHashLink] = useState<{
     state: 'checking' | 'checked'
     value: null | string
@@ -23,9 +26,7 @@ function HashLinkProvider({ children }: { children: React.ReactNode }) {
 
   useLayoutEffect(() => {
     if (!mounted.current) {
-      const hash = window.location.hash
-      const value = hash ?? null
-      setHashLink({ state: 'checked', value })
+      setHashLink({ state: 'checked', value: getWindowHash() })
       mounted.current = true
     }
   }, [])
@@ -33,6 +34,17 @@ function HashLinkProvider({ children }: { children: React.ReactNode }) {
   const handleSetHashLink = useCallback((value: string | null) => {
     setHashLink((prev) => ({ ...prev, value }))
   }, [])
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      handleSetHashLink(getWindowHash())
+    }
+
+    router.events.on('hashChangeComplete', handleHashChange)
+    return () => {
+      router.events.off('hashChangeComplete', handleHashChange)
+    }
+  }, [router.events, handleSetHashLink])
 
   // wait to render the provider and all the children until after the hash link has been checked for
   // that way the correct update can be scrolled to as soon as it loads
@@ -47,6 +59,11 @@ function HashLinkProvider({ children }: { children: React.ReactNode }) {
       </HashLinkContext.Provider>
     </SetHashLinkContext.Provider>
   )
+}
+
+function getWindowHash() {
+  const hash = window.location.hash
+  return hash ?? null
 }
 
 function useSetCurrentHashLink() {
