@@ -135,7 +135,7 @@ function UpdateCircle({ href }: { href: string }) {
       <a
         className="group"
         css={[
-          tw`w-12`,
+          tw`w-12 focus:outline-none`,
           css`
             width: ${circleSize};
             height: ${circleSize};
@@ -150,21 +150,31 @@ function UpdateCircle({ href }: { href: string }) {
             : css`
                 /* must subtract the border width so that the border is on the outside */
                 :hover,
-                :focus {
+                &.focus-visible {
                   padding: calc(
                     ${updateCirclePadding} - ${theme('borderWidth.2')}
                   );
                 }
               `,
+          css`
+            &.focus-visible {
+              & > .inner-circle {
+                border-width: ${theme('borderWidth.2')};
+                border-color: ${theme('colors[matisse-blue].100')};
+              }
+            }
+          `,
         ]}
       >
         <div
+          // this class name is necessary to apply focus-visible styling from the parent
+          className="inner-circle"
           // box-content makes the border on the outside
           css={[
             tw`box-content w-2 h-2 rounded-full bg-gray-yellow-100`,
             highlight
               ? tw`border-2 bg-matisse-blue-100 border-matisse-blue-100`
-              : tw`group-hover:(border-2 border-matisse-blue-100) group-focus:(border-2 border-matisse-blue-100)`,
+              : tw`group-hover:(border-2 border-matisse-blue-100)`,
           ]}
         />
       </a>

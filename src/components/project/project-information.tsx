@@ -91,6 +91,7 @@ function ProjectInformationContainer({
     const onScroll = () => {
       const onScrollFunction = onScrollRef.current
       if (onScrollFunction) {
+        console.log('scroll function!')
         onScrollFunction()
       }
     }

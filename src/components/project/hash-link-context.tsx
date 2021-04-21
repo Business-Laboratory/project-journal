@@ -38,6 +38,7 @@ function HashLinkProvider({ children }: { children: React.ReactNode }) {
   // update the current hash if the route's hash changes
   useEffect(() => {
     const handleHashChange = () => {
+      console.log('the hash changed!')
       handleSetHashLink(getWindowHash())
     }
 
