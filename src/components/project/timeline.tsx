@@ -30,7 +30,6 @@ type TimelineProps = {
   updates: Updates
 }
 export function Timeline({ updates }: TimelineProps) {
-  const { query } = useRouter()
   const datesContainerRef = useRef<null | HTMLDivElement>(null)
   const { delineatorDates, groupedUpdateDates } = useTimelineDates(
     updates,
@@ -58,7 +57,7 @@ export function Timeline({ updates }: TimelineProps) {
             {updates.map(({ id, title, hashLink }) => (
               <UpdateCircle
                 key={id}
-                href={`./${query.id}${hashLink}`}
+                hashLink={hashLink}
                 aria-label={`Go to update ${title}`}
               />
             ))}
@@ -127,11 +126,12 @@ function CircleWrapper({ children }: { children: React.ReactNode }) {
 // A note on the padding/width and height. We need a touch area of 48px -> 3rem.
 // p-5 is 1.25 rem on each side, so 2.5rem. w-2 and h-2 are each 0.5rem
 // 2.5rem + 0.5rem = 3rem, which is the size of the touch area we want
-function UpdateCircle({ href }: { href: string }) {
+function UpdateCircle({ hashLink }: { hashLink: string }) {
+  const { query } = useRouter()
   const currentHashLink = useCurrentHashLink()
-  const highlight = currentHashLink ? href.includes(currentHashLink) : false
+  const highlight = currentHashLink !== null && hashLink === currentHashLink
   return (
-    <Link href={href} passHref>
+    <Link href={`./${query.id}${hashLink}`} passHref>
       <a
         className="group"
         css={[

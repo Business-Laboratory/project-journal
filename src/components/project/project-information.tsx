@@ -1,5 +1,5 @@
 import tw, { css } from 'twin.macro'
-import {
+import React, {
   useLayoutEffect,
   useRef,
   createRef,
@@ -8,6 +8,7 @@ import {
   useContext,
   useMemo,
   useEffect,
+  useState,
 } from 'react'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
@@ -17,9 +18,10 @@ import { PlusIcon, EditIcon } from 'icons'
 import { format } from 'date-fns'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
-import { useCurrentHashLink, useSetCurrentHashLink } from './hash-link-context'
+import { useSetCurrentHashLink } from './hash-link-context'
 
 import type { Updates } from 'pages/project/[id]'
+import { useRouter } from 'next/router'
 
 type ProjectInformationProps = {
   projectId: number
@@ -43,7 +45,7 @@ export function ProjectInformation({
         <UpdatesContainer>
           {updates.map(({ id, hashLink, title, body, createdAt }) => {
             return (
-              <UpdateContainer key={id} hashLink={hashLink}>
+              <UpdateContainer key={id} id={hashLink.replace('#', '')}>
                 <div tw="inline-flex items-center space-x-2">
                   {user?.role === 'ADMIN' ? (
                     <IconLink pathName={`/project/${projectId}/#`}>
@@ -91,7 +93,6 @@ function ProjectInformationContainer({
     const onScroll = () => {
       const onScrollFunction = onScrollRef.current
       if (onScrollFunction) {
-        console.log('scroll function!')
         onScrollFunction()
       }
     }
@@ -145,21 +146,18 @@ function UpdatesContainer({ children }: { children: React.ReactNode }) {
 
   return (
     <div tw="space-y-12">
-      {childrenWithRefs.map(({ child, ref }, idx) => {
-        return (
-          <UpdateRefContext.Provider
-            key={getChildKey(child) ?? idx}
-            value={ref}
-          >
-            {child}
-          </UpdateRefContext.Provider>
-        )
-      })}
+      {childrenWithRefs.map(({ child, ref }, idx) => (
+        <UpdateRefContext.Provider key={getChildKey(child) ?? idx} value={ref}>
+          {child}
+        </UpdateRefContext.Provider>
+      ))}
     </div>
   )
 }
 
 function useUpdateHashLinkOnScroll(children: React.ReactNode) {
+  const router = useRouter()
+  const setHashLink = useSetCurrentHashLink()
   const childrenWithRefs = useMemo(() => {
     return (
       Children.map(children, (child) => {
@@ -170,27 +168,118 @@ function useUpdateHashLinkOnScroll(children: React.ReactNode) {
       }) ?? []
     )
   }, [children])
+  const [hashLinkState, setHashLinkState] = useState<'setting' | 'finished'>(
+    'setting'
+  )
 
-  const setHashLink = useSetCurrentHashLink()
+  // set initial hash link
+  let mounted = useRef(false)
+  useLayoutEffect(() => {
+    let timeoutId: NodeJS.Timeout
+    // when the updates first render, set the hashLink to the window's hash link and
+    // scroll to that element, or set the hashLink to the id of the first element
+    if (!mounted.current) {
+      setHashLinkState('setting')
+      const hashLink = window.location.hash
+      if (hashLink) {
+        setHashLink(hashLink)
+
+        applyToFirstChild(childrenWithRefs, ({ node, child }) => {
+          const childId = node.id
+          const cond = childId === hashLink.replace('#', '')
+          if (cond) {
+            node.scrollIntoView()
+          }
+          return cond
+        })
+      } else {
+        const firstChildId = childrenWithRefs[0]?.ref.current?.id
+        if (firstChildId) {
+          setHashLink(`#${firstChildId}`)
+        } else {
+          setHashLink(null)
+        }
+      }
+
+      timeoutId = setTimeout(() => setHashLinkState('finished'), 50)
+      mounted.current = true
+    }
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+    }
+  }, [childrenWithRefs, setHashLink])
+
+  // synchronize scroll position with hash link
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout
+    const handleHashChange = () => {
+      setHashLinkState('setting')
+      setHashLink(window.location.hash ?? null)
+      // might be too hacky, but simplest way to wait until the scroll is finished before resuming the scroll handler
+      timeoutId = setTimeout(() => setHashLinkState('finished'), 50)
+    }
+
+    router.events.on('hashChangeComplete', handleHashChange)
+    return () => {
+      router.events.off('hashChangeComplete', handleHashChange)
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+    }
+  }, [router.events, setHashLink])
 
   // NOTE: This function assumes that the children are in layout order to check
   // which element is the first one whose top is >= 0
   useOnScroll(() => {
-    let topElementId = null
-    for (const { ref } of childrenWithRefs) {
-      const node = ref.current
-      if (node !== null) {
-        const { top } = node.getBoundingClientRect()
-        if (top >= 0) {
-          topElementId = node.id
-          break
-        }
-      }
+    // bail if currently setting the hash link state
+    if (hashLinkState === 'setting') {
+      return
     }
-    setHashLink(topElementId)
+
+    const applied = applyToFirstChild(childrenWithRefs, ({ node }) => {
+      const { top } = node.getBoundingClientRect()
+      const cond = top >= 0
+      if (cond) {
+        setHashLink(`#${node.id}`)
+      }
+      return cond
+    })
+    if (!applied) {
+      setHashLink(null)
+    }
   })
 
   return childrenWithRefs
+}
+
+type ChildrenWithRefs = Array<{
+  child: React.ReactNode
+  ref: React.RefObject<HTMLElement>
+}>
+type MatchWithAction = (args: {
+  node: HTMLElement
+  child: React.ReactNode
+}) => boolean
+
+/**
+ * Helper function to apply some callback to the first node that matches the condition
+ */
+const applyToFirstChild = (
+  childrenWithRefs: ChildrenWithRefs,
+  matchWithAction: MatchWithAction
+) => {
+  let applied = false
+  for (const { ref, child } of childrenWithRefs) {
+    const node = ref.current
+    if (node === null) continue
+    if (matchWithAction({ node, child })) {
+      applied = true
+      break
+    }
+  }
+  return applied
 }
 
 /**
@@ -200,7 +289,7 @@ function useUpdateHashLinkOnScroll(children: React.ReactNode) {
  */
 function getChildKey(child: any) {
   if (child !== null && typeof child === 'object' && 'key' in child) {
-    return child.key
+    return child?.key
   } else {
     return undefined
   }
@@ -217,34 +306,15 @@ function useContainerRef() {
 }
 
 type UpdateContainerProps = {
-  hashLink: string
+  id: string
   children: React.ReactNode
 }
-function UpdateContainer({ hashLink, children }: UpdateContainerProps) {
+function UpdateContainer({ id, children }: UpdateContainerProps) {
   const containerRef = useContainerRef()
-  useImmediatelyScrollToHashLink(containerRef, hashLink)
 
   return (
-    <section ref={containerRef} id={hashLink.replace('#', '')} tw="space-y-6">
+    <section ref={containerRef} id={id} tw="space-y-6">
       {children}
     </section>
   )
-}
-
-function useImmediatelyScrollToHashLink(
-  containerRef: React.MutableRefObject<HTMLElement | null>,
-  hashLink: string
-) {
-  const currentHashLink = useCurrentHashLink()
-
-  const mounted = useRef(false)
-  useLayoutEffect(() => {
-    const node = containerRef.current
-    if (!mounted.current && node !== null) {
-      if (currentHashLink === hashLink) {
-        node.scrollIntoView()
-      }
-      mounted.current = true
-    }
-  }, [containerRef, currentHashLink, hashLink])
 }

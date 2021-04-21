@@ -1,4 +1,5 @@
 import { css } from 'twin.macro'
+import { useMemo } from 'react'
 import { useQuery } from 'react-query'
 import Header from 'next/head'
 import { useRouter } from 'next/router'
@@ -28,6 +29,18 @@ export default function Project() {
     fetchProject
   )
 
+  // convert the string dates to dates and add the hash for the links
+  const updates = useMemo(
+    () =>
+      data?.updates.map((update) => ({
+        ...update,
+        createdAt: new Date(update.createdAt),
+        updatedAt: new Date(update.updatedAt),
+        hashLink: `#update-${update.id}`,
+      })) ?? [],
+    [data]
+  )
+
   // TODO: figure out the loading state
   if (status === 'loading') {
     return null
@@ -44,14 +57,6 @@ export default function Project() {
   const project = data ?? null
 
   if (project === null) return null
-
-  // convert the string dates to dates and add the hash for the links
-  const updates = project.updates.map((update) => ({
-    ...update,
-    createdAt: new Date(update.createdAt),
-    updatedAt: new Date(update.updatedAt),
-    hashLink: `#update-${update.id}`,
-  }))
 
   return (
     <>
