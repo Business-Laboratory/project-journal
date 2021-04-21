@@ -1,8 +1,8 @@
 // Alternate Admin Home view that displays clients
 import 'twin.macro'
 import Head from 'next/head'
-import { PlusIcon, EditIcon, SpinnerIcon } from 'icons'
-import { Fragment, useEffect, useState } from 'react'
+import { PlusIcon, EditIcon } from 'icons'
+import { Fragment } from 'react'
 import { QueryFunction, useQuery } from 'react-query'
 import { ClientsData } from './api/clients'
 import { IconLink } from '@components/icon-link'
@@ -11,12 +11,6 @@ import { DataErrorMessage } from '@components/data-error-message'
 import { useWaitTimer } from '@utils/use-wait-timer'
 
 export default function Clients() {
-  const { data, status } = useQuery('clients', fetchClients)
-
-  if (status === 'error') {
-    return <DataErrorMessage errorMessage="Unable to load clients" />
-  }
-
   return (
     <>
       <Head>
@@ -27,37 +21,26 @@ export default function Clients() {
           <PlusIcon tw="w-6 h-6" />
           <span tw="bl-text-2xl">Add client</span>
         </IconLink>
-        <ClientList clientData={data} status={status} />
+        <ClientList />
       </main>
     </>
   )
 }
 
-type ClientListProps = {
-  clientData:
-    | {
-        id: number
-        name: string
-        employees: {
-          id: number
-          title: string | null
-          user: {
-            name: string | null
-            email: string | null
-          }
-        }[]
-      }[]
-    | undefined
-  status: string
-}
-function ClientList({ clientData, status }: ClientListProps) {
+function ClientList() {
+  const { status, data } = useQuery('clients', fetchClients)
+
+  if (status === 'error') {
+    return <DataErrorMessage errorMessage="Unable to load clients" />
+  }
+
   const wait = useWaitTimer()
 
   if (wait === 'finished' && status === 'loading') {
     return <LoadingSpinner loadingMessage="Loading clients" />
   }
 
-  const clients = clientData ?? []
+  const clients = data ?? []
 
   return clients.length > 0 ? (
     <>

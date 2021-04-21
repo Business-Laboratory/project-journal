@@ -3,9 +3,8 @@ import tw, { css, theme } from 'twin.macro'
 import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
-import { PlusIcon, SpinnerIcon } from 'icons'
+import { PlusIcon } from 'icons'
 import { useQuery } from 'react-query'
-import { useState, useEffect } from 'react'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
@@ -17,11 +16,6 @@ import type { ProjectsData } from './api/projects'
 
 export default function Projects() {
   const user = useAuth()
-  const { data, status } = useQuery('projects', fetchProjects)
-
-  if (status === 'error') {
-    return <DataErrorMessage errorMessage="Unable to load projects" />
-  }
 
   return (
     <>
@@ -36,7 +30,7 @@ export default function Projects() {
           </IconLink>
         ) : null}
 
-        <CardGrid status={status} data={data} userName={user?.name} />
+        <CardGrid userName={user?.name} />
       </main>
     </>
   )
@@ -121,20 +115,15 @@ type Project = {
 }
 
 type CardGridProps = {
-  status: string
-  data:
-    | {
-        id: number
-        name: string | null
-        imageUrl: string | null
-        summary: {
-          description: string | null
-        } | null
-      }[]
-    | undefined
   userName: string | undefined | null
 }
-function CardGrid({ status, data, userName }: CardGridProps) {
+function CardGrid({ userName }: CardGridProps) {
+  const { data, status } = useQuery('projects', fetchProjects)
+
+  if (status === 'error') {
+    return <DataErrorMessage errorMessage="Unable to load projects" />
+  }
+
   const wait = useWaitTimer()
 
   if (wait === 'finished' && status === 'loading') {

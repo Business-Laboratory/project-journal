@@ -5,11 +5,15 @@ export type { DataErrorMessageProps }
 
 type DataErrorMessageProps = {
   errorMessage: string
+  email?: string
 }
-function DataErrorMessage({ errorMessage }: DataErrorMessageProps) {
+function DataErrorMessage({
+  errorMessage,
+  email = 'help@business-laboratory.com',
+}: DataErrorMessageProps) {
   //Ring color is copper-400
   return (
-    <div tw="space-y-6 pt-40">
+    <div tw="space-y-6">
       <h1 tw="bl-text-3xl text-center text-matisse-red-200 uppercase">
         {errorMessage}
       </h1>
@@ -34,7 +38,7 @@ function DataErrorMessage({ errorMessage }: DataErrorMessageProps) {
             `,
           ]}
         >
-          help@business-laboratory.com
+          {email}
         </a>
       </div>
     </div>
