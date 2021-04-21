@@ -28,13 +28,13 @@ export default function Clients() {
 }
 
 function ClientList() {
-  const { status, data } = useQuery('clients', fetchClients)
+  const { data, status } = useQuery('clients', fetchClients)
+
+  const wait = useWaitTimer()
 
   if (status === 'error') {
     return <DataErrorMessage errorMessage="Unable to load clients" />
   }
-
-  const wait = useWaitTimer()
 
   if (wait === 'finished' && status === 'loading') {
     return <LoadingSpinner loadingMessage="Loading clients" />

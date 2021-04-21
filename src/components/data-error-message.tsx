@@ -17,10 +17,10 @@ function DataErrorMessage({
       <h1 tw="bl-text-3xl text-center text-matisse-red-200 uppercase">
         {errorMessage}
       </h1>
-      <div tw="max-w-max mx-auto">
-        <p tw="bl-text-2xl text-center">If the issue continues email</p>
+      <div tw="max-w-max mx-auto text-center">
+        <p tw="bl-text-2xl">If the issue continues email</p>
         <a
-          href="mailto:help@business-laboratory.com"
+          href={`mailto:${email}`}
           css={[
             tw`bl-text-2xl text-copper-300
               focus:outline-none`,

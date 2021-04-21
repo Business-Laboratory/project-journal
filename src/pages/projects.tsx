@@ -118,13 +118,14 @@ type CardGridProps = {
   userName: string | undefined | null
 }
 function CardGrid({ userName }: CardGridProps) {
-  const { data, status } = useQuery('projects', fetchProjects)
+  const { data } = useQuery('projects', fetchProjects)
+
+  const status = 'error'
+  const wait = useWaitTimer()
 
   if (status === 'error') {
     return <DataErrorMessage errorMessage="Unable to load projects" />
   }
-
-  const wait = useWaitTimer()
 
   if (wait === 'finished' && status === 'loading') {
     return <LoadingSpinner loadingMessage="Loading projects" />
