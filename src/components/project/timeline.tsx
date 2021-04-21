@@ -1,5 +1,7 @@
 import tw, { css, theme } from 'twin.macro'
-import React, { useEffect, useRef, forwardRef, useState, useMemo } from 'react'
+import { useEffect, useRef, forwardRef, useState, useMemo } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 import {
   format as dateFnsFormat,
   eachWeekOfInterval,
@@ -14,14 +16,14 @@ import {
   addYears,
   getQuarter,
 } from 'date-fns'
+import { getDocumentFontSize } from '@utils/get-document-font-size'
+import { useCurrentHashLink } from './hash-link-context'
 
 import type { Interval } from 'date-fns'
-import type { ProjectData } from 'pages/api/project'
-import { getDocumentFontSize } from '@utils/get-document-font-size'
+import type { Updates } from 'pages/project/[id]'
 
 // types
 
-type Updates = ProjectData['updates']
 type DelineatorType = 'weeks' | 'months' | 'quarters' | 'halfYears' | 'years'
 
 type TimelineProps = {
@@ -37,7 +39,6 @@ export function Timeline({ updates }: TimelineProps) {
   return (
     <nav tw="relative w-20 h-full overflow-hidden bg-gray-yellow-600 border-r-2 border-gray-yellow-300">
       <Bar />
-
       <FlexWrapper ref={datesContainerRef}>
         {delineatorDates.dates.map((date) => (
           <DateDelineator
@@ -47,17 +48,17 @@ export function Timeline({ updates }: TimelineProps) {
           />
         ))}
       </FlexWrapper>
-
       <FlexWrapper
         // add this padding and gap so that the circles are evenly spaced between the delineators
         tw="py-5 space-y-5"
       >
-        {groupedUpdateDates.map((dates, idx) => (
+        {groupedUpdateDates.map((updates, idx) => (
           <CircleWrapper key={idx}>
-            {dates.map((date) => (
+            {updates.map(({ id, title, hashLink }) => (
               <UpdateCircle
-                aria-label={date.toLocaleDateString()}
-                key={date.valueOf()}
+                key={id}
+                hashLink={hashLink}
+                aria-label={`Go to update ${title}`}
               />
             ))}
           </CircleWrapper>
@@ -96,6 +97,7 @@ const FlexWrapper = forwardRef<
   )
 })
 
+// this height needs to be a constant so it can be used in `useTimelineDates`
 type DateDelineatorProps = {
   date: Date
   format: DelineatorType
@@ -124,36 +126,59 @@ function CircleWrapper({ children }: { children: React.ReactNode }) {
 // A note on the padding/width and height. We need a touch area of 48px -> 3rem.
 // p-5 is 1.25 rem on each side, so 2.5rem. w-2 and h-2 are each 0.5rem
 // 2.5rem + 0.5rem = 3rem, which is the size of the touch area we want
-function UpdateCircle(
-  props: Omit<React.ComponentPropsWithoutRef<'button'>, 'children'>
-) {
+function UpdateCircle({ hashLink }: { hashLink: string }) {
+  const { query } = useRouter()
+  const currentHashLink = useCurrentHashLink()
+  const highlight = currentHashLink !== null && hashLink === currentHashLink
   return (
-    <button
-      className="group"
-      css={[
-        tw`w-12 focus:outline-none`,
-        css`
-          width: ${circleSize};
-          height: ${circleSize};
-          padding: ${updateCirclePadding};
-          /* must subtract the border width so that the border is on the outside */
-          :hover,
-          :focus {
-            padding: calc(${updateCirclePadding} - ${theme('borderWidth.2')});
-          }
-        `,
-      ]}
-      {...props}
-    >
-      <div
-        // box-content makes the border on the outside
-        tw="
-          w-2 h-2 bg-gray-yellow-100 rounded-full box-content
-          group-hover:(border-2 border-matisse-blue-100)
-          group-focus:(border-2 border-matisse-blue-100)
-        "
-      />
-    </button>
+    <Link href={`./${query.id}${hashLink}`} passHref>
+      <a
+        className="group"
+        css={[
+          tw`w-12 focus:outline-none`,
+          css`
+            width: ${circleSize};
+            height: ${circleSize};
+            padding: ${updateCirclePadding};
+          `,
+          highlight
+            ? css`
+                padding: calc(
+                  ${updateCirclePadding} - ${theme('borderWidth.2')}
+                );
+              `
+            : css`
+                /* must subtract the border width so that the border is on the outside */
+                :hover,
+                &.focus-visible {
+                  padding: calc(
+                    ${updateCirclePadding} - ${theme('borderWidth.2')}
+                  );
+                }
+              `,
+          css`
+            &.focus-visible {
+              & > .inner-circle {
+                border-width: ${theme('borderWidth.2')};
+                border-color: ${theme('colors[matisse-blue].100')};
+              }
+            }
+          `,
+        ]}
+      >
+        <div
+          // this class name is necessary to apply focus-visible styling from the parent
+          className="inner-circle"
+          // box-content makes the border on the outside
+          css={[
+            tw`box-content w-2 h-2 rounded-full bg-gray-yellow-100`,
+            highlight
+              ? tw`border-2 bg-matisse-blue-100 border-matisse-blue-100`
+              : tw`group-hover:(border-2 border-matisse-blue-100)`,
+          ]}
+        />
+      </a>
+    </Link>
   )
 }
 
@@ -258,22 +283,23 @@ function groupUpdates(
     intervals.push([sortedDates[i].valueOf(), sortedDates[i + 1].valueOf()])
   }
 
-  let groups: Date[][] = Array.from({ length: intervals.length }).map(() => [])
+  let groups: Updates[] = Array.from({ length: intervals.length }).map(() => [])
   for (const update of updates) {
-    const createdAtDate = new Date(update.createdAt)
-    const createdAtValue = createdAtDate.valueOf()
+    const createdAtValue = update.createdAt.valueOf()
     // find which two dates the update was created between
     const intervalIndex = intervals.findIndex(([laterDate, earlierDate]) => {
       return earlierDate <= createdAtValue && createdAtValue <= laterDate
     })
     if (intervalIndex === -1) {
       throw new Error(
-        `Date ${createdAtDate} does not exist in one of the intervals ${intervals.map(
-          (dates) => dates.map((d) => new Date(d)).join('\n')
+        `Date ${
+          update.createdAt
+        } does not exist in one of the intervals ${intervals.map((dates) =>
+          dates.map((d) => new Date(d)).join('\n')
         )}`
       )
     }
-    groups[intervalIndex].push(createdAtDate)
+    groups[intervalIndex].push(update)
   }
 
   // Shorten each of the groups if need be

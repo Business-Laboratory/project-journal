@@ -1,14 +1,22 @@
-// Client/Admin Project
 import { css } from 'twin.macro'
+import { useMemo } from 'react'
 import { useQuery } from 'react-query'
 import Header from 'next/head'
 import { useRouter } from 'next/router'
 
-import { Timeline, ProjectInformation, Summary } from '@components/project'
+import {
+  Timeline,
+  ProjectInformation,
+  Summary,
+  HashLinkProvider,
+} from '@components/project'
 import { appBarHeight } from '@components/app-bar'
 
 import type { QueryFunction } from 'react-query'
 import type { ProjectData } from '../api/project'
+import type { Update } from '@prisma/client'
+
+export type Updates = Array<Update & { hashLink: string }>
 
 export default function Project() {
   const { query } = useRouter()
@@ -19,6 +27,18 @@ export default function Project() {
   const { status, data } = useQuery(
     ['project', { id: Number(id) }],
     fetchProject
+  )
+
+  // convert the string dates to dates and add the hash for the links
+  const updates = useMemo(
+    () =>
+      data?.updates.map((update) => ({
+        ...update,
+        createdAt: new Date(update.createdAt),
+        updatedAt: new Date(update.updatedAt),
+        hashLink: `#update-${update.id}`,
+      })) ?? [],
+    [data]
   )
 
   // TODO: figure out the loading state
@@ -51,8 +71,10 @@ export default function Project() {
           grid-template-columns: 80px auto 500px;
         `}
       >
-        <Timeline updates={project.updates} />
-        <ProjectInformation projectId={Number(id)} updates={project.updates} />
+        <HashLinkProvider>
+          <Timeline updates={updates} />
+          <ProjectInformation projectId={Number(id)} updates={updates} />
+        </HashLinkProvider>
         <Summary
           projectId={Number(id)}
           name={project.name ?? ''}
