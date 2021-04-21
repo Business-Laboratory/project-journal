@@ -118,9 +118,8 @@ type CardGridProps = {
   userName: string | undefined | null
 }
 function CardGrid({ userName }: CardGridProps) {
-  const { data } = useQuery('projects', fetchProjects)
+  const { data, status } = useQuery('projects', fetchProjects)
 
-  const status = 'error'
   const wait = useWaitTimer()
 
   if (status === 'error') {
