@@ -28,6 +28,7 @@ export default function Project() {
     ['project', { id: Number(id) }],
     fetchProject
   )
+  //const status = 'error'
 
   // convert the string dates to dates and add the hash for the links
   const updates = useMemo(
@@ -40,14 +41,6 @@ export default function Project() {
       })) ?? [],
     [data]
   )
-
-  if (status === 'error') {
-    return (
-      <h1 tw="bl-text-3xl max-w-prose text-center text-matisse-red-200">
-        Something went wrong
-      </h1>
-    )
-  }
 
   const project = data ?? null
 
