@@ -315,7 +315,7 @@ function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
     return <LoadingSpinner loadingMessage="Loading updates" />
   }
 
-  return (
+  return updates?.length > 0 ? (
     <UpdatesContainer>
       {updates.map(({ id, hashLink, title, body, createdAt }) => {
         return (
@@ -339,7 +339,9 @@ function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
         )
       })}
     </UpdatesContainer>
-  )
+  ) : status === 'success' ? (
+    <h1 tw="bl-text-3xl max-w-prose">No updates have been added</h1>
+  ) : null
 }
 
 // update container, which gets the hook provisioned for it and applies it to the top level element
