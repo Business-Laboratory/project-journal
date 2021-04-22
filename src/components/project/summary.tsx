@@ -6,6 +6,7 @@ import gfm from 'remark-gfm'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { EditIcon, GearIcon } from 'icons'
+import { LoadingSpinner } from '@components/loading-spinner'
 
 import type { ProjectData } from 'pages/api/project'
 
@@ -19,6 +20,7 @@ type SummaryProps = {
   clientName: string
   clientEmployees: Team // TODO: update this. There's probably a better way to do this, but I'm just replacing what was here
   team: Team
+  status: string
 }
 
 export function Summary({
@@ -29,8 +31,29 @@ export function Summary({
   clientName,
   clientEmployees,
   team,
+  status,
 }: SummaryProps) {
   const user = useAuth()
+
+  if (status === 'loading') {
+    //Need precise rem to match the y coordinate of the loading updates spinner
+    return (
+      <aside
+        css={[
+          user?.role === 'ADMIN'
+            ? css`
+                padding-top: 11.875rem;
+              `
+            : css`
+                padding-top: 7.625rem;
+              `,
+        ]}
+      >
+        <LoadingSpinner loadingMessage="Loading project summary" />
+      </aside>
+    )
+  }
+
   return (
     <aside tw="relative h-full px-14 overflow-y-auto">
       <div tw="space-y-8 py-10">

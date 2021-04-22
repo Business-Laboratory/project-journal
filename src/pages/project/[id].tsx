@@ -24,7 +24,7 @@ export default function Project() {
   if (id === undefined || Array.isArray(id)) {
     throw new Error(`Invalid id: ${id}`)
   }
-  const { status, data } = useQuery(
+  const { data, status } = useQuery(
     ['project', { id: Number(id) }],
     fetchProject
   )
@@ -40,11 +40,6 @@ export default function Project() {
       })) ?? [],
     [data]
   )
-
-  // TODO: figure out the loading state
-  // if (status === 'loading') {
-  //   return null
-  // }
 
   if (status === 'error') {
     return (
@@ -89,6 +84,7 @@ export default function Project() {
             project.client?.employees.map(({ user }) => user) ?? []
           }
           team={project.team}
+          status={status}
         />
       </main>
     </>
