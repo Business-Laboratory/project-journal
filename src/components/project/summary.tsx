@@ -7,6 +7,8 @@ import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { EditIcon, GearIcon } from 'icons'
 import { LoadingSpinner } from '@components/loading-spinner'
+import { DataErrorMessage } from '@components/data-error-message'
+import { useWaitTimer } from '@utils/use-wait-timer'
 
 import type { ProjectData } from 'pages/api/project'
 
@@ -35,7 +37,27 @@ export function Summary({
 }: SummaryProps) {
   const user = useAuth()
 
-  if (status === 'loading') {
+  const wait = useWaitTimer()
+
+  if (status === 'error') {
+    return (
+      <aside
+        css={[
+          user?.role === 'ADMIN'
+            ? css`
+                padding-top: 11.875rem;
+              `
+            : css`
+                padding-top: 7.625rem;
+              `,
+        ]}
+      >
+        <DataErrorMessage errorMessage="Unable to load summary" />
+      </aside>
+    )
+  }
+
+  if (wait === 'finished' && status === 'loading') {
     //Need precise rem to match the y coordinate of the loading updates spinner
     return (
       <aside
