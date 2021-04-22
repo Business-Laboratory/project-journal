@@ -13,23 +13,25 @@ import { matchSorter } from 'match-sorter'
 
 import { SearchIcon } from 'icons'
 
+import type { Updates } from 'pages/project/[id]'
 import type { ComboboxOptionProps } from '@reach/combobox'
 
 // import '@reach/combobox/styles.css'
 
 const inputPaddingY = theme('spacing.3')
 
-const fruit = ['Apple', 'Banana', 'Orange', 'Pineapple', 'Kiwi']
-
 type SearchBarProps = {
+  updates: Updates
   id?: string
 }
-export function SearchBar({ id = 'projects-search-bar' }: SearchBarProps) {
+export function SearchBar({
+  updates,
+  id = 'projects-search-bar',
+}: SearchBarProps) {
   const ref = useRef<HTMLLabelElement | null>(null)
   const rect = useRect(ref)
   const [searchTerm, setSearchTerm] = useState('')
-
-  const matchedProjects = useProjectMatch(searchTerm)
+  const matchedProjects = useProjectMatch(updates, searchTerm)
 
   return (
     <Combobox aria-label="search projects" openOnFocus>
@@ -52,13 +54,13 @@ export function SearchBar({ id = 'projects-search-bar' }: SearchBarProps) {
         <ComboboxInput
           id={id}
           tw="ml-3 w-full placeholder-gray-yellow-300 focus:outline-none"
-          value={searchTerm}
           onChange={(e) => setSearchTerm(e.currentTarget.value)}
           placeholder="Search project updates..."
           autoComplete="off"
           autocomplete={false}
         />
       </label>
+
       <ComboboxPopover
         css={[
           tw`py-1 bg-white border rounded border-copper-400`,
@@ -74,13 +76,15 @@ export function SearchBar({ id = 'projects-search-bar' }: SearchBarProps) {
             : null,
         ]}
       >
-        {matchedProjects ? (
-          <ComboboxList>
-            {matchedProjects.slice(0, 10).map((value) => {
-              return <CustomComboboxOption key={value} value={value} />
-            })}
-          </ComboboxList>
-        ) : null}
+        <ComboboxList>
+          {matchedProjects.length > 0 ? (
+            matchedProjects.slice(0, 10).map(({ key, value }) => {
+              return <CustomComboboxOption key={key} value={value} />
+            })
+          ) : (
+            <span css={[optionCss]}>No results</span>
+          )}
+        </ComboboxList>
       </ComboboxPopover>
     </Combobox>
   )
@@ -90,22 +94,15 @@ function CustomComboboxOption(props: ComboboxOptionProps) {
   return (
     <ComboboxOption
       css={[
-        tw`px-8 py-2 bl-text-xs`,
+        optionCss,
         css`
-          &[aria-selected='true'] {
+          &[aria-selected='true'],
+          :hover {
             ${tw`bg-copper-100`}
           }
-          :hover {
-            ${tw`bg-copper-400 text-gray-yellow-100`}
-          }
-
-          /* [data-suggested-value] {
-            color: red;
-          } */
-
-          /* [data-user-value] {
+          [data-user-value] {
             ${tw`text-gray-yellow-500`}
-          } */
+          }
         `,
       ]}
       children={<ComboboxOptionText />}
@@ -114,16 +111,23 @@ function CustomComboboxOption(props: ComboboxOptionProps) {
   )
 }
 
+const optionCss = tw`px-8 py-2 bl-text-xs`
+
 /**
  * Inspired by https://github.com/reach/reach-ui/blob/develop/packages/combobox/examples/utils.ts
  * @param term
  */
-function useProjectMatch(searchTerm: string) {
+function useProjectMatch(updates: Updates, searchTerm: string) {
+  const projectKeyValue = useMemo(
+    () => updates.map(({ id, title }) => ({ key: id, value: title })),
+    [updates]
+  )
   return useMemo(() => {
-    return searchTerm.trim() === ''
-      ? null
-      : matchSorter(fruit, searchTerm, {
-          keys: [(item) => `${item}`],
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase()
+    return normalizedSearchTerm === ''
+      ? projectKeyValue
+      : matchSorter(projectKeyValue, searchTerm, {
+          keys: [(item) => item.value],
         })
-  }, [searchTerm])
+  }, [searchTerm, projectKeyValue])
 }
