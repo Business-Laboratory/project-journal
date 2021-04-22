@@ -42,9 +42,9 @@ export default function Project() {
   )
 
   // TODO: figure out the loading state
-  if (status === 'loading') {
-    return null
-  }
+  // if (status === 'loading') {
+  //   return null
+  // }
 
   if (status === 'error') {
     return (
@@ -73,7 +73,11 @@ export default function Project() {
       >
         <HashLinkProvider>
           <Timeline updates={updates} />
-          <ProjectInformation projectId={Number(id)} updates={updates} />
+          <ProjectInformation
+            projectId={Number(id)}
+            updates={updates}
+            status={status}
+          />
         </HashLinkProvider>
         <Summary
           projectId={Number(id)}

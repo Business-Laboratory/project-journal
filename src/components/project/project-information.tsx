@@ -19,6 +19,7 @@ import { format } from 'date-fns'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { useSetCurrentHashLink } from './hash-link-context'
+import { LoadingSpinner } from '@components/loading-spinner'
 
 import type { Updates } from 'pages/project/[id]'
 import { useRouter } from 'next/router'
@@ -28,10 +29,12 @@ import { useRouter } from 'next/router'
 type ProjectInformationProps = {
   projectId: number
   updates: Updates
+  status: string
 }
 export function ProjectInformation({
   projectId,
   updates,
+  status,
 }: ProjectInformationProps) {
   const user = useAuth()
   return (
@@ -45,27 +48,31 @@ export function ProjectInformation({
           </IconLink>
         )}
         <UpdatesContainer>
-          {updates.map(({ id, hashLink, title, body, createdAt }) => {
-            return (
-              <UpdateContainer key={id} id={hashLink.replace('#', '')}>
-                <div tw="inline-flex items-center space-x-2">
-                  {user?.role === 'ADMIN' ? (
-                    <IconLink pathName={`/project/${projectId}/#`}>
-                      <EditIcon tw="w-6 h-6" />
+          {status === 'loading' ? (
+            <LoadingSpinner loadingMessage="Loading updates" />
+          ) : (
+            updates.map(({ id, hashLink, title, body, createdAt }) => {
+              return (
+                <UpdateContainer key={id} id={hashLink.replace('#', '')}>
+                  <div tw="inline-flex items-center space-x-2">
+                    {user?.role === 'ADMIN' ? (
+                      <IconLink pathName={`/project/${projectId}/#`}>
+                        <EditIcon tw="w-6 h-6" />
+                        <span tw="bl-text-3xl">{title}</span>
+                      </IconLink>
+                    ) : (
                       <span tw="bl-text-3xl">{title}</span>
-                    </IconLink>
-                  ) : (
-                    <span tw="bl-text-3xl">{title}</span>
-                  )}
+                    )}
 
-                  <span tw="bl-text-sm self-end pb-2">
-                    {format(createdAt, 'M/d/yy')}
-                  </span>
-                </div>
-                <ReactMarkdown plugins={[gfm]}>{body}</ReactMarkdown>
-              </UpdateContainer>
-            )
-          })}
+                    <span tw="bl-text-sm self-end pb-2">
+                      {format(createdAt, 'M/d/yy')}
+                    </span>
+                  </div>
+                  <ReactMarkdown plugins={[gfm]}>{body}</ReactMarkdown>
+                </UpdateContainer>
+              )
+            })
+          )}
         </UpdatesContainer>
       </div>
     </ProjectInformationContainer>
