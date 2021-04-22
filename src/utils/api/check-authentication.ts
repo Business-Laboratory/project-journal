@@ -22,7 +22,7 @@ async function checkAuthentication(req: NextApiRequest, res: NextApiResponse) {
   }
 
   try {
-    const user = await getUser(session.user.email ?? '')
+    const user = await getUser(session?.user?.email ?? '')
     if (user.role === null) {
       setUnauthorized(res)
       return

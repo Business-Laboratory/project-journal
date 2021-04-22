@@ -22,7 +22,7 @@
     "@azure/storage-blob": "^12.5.0",
     "@emotion/react": "^11.1.5",
     "@prisma/client": "^2.20.1",
-    "@reach/menu-button": "^0.14.0",
+    "@reach/menu-button": "^0.15.1",
     "date-fns": "^2.21.1",
     "focus-visible": "^5.2.0",
     "next": "^10.0.6",
@@ -73,6 +73,6 @@
     "pretty-quick": "^3.1.0",
     "prisma": "^2.20.1",
     "typescript": "^4.1.5",
-    "vercel": "^21.3.3"
+    "vercel": "^22.0.0"
   }
 }
