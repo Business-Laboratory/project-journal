@@ -1,5 +1,5 @@
 import tw, { css } from 'twin.macro'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
 
@@ -9,6 +9,8 @@ import { Update } from '@prisma/client'
 import { format } from 'date-fns'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
+import { useRouter } from 'next/router'
+import Dialog from '@reach/dialog'
 
 type ProjectInformationProps = {
   projectId: number
@@ -19,6 +21,23 @@ export function ProjectInformation({
   updates,
 }: ProjectInformationProps) {
   const user = useAuth()
+  const [open, setOpen] = useState(true)
+  const router = useRouter()
+  const { update } = router.query
+
+  useEffect(() => {
+    if (!update || Array.isArray(update)) return
+    const updateInformation = updates.find(({ id }) => id === Number(update))
+    if (!updateInformation) {
+      throw new Error(`Update doesn't exist`)
+    }
+    setOpen(true)
+  }, [update, updates])
+
+  const close = () => {
+    setOpen(false)
+    router.replace(`/project/${projectId}`, undefined, { shallow: true })
+  }
   return (
     <article
       css={[
@@ -41,11 +60,11 @@ export function ProjectInformation({
           </IconLink>
         )}
         <div tw="space-y-12">
-          {updates.map(({ title, body, createdAt }, index) => (
+          {updates.map(({ id, title, body, createdAt }, index) => (
             <div key={index} tw="space-y-6">
               <div tw="inline-flex items-center space-x-2">
                 {user?.role === 'ADMIN' ? (
-                  <IconLink pathName={`/project/${projectId}/#`}>
+                  <IconLink pathName={`/project/${projectId}?update=${id}`}>
                     <EditIcon tw="w-6 h-6" />
                     <span tw="bl-text-3xl">{title}</span>
                   </IconLink>
@@ -62,6 +81,10 @@ export function ProjectInformation({
           ))}
         </div>
       </div>
+      <Dialog isOpen={open} onDismiss={close} aria-label="asdf">
+        Test
+        <button onClick={close}>okay</button>
+      </Dialog>
     </article>
   )
 }
