@@ -29,7 +29,7 @@ export default function Project() {
     fetchProject
   )
 
-  // convert the string dates to dates and add the hash for the links
+  //convert the string dates to dates and add the hash for the links
   const updates = useMemo(
     () =>
       data?.updates.map((update) => ({
@@ -59,7 +59,7 @@ export default function Project() {
         `}
       >
         <HashLinkProvider>
-          <Timeline updates={updates} />
+          <Timeline updates={updates} status={status} />
           <ProjectInformation
             projectId={Number(id)}
             updates={updates}
