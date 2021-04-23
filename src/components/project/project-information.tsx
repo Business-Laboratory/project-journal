@@ -132,50 +132,9 @@ function ProjectInformationContainer({
         `,
       ]}
     >
-      <div tw="w-9/12 mx-auto py-10 space-y-8">
-        <SearchBar />
-        {user?.role === 'ADMIN' && (
-          <IconLink pathName={`/project/${projectId}/?update=new`}>
-            <PlusIcon tw="w-6 h-6" />
-            <span tw="bl-text-2xl">Add update</span>
-          </IconLink>
-        )}
-        <div tw="space-y-12">
-          {updates.map(({ id, title, body, createdAt }, index) => (
-            <div key={index} tw="space-y-6">
-              <div tw="inline-flex items-center space-x-2">
-                {user?.role === 'ADMIN' ? (
-                  <IconLink pathName={`/project/${projectId}?update=${id}`}>
-                    <EditIcon tw="w-6 h-6" />
-                    <span tw="bl-text-3xl">{title}</span>
-                  </IconLink>
-                ) : (
-                  <span tw="bl-text-3xl">{title}</span>
-                )}
-
-                <span tw="bl-text-sm self-end pb-2">
-                  {format(new Date(createdAt), 'M/d/yy')}
-                </span>
-              </div>
-              <ReactMarkdown plugins={[gfm]}>{body}</ReactMarkdown>
-            </div>
-          ))}
-        </div>
-      </div>
-      {!update || !Array.isArray(update) ? (
-        <UpdateModal
-          isOpen={open}
-          close={close}
-          projectId={projectId}
-          update={
-            updates.find(({ id }) => id === Number(update)) ?? {
-              id: 'new',
-              title: '',
-              body: '',
-            }
-          }
-        />
-      ) : null}
+      <OnScrollRefContext.Provider value={onScrollRef}>
+        {children}
+      </OnScrollRefContext.Provider>
     </article>
   )
 }
