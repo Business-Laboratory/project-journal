@@ -1,6 +1,11 @@
 import { BlobServiceClient, ContainerSASPermissions } from '@azure/storage-blob'
 
-export { blobServiceClient, generateSasUrl, uploadImage }
+export {
+  blobServiceClient,
+  generateSasUrl,
+  uploadImage,
+  generateSasUrlForImageUpload,
+}
 
 declare global {
   var blobServiceClientGlobal: BlobServiceClient
@@ -96,4 +101,23 @@ async function uploadImage(name: string, contentType: string, dataUrl: string) {
     },
   })
   return uploadBlobResponse
+}
+
+async function generateSasUrlForImageUpload(
+  containerName: string,
+  blockBlobName: string,
+  maxAge = 60
+) {
+  // get the container, creating it if none exists
+  const containerClient = blobServiceClient.getContainerClient(containerName)
+  await containerClient.createIfNotExists()
+  const blockBlobClient = containerClient.getBlockBlobClient(blockBlobName)
+
+  const expiresOn = new Date(Date.now() + maxAge * 1000)
+
+  return await blockBlobClient.generateSasUrl({
+    permissions: ContainerSASPermissions.parse('w'),
+    expiresOn,
+    cacheControl: `public, max-age=${maxAge}, immutable`,
+  })
 }
