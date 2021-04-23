@@ -82,10 +82,16 @@ export function Summary({
         {user?.role === 'ADMIN' ? (
           <IconLink pathName={`/project/${projectId}/#`}>
             <GearIcon tw="h-6 w-6" />
-            <h1 tw="bl-text-4xl inline">{name}</h1>
+            {name === '' ? (
+              <h1 tw="bl-text-4xl text-gray-yellow-300 inline capitalize">
+                Untitled project
+              </h1>
+            ) : (
+              <h1 tw="bl-text-4xl inline">{name}</h1>
+            )}
           </IconLink>
         ) : (
-          <h1 tw="bl-text-4xl">{name}</h1>
+          <h1 tw="bl-text-4xl">{name === '' ? 'Untitled Project' : name}</h1>
         )}
         {imageUrl ? (
           <div tw="relative h-60 w-full">
