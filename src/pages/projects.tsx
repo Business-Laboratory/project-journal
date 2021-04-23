@@ -3,53 +3,19 @@ import tw, { css, theme } from 'twin.macro'
 import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
-import { PlusIcon, SpinnerIcon } from 'icons'
+import { PlusIcon } from 'icons'
 import { useQuery } from 'react-query'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
-import { useState, useEffect } from 'react'
+import { LoadingSpinner } from '@components/loading-spinner'
+import { DataErrorMessage } from '@components/data-error-message'
+import { useWaitTimer } from '@utils/use-wait-timer'
 
 import type { QueryFunction } from 'react-query'
 import type { ProjectsData } from './api/projects'
 
 export default function Projects() {
   const user = useAuth()
-  const { status, data } = useQuery('projects', fetchProjects)
-
-  if (status === 'error') {
-    //Ring color is copper-400
-    return (
-      <div tw="space-y-6 pt-40">
-        <h1 tw="bl-text-3xl text-center text-matisse-red-200 uppercase">
-          Unable to load projects
-        </h1>
-        <div tw="max-w-max mx-auto">
-          <p tw="bl-text-2xl text-center">If the issue continues email</p>
-          <a
-            href="mailto:help@business-laboratory.com"
-            css={[
-              tw`bl-text-2xl text-copper-300
-                focus:outline-none`,
-              css`
-                &.focus-visible {
-                  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
-                    var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-                  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
-                    calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-                  box-shadow: var(--tw-ring-offset-shadow),
-                    var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
-                  --tw-ring-opacity: 1;
-                  --tw-ring-color: rgba(171, 133, 94, var(--tw-ring-opacity));
-                }
-              `,
-            ]}
-          >
-            help@business-laboratory.com
-          </a>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <>
@@ -64,7 +30,7 @@ export default function Projects() {
           </IconLink>
         ) : null}
 
-        <CardGrid status={status} data={data} userName={user?.name} />
+        <CardGrid userName={user?.name} />
       </main>
     </>
   )
@@ -149,40 +115,24 @@ type Project = {
 }
 
 type CardGridProps = {
-  status: string
-  data:
-    | {
-        id: number
-        name: string | null
-        imageUrl: string | null
-        summary: {
-          description: string | null
-        } | null
-      }[]
-    | undefined
   userName: string | undefined | null
 }
-function CardGrid({ status, data, userName }: CardGridProps) {
-  const [wait, setWait] = useState<'waiting' | 'finished'>('waiting')
-  useEffect(() => {
-    const id = setTimeout(() => {
-      setWait('finished')
-    }, 1000)
-    return () => clearTimeout(id)
-  }, [])
+function CardGrid({ userName }: CardGridProps) {
+  const { data, status } = useQuery('projects', fetchProjects)
 
-  if (wait === 'finished' && status === 'loading') {
-    return (
-      <div tw="space-y-4">
-        <SpinnerIcon tw="animate-spin w-20 h-20 max-w-max mx-auto" />
-        <p tw="bl-text-sm text-center">Loading projects</p>
-      </div>
-    )
+  const wait = useWaitTimer()
+
+  if (status === 'error') {
+    return <DataErrorMessage errorMessage="Unable to load projects" />
   }
 
-  const projects = data ?? []
+  if (wait === 'finished' && status === 'loading') {
+    return <LoadingSpinner loadingMessage="Loading projects" />
+  }
 
   const userNameFormatted = userName ? userName : 'you'
+
+  const projects = data ?? []
 
   return projects.length > 0 ? (
     <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">

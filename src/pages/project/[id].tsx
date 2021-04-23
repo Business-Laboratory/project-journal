@@ -1,13 +1,21 @@
-// Client/Admin Project
 import { css } from 'twin.macro'
+import { useMemo } from 'react'
 import { useQuery } from 'react-query'
 import Header from 'next/head'
-import type { QueryFunction } from 'react-query'
 import { useRouter } from 'next/router'
 
-import type { ProjectData } from '../api/project'
-import { Timeline, ProjectInformation, Summary } from '@components/project'
+import {
+  Timeline,
+  ProjectInformation,
+  Summary,
+  HashLinkProvider,
+} from '@components/project'
 import { appBarHeight } from '@components/app-bar'
+
+import type { QueryFunction } from 'react-query'
+import type { ProjectData } from '../api/project'
+
+export type Updates = ReturnType<typeof useUpdates>
 
 export default function Project() {
   const { query } = useRouter()
@@ -19,6 +27,9 @@ export default function Project() {
     ['project', { id: Number(id) }],
     fetchProject
   )
+
+  // convert the string dates to dates and add the hash for the links
+  const updates = useUpdates(data?.updates ?? [])
 
   // TODO: figure out the loading state
   if (status === 'loading') {
@@ -50,11 +61,10 @@ export default function Project() {
           grid-template-columns: 80px auto 500px;
         `}
       >
-        <Timeline />
-        <ProjectInformation
-          projectId={Number(id)}
-          updates={project?.updates ?? []}
-        />
+        <HashLinkProvider>
+          <Timeline updates={updates} />
+          <ProjectInformation projectId={Number(id)} updates={updates} />
+        </HashLinkProvider>
         <Summary
           projectId={Number(id)}
           name={project.name ?? ''}
@@ -68,6 +78,19 @@ export default function Project() {
         />
       </main>
     </>
+  )
+}
+
+function useUpdates(originalUpdates: ProjectData['updates']) {
+  return useMemo(
+    () =>
+      originalUpdates.map((update) => ({
+        ...update,
+        createdAt: new Date(update.createdAt),
+        updatedAt: new Date(update.updatedAt),
+        hashLink: `#update-${update.id}`,
+      })) ?? [],
+    [originalUpdates]
   )
 }
 

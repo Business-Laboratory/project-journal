@@ -2,10 +2,11 @@ import { prisma } from '@lib/prisma'
 import { checkAuthentication } from '@utils/api/check-authentication'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
-import type { UnwrapPromise } from '@types'
+import type { PrepareAPIData } from '@types'
 import type { User } from '@prisma/client'
 
-export type ProjectData = UnwrapPromise<ReturnType<typeof getProject>>
+// TODO: apply PrepareAPIData to all APIs
+export type ProjectData = PrepareAPIData<ReturnType<typeof getProject>>
 
 /**
  * Gets projects based on their role:
@@ -53,15 +54,27 @@ async function getProject(user: User, id: number) {
       },
       team: true,
       summary: true,
-      updates: true,
+      updates: {
+        orderBy: [
+          {
+            createdAt: 'desc',
+          },
+        ],
+      },
     },
   })
+
+  if (project === null) {
+    throw new Error(`Project does not exist`)
+  }
 
   if (userRole === 'USER') {
     const projectHasUser = project?.client?.employees?.find(
       ({ user }) => user.id === userId
     )
-    if (!projectHasUser) return
+    if (!projectHasUser) {
+      throw new Error(`User does not belong to this project`)
+    }
   }
 
   return project

@@ -6,3 +6,10 @@ export type UnwrapPromise<T> = T extends Promise<infer U>
   : T extends (...args: any) => infer U
   ? U
   : T
+
+// Taken from https://stackoverflow.com/questions/52910047/convert-all-date-properties-including-nested-to-string-in-a-typescript-generic
+export type SerializeDates<T> = {
+  [P in keyof T]: T[P] extends Date ? string : SerializeDates<T[P]>
+}
+
+export type PrepareAPIData<T> = SerializeDates<UnwrapPromise<T>>
