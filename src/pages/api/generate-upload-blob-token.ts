@@ -25,13 +25,15 @@ export default async function handler(
     const { projectId, fileName } = checkBody(req.body)
     checkIfProjectExists(projectId)
 
+    const newFileName = `${fileName}_${new Date().toISOString()}`
+
     // get a SAS url to upload the image. This will also create the container if it does not exist
-    generateSasUrlForImageUpload(
-      String(projectId),
-      `${fileName}_${new Date().toISOString()}`
+    const sasUrl = await generateSasUrlForImageUpload(
+      `project-${projectId}`,
+      newFileName
     )
 
-    res.status(200).json(user)
+    res.status(200).json({ sasUrl, newFileName })
   } catch (error) {
     res.status(501).json(error)
   }
@@ -45,7 +47,7 @@ function checkBody({
   fileName: unknown
 }) {
   if (
-    typeof projectId !== 'string' ||
+    (typeof projectId !== 'string' && typeof projectId !== 'number') ||
     projectId === '' ||
     Number.isNaN(Number(projectId))
   ) {
@@ -65,7 +67,7 @@ async function checkIfProjectExists(projectId: number) {
       id: projectId,
     },
   })
-  if (projects === 1) {
+  if (projects !== 1) {
     throw new Error(`Project with project id of ${projectId} does not exist`)
   }
 }
