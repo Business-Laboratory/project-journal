@@ -12,14 +12,15 @@ export function Modal({ children, ...props }: ModalProps) {
     <DialogOverlay
       css={[
         tw`bg-gray-yellow-200 bg-opacity-50 z-20`,
-        // overlay is on top of the content so I need to figure out how to make blur be behind it
-        // z-indices not working
-        // css`filter: blur(4px);`
+        // does not work in firefox
+        css`
+          backdrop-filter: blur(4px);
+        `,
       ]}
       {...props}
     >
       <DialogContent
-        tw="bg-gray-yellow-100 py-16 px-24 shadow-bl border-2 border-copper-300 rounded relative z-30"
+        tw="bg-gray-yellow-100 xl:py-16 xl:px-24 py-8 px-12 shadow-bl border-2 border-copper-300 rounded relative z-30"
         aria-label="modal-content"
       >
         {children}

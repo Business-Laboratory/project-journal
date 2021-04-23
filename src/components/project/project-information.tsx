@@ -37,12 +37,12 @@ export function ProjectInformation({
   const user = useAuth()
   const [open, setOpen] = useState(false)
   const router = useRouter()
-  const { update } = router.query
+  const { updateId } = router.query
 
   useEffect(() => {
-    if (!update || Array.isArray(update)) return
+    if (!updateId || Array.isArray(updateId)) return
     setOpen(true)
-  }, [update, updates])
+  }, [updateId, updates])
 
   const close = () => {
     setOpen(false)
@@ -54,7 +54,10 @@ export function ProjectInformation({
       <div tw="w-9/12 mx-auto py-10 space-y-8">
         <SearchBar updates={updates} />
         {user?.role === 'ADMIN' && (
-          <IconLink pathName={`/project/${projectId}?update=new`}>
+          <IconLink
+            pathName={`/project/${projectId}?updateId=new`}
+            replace={true}
+          >
             <PlusIcon tw="w-6 h-6" />
             <span tw="bl-text-2xl">Add update</span>
           </IconLink>
@@ -65,7 +68,10 @@ export function ProjectInformation({
               <UpdateContainer key={id} id={hashLink.replace('#', '')}>
                 <div tw="inline-flex items-center space-x-2">
                   {user?.role === 'ADMIN' ? (
-                    <IconLink pathName={`/project/${projectId}?update=${id}`}>
+                    <IconLink
+                      pathName={`/project/${projectId}?updateId=${id}`}
+                      replace={true}
+                    >
                       <EditIcon tw="w-6 h-6" />
                       <span tw="bl-text-3xl">{title}</span>
                     </IconLink>
@@ -83,13 +89,13 @@ export function ProjectInformation({
           })}
         </UpdatesContainer>
       </div>
-      {!update || !Array.isArray(update) ? (
+      {!updateId || !Array.isArray(updateId) ? (
         <UpdateModal
           isOpen={open}
           close={close}
           projectId={projectId}
           update={
-            updates.find(({ id }) => id === Number(update)) ?? {
+            updates.find(({ id }) => id === Number(updateId)) ?? {
               id: 'new',
               title: '',
               body: '',

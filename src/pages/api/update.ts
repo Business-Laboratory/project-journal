@@ -51,9 +51,7 @@ async function postUpdate(
   body: string,
   projectId: number
 ) {
-  if ((typeof id !== 'number' && id !== 'new') || title === '' || body === '') {
-    throw new Error('Invalid data')
-  }
+  checkData(id, title, body)
   const data = {
     title,
     body,
@@ -76,10 +74,21 @@ async function postUpdate(
 }
 
 async function deleteUpdate(id: number) {
-  const update = await prisma.update.delete({
+  await prisma.update.delete({
     where: {
       id,
     },
   })
-  return update
+}
+
+function checkData(id: number | 'new', title: string, body: string) {
+  if (typeof id !== 'number' && id !== 'new') {
+    throw new Error('Invalid update id.')
+  }
+  if (title === '') {
+    throw new Error('No title found')
+  }
+  if (body === '') {
+    throw new Error('No body found')
+  }
 }

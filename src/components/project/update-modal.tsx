@@ -1,10 +1,13 @@
 import tw from 'twin.macro'
 import { useRouter } from 'next/router'
-import { useEffect, useReducer, useState } from 'react'
+import React, { useEffect, useReducer, useState } from 'react'
 
 import { Update } from '@prisma/client'
 import { Modal } from '@components/modal'
 import { Button } from '@components/button'
+import { CloseIcon } from 'icons'
+import { IconLink } from '@components/icon-link'
+import { useQueryClient } from 'react-query'
 
 type UpdateModalProps = {
   isOpen: boolean
@@ -31,15 +34,14 @@ export function UpdateModal({
   )
 }
 
+type NewUpdate = {
+  id: 'new'
+  title: string
+  body: string
+}
 type UpdateModalContentProps = {
   projectId: number
-  update:
-    | Update
-    | {
-        id: 'new'
-        title: string
-        body: string
-      }
+  update: Update | NewUpdate
   close: () => void
 }
 function UpdateModalContent({
@@ -53,10 +55,11 @@ function UpdateModalContent({
     updateReducer,
     initialState(update)
   )
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     if (id === 'new' && router.query.update !== 'new') {
-      router.replace(`/project/${projectId}?update=new`, undefined, {
+      router.replace(`/project/${projectId}?updateId=new`, undefined, {
         shallow: true,
       })
     }
@@ -66,6 +69,7 @@ function UpdateModalContent({
     dispatch({ type: 'SAVING' })
     try {
       await postUpdate({ id, title, body, projectId })
+      queryClient.invalidateQueries('project')
       close()
     } catch {
       dispatch({ type: 'FAILURE' })
@@ -76,6 +80,14 @@ function UpdateModalContent({
     <div tw="space-y-16">
       <div tw="space-y-8 text-right">
         <div tw="text-left">
+          {/* Icon Link put in here to remove top margin on top component */}
+          <IconLink
+            tw="absolute top-3 right-3"
+            pathName={`/project/${projectId}`}
+            replace={true}
+          >
+            <CloseIcon tw="w-4 h-4" />
+          </IconLink>
           <div tw="bl-text-xs text-gray-yellow-300">Update title</div>
           <input
             css={[
@@ -91,7 +103,8 @@ function UpdateModalContent({
           />
         </div>
         <textarea
-          tw="w-full h-64 overflow-y-auto resize-none focus:outline-none border border-gray-yellow-600"
+          // Padding bottom doesn't work.  Found this age old bug https://bugzilla.mozilla.org/show_bug.cgi?id=748518
+          tw="w-full h-64 py-5 px-6 overflow-y-scroll resize-none focus:outline-none border border-gray-yellow-600"
           value={body}
           onChange={(e) =>
             dispatch({ type: 'SET_BODY', payload: e.target.value })
@@ -99,12 +112,15 @@ function UpdateModalContent({
         />
         <div tw="space-y-3">
           <Button
+            tw="border-4"
             onClick={() => save()}
             disabled={saveState === 'saving' || saveState === 'disabled'}
           >
             Save update
           </Button>
-          {saveState === 'error' ? (
+          {saveState === 'saving' ? (
+            <div tw="bl-text-lg uppercase">Saving update...</div>
+          ) : saveState === 'error' ? (
             <div tw="bl-text-lg uppercase text-matisse-red-200">
               Failed to save
             </div>
