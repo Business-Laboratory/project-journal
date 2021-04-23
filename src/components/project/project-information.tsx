@@ -10,7 +10,7 @@ import { format } from 'date-fns'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { useRouter } from 'next/router'
-import Dialog from '@reach/dialog'
+import { Modal } from '@components/modal'
 
 type ProjectInformationProps = {
   projectId: number
@@ -21,7 +21,7 @@ export function ProjectInformation({
   updates,
 }: ProjectInformationProps) {
   const user = useAuth()
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   const router = useRouter()
   const { update } = router.query
 
@@ -38,6 +38,7 @@ export function ProjectInformation({
     setOpen(false)
     router.replace(`/project/${projectId}`, undefined, { shallow: true })
   }
+
   return (
     <article
       css={[
@@ -81,10 +82,77 @@ export function ProjectInformation({
           ))}
         </div>
       </div>
-      <Dialog isOpen={open} onDismiss={close} aria-label="asdf">
-        Test
-        <button onClick={close}>okay</button>
-      </Dialog>
+      {!update || !Array.isArray(update) ? (
+        <Modal isOpen={open} onDismiss={close}>
+          <UpdateModalContent
+            update={updates.find(({ id }) => id === Number(update))}
+            close={close}
+          />
+        </Modal>
+      ) : null}
     </article>
+  )
+}
+
+type UpdateModalContentProps = {
+  update: Update | undefined
+  close: () => void
+}
+function UpdateModalContent({
+  update,
+  close,
+  ...props
+}: UpdateModalContentProps) {
+  const [title, setTitle] = useState(update?.title ?? '')
+  const [body, setBody] = useState(update?.body ?? '')
+  const [verifyTitle, setVerifyTitle] = useState('')
+  return (
+    <div tw="space-y-8 text-right">
+      <div tw="text-left">
+        <div tw="bl-text-xs text-gray-yellow-300">Update title</div>
+        <input
+          css={[
+            tw`w-full bl-text-3xl placeholder-gray-yellow-400`,
+            tw`focus:outline-none border-b border-gray-yellow-600`,
+          ]}
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Update #"
+        />
+      </div>
+      <textarea
+        tw="w-full h-64 overflow-y-auto resize-none focus:outline-none border border-gray-yellow-600"
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+      />
+      <button tw="bl-text-lg uppercase px-4 py-1 border-4 border-copper-300">
+        Save update
+      </button>
+      <div tw="w-full border-b border-dashed border-matisse-red-200" />
+      <div tw="w-full grid grid-cols-2 col-auto">
+        <div tw="text-left col-span-1">
+          <div tw="bl-text-xs text-gray-yellow-300">Verify update title</div>
+          <input
+            tw="w-full placeholder-gray-yellow-400 border-b border-gray-yellow-600 focus:outline-none"
+            type="text"
+            value={verifyTitle}
+            onChange={(e) => setVerifyTitle(e.target.value)}
+            placeholder="Update #"
+          />
+        </div>
+        <div tw="text-right col-span-1 pr-2">
+          <button
+            css={[
+              tw`bl-text-lg uppercase py-1 px-2 border-2 border-copper-300`,
+              tw`disabled:bg-gray-yellow-300 disabled:bg-opacity-60`,
+            ]}
+            disabled={title !== verifyTitle}
+          >
+            Delete update
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
