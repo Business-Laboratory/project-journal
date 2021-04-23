@@ -27,8 +27,9 @@ export function SearchBar({
   id = 'projects-search-bar',
 }: SearchBarProps) {
   const router = useRouter()
-  const ref = useRef<HTMLLabelElement | null>(null)
-  const rect = useRect(ref)
+  const labelRef = useRef<HTMLLabelElement | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const rect = useRect(labelRef)
   const [searchTerm, setSearchTerm] = useState('')
   const matchedUpdates = useMatchedUpdates(updates, searchTerm)
 
@@ -43,14 +44,16 @@ export function SearchBar({
         )
         const hashLink = selectedUpdate?.hashLink
         if (hashLink) {
+          inputRef.current?.blur()
           router.push(`./${router.query.id}${hashLink}`)
         }
       }}
     >
-      <label ref={ref} htmlFor={id} css={labelCss}>
+      <label ref={labelRef} htmlFor={id} css={labelCss}>
         <SearchIcon tw="w-5 h-5" />
         <ComboboxInput
           id={id}
+          ref={inputRef}
           tw="ml-3 w-full placeholder-gray-yellow-300 focus:outline-none"
           onChange={(e) => setSearchTerm(e.currentTarget.value)}
           placeholder="Search project updates..."
@@ -89,7 +92,7 @@ export function SearchBar({
 function useMatchedUpdates(updates: Updates, searchTerm: string) {
   const updateValuesAndHashLinks = useMemo(
     () =>
-      updates.map(({ id, title, hashLink }, idx) => ({
+      updates.map(({ title, hashLink }) => ({
         value: title,
         hashLink,
       })),
@@ -108,7 +111,7 @@ function useMatchedUpdates(updates: Updates, searchTerm: string) {
 // styles
 
 const comboboxPopoverCss = (rect: DOMRect | null) => [
-  tw`py-1 bg-white border rounded border-copper-400`,
+  tw`py-1 bg-white border rounded border-copper-400 shadow-bl`,
   css`
     margin-top: calc(${inputPaddingY} + ${theme('spacing.2')});
   `,
