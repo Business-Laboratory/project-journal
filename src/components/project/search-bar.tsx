@@ -30,7 +30,7 @@ export function SearchBar({
   const ref = useRef<HTMLLabelElement | null>(null)
   const rect = useRect(ref)
   const [searchTerm, setSearchTerm] = useState('')
-  const matchedProjects = useProjectMatch(updates, searchTerm)
+  const matchedUpdates = useMatchedUpdates(updates, searchTerm)
 
   return (
     <Combobox
@@ -38,10 +38,10 @@ export function SearchBar({
       openOnFocus
       onSelect={(selectedValue) => {
         setSearchTerm(selectedValue)
-        const selectedProject = matchedProjects.find(
+        const selectedUpdate = matchedUpdates.find(
           ({ value }) => value === selectedValue
         )
-        const hashLink = selectedProject?.hashLink
+        const hashLink = selectedUpdate?.hashLink
         if (hashLink) {
           router.push(`./${router.query.id}${hashLink}`)
         }
@@ -61,8 +61,8 @@ export function SearchBar({
 
       <ComboboxPopover css={comboboxPopoverCss(rect)}>
         <ComboboxList>
-          {matchedProjects.length > 0 ? (
-            matchedProjects.slice(0, 10).map(({ value }, idx) => {
+          {matchedUpdates.length > 0 ? (
+            matchedUpdates.slice(0, 10).map(({ value }, idx) => {
               return (
                 <ComboboxOption
                   key={idx} // key has to be index to that using the arrow keys has the correct order
@@ -86,8 +86,8 @@ export function SearchBar({
  * Inspired by https://github.com/reach/reach-ui/blob/develop/packages/combobox/examples/utils.ts
  * @param term
  */
-function useProjectMatch(updates: Updates, searchTerm: string) {
-  const projectKeyValues = useMemo(
+function useMatchedUpdates(updates: Updates, searchTerm: string) {
+  const updateValuesAndHashLinks = useMemo(
     () =>
       updates.map(({ id, title, hashLink }, idx) => ({
         value: title,
@@ -98,11 +98,11 @@ function useProjectMatch(updates: Updates, searchTerm: string) {
   return useMemo(() => {
     const normalizedSearchTerm = searchTerm.trim().toLowerCase()
     return normalizedSearchTerm === ''
-      ? projectKeyValues
-      : matchSorter(projectKeyValues, searchTerm, {
+      ? updateValuesAndHashLinks
+      : matchSorter(updateValuesAndHashLinks, searchTerm, {
           keys: [(item) => item.value],
         })
-  }, [searchTerm, projectKeyValues])
+  }, [searchTerm, updateValuesAndHashLinks])
 }
 
 // styles
@@ -143,7 +143,7 @@ const comboboxOptionCss = [
       ${tw`bg-copper-100`}
     }
     [data-user-value] {
-      ${tw`text-gray-yellow-500`}
+      ${tw`text-matisse-blue-100`}
     }
   `,
 ]
