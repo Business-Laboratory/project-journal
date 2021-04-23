@@ -87,16 +87,16 @@ export function Summary({
         ) : (
           <h1 tw="bl-text-4xl">{name}</h1>
         )}
-        <div tw="relative h-60 w-full">
-          {imageUrl ? (
+        {imageUrl ? (
+          <div tw="relative h-60 w-full">
             <Image
               tw="object-contain"
               layout="fill"
               src={imageUrl}
               alt={name}
             />
-          ) : null}
-        </div>
+          </div>
+        ) : null}
         <div tw="space-y-2">
           {user?.role === 'ADMIN' ? (
             <IconLink pathName={`/project/${projectId}/#`}>
@@ -123,14 +123,16 @@ export function Summary({
             <MarkdownWrapper>{summary.roadmap}</MarkdownWrapper>
           ) : null}
         </div>
-        <div tw="space-y-6">
+        <div tw="space-y-2">
           <h3 tw="bl-text-3xl">Project Personnel</h3>
-          <div>
-            <div tw="bl-text-2xl">Client</div>
-            <div tw="bl-text-base">{clientName}</div>
+          <div tw="space-y-6">
+            <div>
+              <div tw="bl-text-2xl">Client</div>
+              <div tw="bl-text-base">{clientName}</div>
+            </div>
+            <TeamSection title="Client Team" team={clientEmployees} />
+            <TeamSection title="Project Team" team={team} />
           </div>
-          <TeamSection title="Client Team" team={clientEmployees} />
-          <TeamSection title="Project Team" team={team} />
         </div>
       </div>
     </aside>
@@ -180,12 +182,14 @@ function TeamSection({ title, team }: TeamSectionProps) {
   return (
     <div>
       <div tw="bl-text-2xl">{title}</div>
-      {team.map(({ id, name, email }) => (
-        <span key={id}>
-          <div tw="bl-text-lg">{name}</div>
-          <div tw="bl-text-base">{email}</div>
-        </span>
-      ))}
+      <div tw="space-y-2">
+        {team.map(({ id, name, email }) => (
+          <div key={id}>
+            <div tw="bl-text-lg">{name}</div>
+            <div tw="bl-text-base">{email}</div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
