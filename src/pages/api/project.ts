@@ -54,7 +54,13 @@ async function getProject(user: User, id: number) {
       },
       team: true,
       summary: true,
-      updates: true,
+      updates: {
+        orderBy: [
+          {
+            createdAt: 'desc',
+          },
+        ],
+      },
     },
   })
 
