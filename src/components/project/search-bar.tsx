@@ -37,6 +37,7 @@ export function SearchBar({
       aria-label="search projects"
       openOnFocus
       onSelect={(selectedValue) => {
+        setSearchTerm(selectedValue)
         const selectedProject = matchedProjects.find(
           ({ value }) => value === selectedValue
         )
@@ -61,9 +62,13 @@ export function SearchBar({
       <ComboboxPopover css={comboboxPopoverCss(rect)}>
         <ComboboxList>
           {matchedProjects.length > 0 ? (
-            matchedProjects.slice(0, 10).map(({ key, value }) => {
+            matchedProjects.slice(0, 10).map(({ value }, idx) => {
               return (
-                <ComboboxOption key={key} css={comboboxOptionCss} value={value}>
+                <ComboboxOption
+                  key={idx} // key has to be index to that using the arrow keys has the correct order
+                  css={comboboxOptionCss}
+                  value={value}
+                >
                   <ComboboxOptionText />
                 </ComboboxOption>
               )
@@ -82,10 +87,9 @@ export function SearchBar({
  * @param term
  */
 function useProjectMatch(updates: Updates, searchTerm: string) {
-  const projectKeyValue = useMemo(
+  const projectKeyValues = useMemo(
     () =>
-      updates.map(({ id, title, hashLink }) => ({
-        key: id,
+      updates.map(({ id, title, hashLink }, idx) => ({
         value: title,
         hashLink,
       })),
@@ -94,11 +98,11 @@ function useProjectMatch(updates: Updates, searchTerm: string) {
   return useMemo(() => {
     const normalizedSearchTerm = searchTerm.trim().toLowerCase()
     return normalizedSearchTerm === ''
-      ? projectKeyValue
-      : matchSorter(projectKeyValue, searchTerm, {
+      ? projectKeyValues
+      : matchSorter(projectKeyValues, searchTerm, {
           keys: [(item) => item.value],
         })
-  }, [searchTerm, projectKeyValue])
+  }, [searchTerm, projectKeyValues])
 }
 
 // styles
