@@ -54,7 +54,7 @@ export function ProjectInformation({
       <div tw="w-9/12 mx-auto py-10 space-y-8">
         <SearchBar updates={updates} />
         {user?.role === 'ADMIN' && (
-          <IconLink pathName={`/project/${projectId}/#`}>
+          <IconLink pathName={`/project/${projectId}?update=new`}>
             <PlusIcon tw="w-6 h-6" />
             <span tw="bl-text-2xl">Add update</span>
           </IconLink>
@@ -65,7 +65,7 @@ export function ProjectInformation({
               <UpdateContainer key={id} id={hashLink.replace('#', '')}>
                 <div tw="inline-flex items-center space-x-2">
                   {user?.role === 'ADMIN' ? (
-                    <IconLink pathName={`/project/${projectId}/#`}>
+                    <IconLink pathName={`/project/${projectId}?update=${id}`}>
                       <EditIcon tw="w-6 h-6" />
                       <span tw="bl-text-3xl">{title}</span>
                     </IconLink>
