@@ -14,9 +14,8 @@ import { appBarHeight } from '@components/app-bar'
 
 import type { QueryFunction } from 'react-query'
 import type { ProjectData } from '../api/project'
-import type { Update } from '@prisma/client'
 
-export type Updates = Array<Update & { hashLink: string }>
+export type Updates = ReturnType<typeof useUpdates>
 
 export default function Project() {
   const { query } = useRouter()
@@ -29,17 +28,8 @@ export default function Project() {
     fetchProject
   )
 
-  //convert the string dates to dates and add the hash for the links
-  const updates = useMemo(
-    () =>
-      data?.updates.map((update) => ({
-        ...update,
-        createdAt: new Date(update.createdAt),
-        updatedAt: new Date(update.updatedAt),
-        hashLink: `#update-${update.id}`,
-      })) ?? [],
-    [data]
-  )
+  // convert the string dates to dates and add the hash for the links
+  const updates = useUpdates(data?.updates ?? [])
 
   const project = data ?? null
 
@@ -80,6 +70,19 @@ export default function Project() {
         />
       </main>
     </>
+  )
+}
+
+function useUpdates(originalUpdates: ProjectData['updates']) {
+  return useMemo(
+    () =>
+      originalUpdates.map((update) => ({
+        ...update,
+        createdAt: new Date(update.createdAt),
+        updatedAt: new Date(update.updatedAt),
+        hashLink: `#update-${update.id}`,
+      })) ?? [],
+    [originalUpdates]
   )
 }
 
