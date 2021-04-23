@@ -42,7 +42,7 @@ export function ProjectInformation({
   return (
     <ProjectInformationContainer>
       <div tw="w-9/12 mx-auto py-10 space-y-8">
-        <SearchBar updates={updates} />
+        <SearchBar updates={updates} status={status} />
         {user?.role === 'ADMIN' && (
           <IconLink pathName={`/project/${projectId}/#`}>
             <PlusIcon tw="w-6 h-6" />
