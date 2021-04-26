@@ -6,9 +6,9 @@ import 'focus-visible'
 
 import { AuthProvider } from '@components/auth-context'
 import { AppBar } from '@components/app-bar'
+import { Button } from '@components/button'
 
 import '../styles/globals.css'
-import { Button } from '@components/button'
 
 type ComponentWithPageLayout = {
   Component: AppProps['Component'] & {
@@ -44,15 +44,22 @@ function App({ Component, pageProps }: AppProps & ComponentWithPageLayout) {
 }
 
 function TempImageUpload() {
-  const [selectedImage, setSelectedImage] = useState<File | null>(null)
+  const [{ selectedImage, status }, setSelectedImage] = useState<{
+    selectedImage: File | null
+    status: 'ready' | 'uploading' | 'successful' | 'error'
+  }>({ selectedImage: null, status: 'ready' })
+
   return (
     <form
       tw="flex flex-col w-56 space-y-2 py-4"
       onSubmit={async (e) => {
         e.preventDefault()
-        if (selectedImage === null) {
+        if (selectedImage === null || status === 'uploading') {
           return
         }
+
+        setSelectedImage((prev) => ({ ...prev, status: 'uploading' }))
+
         try {
           const result = await fetch('/api/generate-upload-blob-token', {
             method: 'POST',
@@ -62,9 +69,15 @@ function TempImageUpload() {
               fileName: selectedImage.name,
             }),
           })
-          const data = await result.json()
-          console.log(data)
+          const { sasUrl } = await result.json()
+
+          // lazy load the image uploader since it's pretty large
+          const { uploadImage } = await import('@utils/upload-image')
+
+          await uploadImage(sasUrl, selectedImage)
+          setSelectedImage((prev) => ({ ...prev, status: 'successful' }))
         } catch (error) {
+          setSelectedImage((prev) => ({ ...prev, status: 'error' }))
           console.error(error)
         }
       }}
@@ -76,14 +89,21 @@ function TempImageUpload() {
         onChange={(e) => {
           const file = e.currentTarget.files?.[0]
           if (file) {
-            setSelectedImage(file)
+            setSelectedImage({ selectedImage: file, status: 'ready' })
           }
         }}
         name="img"
         accept="image/*"
       />
-      <Button type="submit" disabled={selectedImage === null}>
-        Upload image
+      <Button
+        type="submit"
+        disabled={status === 'uploading' || status === 'successful'}
+      >
+        {status === 'uploading'
+          ? 'uploading image...'
+          : status === 'successful'
+          ? 'upload successful'
+          : 'upload image'}
       </Button>
     </form>
   )

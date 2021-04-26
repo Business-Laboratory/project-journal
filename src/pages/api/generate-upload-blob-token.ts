@@ -25,15 +25,13 @@ export default async function handler(
     const { projectId, fileName } = checkBody(req.body)
     checkIfProjectExists(projectId)
 
-    const newFileName = `${fileName}_${new Date().toISOString()}`
-
     // get a SAS url to upload the image. This will also create the container if it does not exist
     const sasUrl = await generateSasUrlForImageUpload(
       `project-${projectId}`,
-      newFileName
+      `${fileName}_${new Date().toISOString()}`
     )
 
-    res.status(200).json({ sasUrl, newFileName })
+    res.status(200).json({ sasUrl })
   } catch (error) {
     res.status(501).json(error)
   }
