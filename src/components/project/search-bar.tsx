@@ -49,6 +49,7 @@ export function SearchBar({
           inputRef.current?.blur()
           router.push(`./${router.query.id}${hashLink}`)
         }
+        setSearchTerm('')
       }}
     >
       <label ref={labelRef} htmlFor={id} css={labelCss(status, updates)}>
@@ -70,6 +71,7 @@ export function SearchBar({
           placeholder="Search project updates..."
           autoComplete="off"
           autocomplete={false}
+          value={searchTerm}
         />
       </label>
 
