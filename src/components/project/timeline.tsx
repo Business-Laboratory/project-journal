@@ -28,13 +28,20 @@ type DelineatorType = 'weeks' | 'months' | 'quarters' | 'halfYears' | 'years'
 
 type TimelineProps = {
   updates: Updates
+  status: string
 }
-export function Timeline({ updates }: TimelineProps) {
+export function Timeline({ updates, status }: TimelineProps) {
   const datesContainerRef = useRef<null | HTMLDivElement>(null)
   const { delineatorDates, groupedUpdateDates } = useTimelineDates(
     updates,
     datesContainerRef
   )
+
+  if (status === 'loading' || status === 'error' || updates.length === 0) {
+    return (
+      <nav tw="relative w-20 h-full overflow-hidden bg-gray-yellow-600 border-r-2 border-gray-yellow-300" />
+    )
+  }
 
   return (
     <nav tw="relative w-20 h-full overflow-hidden bg-gray-yellow-600 border-r-2 border-gray-yellow-300">
