@@ -12,7 +12,7 @@ import { useRouter } from 'next/router'
 import { useRect } from '@reach/rect'
 import { matchSorter } from 'match-sorter'
 
-import { SearchIcon } from 'icons'
+import { SearchIcon, SearchIconDisabled } from 'icons'
 
 import type { Updates } from 'pages/project/[id]'
 
@@ -21,10 +21,12 @@ const inputPaddingY = theme('spacing.3')
 type SearchBarProps = {
   updates: Updates
   id?: string
+  status: string
 }
 export function SearchBar({
   updates,
   id = 'projects-search-bar',
+  status,
 }: SearchBarProps) {
   const router = useRouter()
   const labelRef = useRef<HTMLLabelElement | null>(null)
@@ -49,9 +51,18 @@ export function SearchBar({
         }
       }}
     >
-      <label ref={labelRef} htmlFor={id} css={labelCss}>
-        <SearchIcon tw="w-5 h-5" />
+      <label ref={labelRef} htmlFor={id} css={labelCss(status, updates)}>
+        {status === 'loading' || status === 'error' || updates.length === 0 ? (
+          <SearchIconDisabled tw="w-5 h-5" />
+        ) : (
+          <SearchIcon tw="w-5 h-5" />
+        )}
         <ComboboxInput
+          disabled={
+            status === 'loading' || status === 'error' || updates.length === 0
+              ? true
+              : false
+          }
           id={id}
           ref={inputRef}
           tw="ml-3 w-full placeholder-gray-yellow-300 focus:outline-none"
@@ -124,8 +135,12 @@ const comboboxPopoverCss = (rect: DOMRect | null) => [
     : null,
 ]
 
-const labelCss = [
-  tw`
+const labelCss = (status: string, updates: Updates) => [
+  status === 'loading' || status === 'error' || updates.length === 0
+    ? tw`flex items-center w-full px-8 bl-text-base text-gray-yellow-600
+    ring-1 ring-inset ring-gray-yellow-600
+    focus-within:(ring-2 ring-copper-400)`
+    : tw`
     flex items-center w-full px-8 bl-text-base text-gray-yellow-600
     ring-1 ring-inset ring-gray-yellow-600
     hover:(ring-2 ring-copper-300) focus-within:(ring-2 ring-copper-400)

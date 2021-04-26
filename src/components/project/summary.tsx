@@ -6,6 +6,9 @@ import gfm from 'remark-gfm'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { EditIcon, GearIcon } from 'icons'
+import { LoadingSpinner } from '@components/loading-spinner'
+import { DataErrorMessage } from '@components/data-error-message'
+import { useWaitTimer } from '@utils/use-wait-timer'
 
 import type { ProjectData } from 'pages/api/project'
 
@@ -19,6 +22,7 @@ type SummaryProps = {
   clientName: string
   clientEmployees: Team // TODO: update this. There's probably a better way to do this, but I'm just replacing what was here
   team: Team
+  status: string
 }
 
 export function Summary({
@@ -29,29 +33,76 @@ export function Summary({
   clientName,
   clientEmployees,
   team,
+  status,
 }: SummaryProps) {
   const user = useAuth()
+
+  const wait = useWaitTimer()
+
+  if (status === 'error') {
+    return (
+      <aside
+        css={[
+          user?.role === 'ADMIN'
+            ? css`
+                padding-top: 11.875rem;
+              `
+            : css`
+                padding-top: 7.625rem;
+              `,
+        ]}
+      >
+        <DataErrorMessage errorMessage="Unable to load summary" />
+      </aside>
+    )
+  }
+
+  if (wait === 'finished' && status === 'loading') {
+    //Need precise rem to match the y coordinate of the loading updates spinner
+    return (
+      <aside
+        css={[
+          user?.role === 'ADMIN'
+            ? css`
+                padding-top: 11.875rem;
+              `
+            : css`
+                padding-top: 7.625rem;
+              `,
+        ]}
+      >
+        <LoadingSpinner loadingMessage="Loading project summary" />
+      </aside>
+    )
+  }
+
   return (
     <aside tw="relative h-full px-14 overflow-y-auto">
       <div tw="space-y-8 py-10">
         {user?.role === 'ADMIN' ? (
           <IconLink pathName={`/project/${projectId}/#`}>
             <GearIcon tw="h-6 w-6" />
-            <h1 tw="bl-text-4xl inline">{name}</h1>
+            {name === '' ? (
+              <h1 tw="bl-text-4xl text-gray-yellow-300 inline capitalize">
+                Untitled project
+              </h1>
+            ) : (
+              <h1 tw="bl-text-4xl inline">{name}</h1>
+            )}
           </IconLink>
         ) : (
-          <h1 tw="bl-text-4xl">{name}</h1>
+          <h1 tw="bl-text-4xl">{name === '' ? 'Untitled Project' : name}</h1>
         )}
-        <div tw="relative h-60 w-full">
-          {imageUrl ? (
+        {imageUrl ? (
+          <div tw="relative h-60 w-full">
             <Image
               tw="object-contain"
               layout="fill"
               src={imageUrl}
               alt={name}
             />
-          ) : null}
-        </div>
+          </div>
+        ) : null}
         <div tw="space-y-2">
           {user?.role === 'ADMIN' ? (
             <IconLink pathName={`/project/${projectId}/#`}>
@@ -78,14 +129,16 @@ export function Summary({
             <MarkdownWrapper>{summary.roadmap}</MarkdownWrapper>
           ) : null}
         </div>
-        <div tw="space-y-6">
+        <div tw="space-y-2">
           <h3 tw="bl-text-3xl">Project Personnel</h3>
-          <div>
-            <div tw="bl-text-2xl">Client</div>
-            <div tw="bl-text-base">{clientName}</div>
+          <div tw="space-y-6">
+            <div>
+              <div tw="bl-text-2xl">Client</div>
+              <div tw="bl-text-base">{clientName}</div>
+            </div>
+            <TeamSection title="Client Team" team={clientEmployees} />
+            <TeamSection title="Project Team" team={team} />
           </div>
-          <TeamSection title="Client Team" team={clientEmployees} />
-          <TeamSection title="Project Team" team={team} />
         </div>
       </div>
     </aside>
@@ -135,12 +188,14 @@ function TeamSection({ title, team }: TeamSectionProps) {
   return (
     <div>
       <div tw="bl-text-2xl">{title}</div>
-      {team.map(({ id, name, email }) => (
-        <span key={id}>
-          <div tw="bl-text-lg">{name}</div>
-          <div tw="bl-text-base">{email}</div>
-        </span>
-      ))}
+      <div tw="space-y-2">
+        {team.map(({ id, name, email }) => (
+          <div key={id}>
+            <div tw="bl-text-lg">{name}</div>
+            <div tw="bl-text-base">{email}</div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

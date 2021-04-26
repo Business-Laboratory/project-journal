@@ -23,26 +23,13 @@ export default function Project() {
   if (id === undefined || Array.isArray(id)) {
     throw new Error(`Invalid id: ${id}`)
   }
-  const { status, data } = useQuery(
+  const { data, status } = useQuery(
     ['project', { id: Number(id) }],
     fetchProject
   )
 
   // convert the string dates to dates and add the hash for the links
   const updates = useUpdates(data?.updates ?? [])
-
-  // TODO: figure out the loading state
-  if (status === 'loading') {
-    return null
-  }
-
-  if (status === 'error') {
-    return (
-      <h1 tw="bl-text-3xl max-w-prose text-center text-matisse-red-200">
-        Something went wrong
-      </h1>
-    )
-  }
 
   const project = data ?? null
 
@@ -62,8 +49,12 @@ export default function Project() {
         `}
       >
         <HashLinkProvider>
-          <Timeline updates={updates} />
-          <ProjectInformation projectId={Number(id)} updates={updates} />
+          <Timeline updates={updates} status={status} />
+          <ProjectInformation
+            projectId={Number(id)}
+            updates={updates}
+            status={status}
+          />
         </HashLinkProvider>
         <Summary
           projectId={Number(id)}
@@ -75,6 +66,7 @@ export default function Project() {
             project.client?.employees.map(({ user }) => user) ?? []
           }
           team={project.team}
+          status={status}
         />
       </main>
     </>

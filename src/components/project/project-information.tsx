@@ -19,6 +19,9 @@ import { format } from 'date-fns'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { useSetCurrentHashLink } from './hash-link-context'
+import { LoadingSpinner } from '@components/loading-spinner'
+import { DataErrorMessage } from '@components/data-error-message'
+import { useWaitTimer } from '@utils/use-wait-timer'
 
 import type { Updates } from 'pages/project/[id]'
 import { useRouter } from 'next/router'
@@ -28,45 +31,30 @@ import { useRouter } from 'next/router'
 type ProjectInformationProps = {
   projectId: number
   updates: Updates
+  status: string
 }
 export function ProjectInformation({
   projectId,
   updates,
+  status,
 }: ProjectInformationProps) {
   const user = useAuth()
   return (
     <ProjectInformationContainer>
       <div tw="w-9/12 mx-auto py-10 space-y-8">
-        <SearchBar updates={updates} />
+        <SearchBar updates={updates} status={status} />
         {user?.role === 'ADMIN' && (
           <IconLink pathName={`/project/${projectId}/#`}>
             <PlusIcon tw="w-6 h-6" />
             <span tw="bl-text-2xl">Add update</span>
           </IconLink>
         )}
-        <UpdatesContainer>
-          {updates.map(({ id, hashLink, title, body, createdAt }) => {
-            return (
-              <UpdateContainer key={id} id={hashLink.replace('#', '')}>
-                <div tw="inline-flex items-center space-x-2">
-                  {user?.role === 'ADMIN' ? (
-                    <IconLink pathName={`/project/${projectId}/#`}>
-                      <EditIcon tw="w-6 h-6" />
-                      <span tw="bl-text-3xl">{title}</span>
-                    </IconLink>
-                  ) : (
-                    <span tw="bl-text-3xl">{title}</span>
-                  )}
-
-                  <span tw="bl-text-sm self-end pb-2">
-                    {format(createdAt, 'M/d/yy')}
-                  </span>
-                </div>
-                <ReactMarkdown plugins={[gfm]}>{body}</ReactMarkdown>
-              </UpdateContainer>
-            )
-          })}
-        </UpdatesContainer>
+        <UpdatesList
+          updates={updates}
+          role={user?.role}
+          projectId={projectId}
+          status={status}
+        />
       </div>
     </ProjectInformationContainer>
   )
@@ -306,6 +294,54 @@ const applyToFirstChild = (
     }
   }
   return applied
+}
+
+// List of all updates
+
+type UpdatesListProps = {
+  updates: Updates
+  role: string | undefined | null
+  projectId: number
+  status: string
+}
+function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
+  const wait = useWaitTimer()
+
+  if (status === 'error') {
+    return <DataErrorMessage errorMessage="Unable to load updates" />
+  }
+
+  if (wait === 'finished' && status === 'loading') {
+    return <LoadingSpinner loadingMessage="Loading updates" />
+  }
+
+  return updates?.length > 0 ? (
+    <UpdatesContainer>
+      {updates.map(({ id, hashLink, title, body, createdAt }) => {
+        return (
+          <UpdateContainer key={id} id={hashLink.replace('#', '')}>
+            <div tw="inline-flex items-center space-x-2">
+              {role === 'ADMIN' ? (
+                <IconLink pathName={`/project/${projectId}/#`}>
+                  <EditIcon tw="w-6 h-6" />
+                  <span tw="bl-text-3xl">{title}</span>
+                </IconLink>
+              ) : (
+                <span tw="bl-text-3xl">{title}</span>
+              )}
+
+              <span tw="bl-text-sm self-end pb-2">
+                {format(createdAt, 'M/d/yy')}
+              </span>
+            </div>
+            <ReactMarkdown plugins={[gfm]}>{body}</ReactMarkdown>
+          </UpdateContainer>
+        )
+      })}
+    </UpdatesContainer>
+  ) : status === 'success' ? (
+    <h1 tw="bl-text-3xl max-w-prose">No updates have been added</h1>
+  ) : null
 }
 
 // update container, which gets the hook provisioned for it and applies it to the top level element
