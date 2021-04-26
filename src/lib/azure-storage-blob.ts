@@ -1,10 +1,14 @@
-import { BlobServiceClient, ContainerSASPermissions } from '@azure/storage-blob'
+import {
+  BlobServiceClient,
+  BlockBlobClient,
+  ContainerSASPermissions,
+} from '@azure/storage-blob'
 
 export {
   blobServiceClient,
   generateSasUrl,
-  uploadImage,
   generateSasUrlForImageUpload,
+  deleteImage,
 }
 
 declare global {
@@ -87,22 +91,6 @@ function isSasUrlExpired(sasUrl: string) {
   return Number.isNaN(timeLeft) || timeLeft <= 0
 }
 
-// TODO: Update to not require a base64 dataURL
-async function uploadImage(name: string, contentType: string, dataUrl: string) {
-  const containerClient = blobServiceClient.getContainerClient('test')
-  const blockBlobClient = containerClient.getBlockBlobClient(name)
-
-  // remove the the Data-URL declaration if it was passed along https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL
-  let base64Image = dataUrl.replace(/^data:.+;base64?,/, '')
-  const buffer = Buffer.from(base64Image, 'base64')
-  const uploadBlobResponse = await blockBlobClient.uploadData(buffer, {
-    blobHTTPHeaders: {
-      blobContentType: contentType,
-    },
-  })
-  return uploadBlobResponse
-}
-
 async function generateSasUrlForImageUpload(
   containerName: string,
   blockBlobName: string,
@@ -120,4 +108,20 @@ async function generateSasUrlForImageUpload(
     expiresOn,
     cacheControl: `public, max-age=${maxAge}, immutable`,
   })
+}
+
+async function deleteImage(storageBlobUrl: string) {
+  const storageBlobSegments = storageBlobUrl
+    .replace(blobServiceClient.url, '')
+    .split('/')
+  if (storageBlobSegments.length !== 2) {
+    throw new Error(
+      `Invalid URL: ${storageBlobUrl}. Must contain only 2 segments, contained ${storageBlobSegments.length}`
+    )
+  }
+  const [containerName, blockBlobName] = storageBlobSegments
+
+  const containerClient = blobServiceClient.getContainerClient(containerName)
+  const blockBlobClient = containerClient.getBlockBlobClient(blockBlobName)
+  await blockBlobClient.deleteIfExists()
 }

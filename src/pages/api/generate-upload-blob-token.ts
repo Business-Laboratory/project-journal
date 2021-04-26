@@ -27,8 +27,9 @@ export default async function handler(
 
     // get a SAS url to upload the image. This will also create the container if it does not exist
     const sasUrl = await generateSasUrlForImageUpload(
-      `project-${projectId}`,
-      `${fileName}_${new Date().toISOString()}`
+      'project-images', // for now we're just added all project images to the same container
+      // `${new Date().toISOString()}_${fileName}`
+      fileName
     )
 
     res.status(200).json({ sasUrl })
