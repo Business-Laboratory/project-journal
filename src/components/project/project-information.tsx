@@ -37,12 +37,18 @@ export function ProjectInformation({
   const user = useAuth()
   const [open, setOpen] = useState(false)
   const router = useRouter()
-  const { updateId } = router.query
+  let updateId = router.query.updateId
+  if (!updateId || Array.isArray(updateId)) {
+    updateId = undefined
+  }
 
   useEffect(() => {
-    if (!updateId || Array.isArray(updateId)) return
+    if (!updateId && open) {
+      setOpen(false)
+    }
+    if (!updateId) return
     setOpen(true)
-  }, [updateId, updates])
+  }, [updateId, updates, open])
 
   const close = () => {
     setOpen(false)
@@ -89,7 +95,7 @@ export function ProjectInformation({
           })}
         </UpdatesContainer>
       </div>
-      {!updateId || !Array.isArray(updateId) ? (
+      {!!updateId ? (
         <UpdateModal
           isOpen={open}
           close={close}

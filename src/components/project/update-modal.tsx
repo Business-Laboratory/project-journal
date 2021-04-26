@@ -58,7 +58,7 @@ function UpdateModalContent({
   const queryClient = useQueryClient()
 
   useEffect(() => {
-    if (id === 'new' && router.query.update !== 'new') {
+    if (id === 'new' && router.query.updateId !== 'new') {
       router.replace(`/project/${projectId}?updateId=new`, undefined, {
         shallow: true,
       })
@@ -104,7 +104,7 @@ function UpdateModalContent({
         </div>
         <textarea
           // Padding bottom doesn't work.  Found this age old bug https://bugzilla.mozilla.org/show_bug.cgi?id=748518
-          tw="w-full h-64 py-5 px-6 overflow-y-scroll resize-none focus:outline-none border border-gray-yellow-600"
+          tw="w-full h-64 py-6 px-5 overflow-y-scroll resize-none focus:outline-none border border-gray-yellow-600"
           value={body}
           onChange={(e) =>
             dispatch({ type: 'SET_BODY', payload: e.target.value })
@@ -112,7 +112,7 @@ function UpdateModalContent({
         />
         <div tw="space-y-3">
           <Button
-            tw="border-4"
+            variant="important"
             onClick={() => save()}
             disabled={saveState === 'saving' || saveState === 'disabled'}
           >

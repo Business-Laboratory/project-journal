@@ -83,12 +83,12 @@ async function deleteUpdate(id: number) {
 
 function checkData(id: number | 'new', title: string, body: string) {
   if (typeof id !== 'number' && id !== 'new') {
-    throw new Error('Invalid update id.')
+    throw new Error(`Invalid update id: ${id}`)
   }
-  if (title === '') {
-    throw new Error('No title found')
+  if (typeof title !== 'string' || title === '') {
+    throw new Error(`Invalid update title: ${title}`)
   }
-  if (body === '') {
-    throw new Error('No body found')
+  if (typeof body !== 'string' || body === '') {
+    throw new Error(`Invalid update body: ${body}`)
   }
 }
