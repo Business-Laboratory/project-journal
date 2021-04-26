@@ -359,7 +359,10 @@ function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
           <UpdateContainer key={id} id={hashLink.replace('#', '')}>
             <div tw="inline-flex items-center space-x-2">
               {role === 'ADMIN' ? (
-                <IconLink pathName={`/project/${projectId}?updateId=${id}`}>
+                <IconLink
+                  pathName={`/project/${projectId}?updateId=${id}`}
+                  replace={true}
+                >
                   <EditIcon tw="w-6 h-6" />
                   <span tw="bl-text-3xl">{title}</span>
                 </IconLink>

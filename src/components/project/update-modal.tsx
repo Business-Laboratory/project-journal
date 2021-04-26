@@ -246,7 +246,7 @@ function DeleteSection({ id, title, close }: DeleteSectionProps) {
   return (
     <div tw="space-y-12">
       <div tw="w-full border-b border-dashed border-matisse-red-200" />
-      <div tw="w-full grid grid-cols-2 col-auto">
+      <div tw="w-full grid grid-cols-2 col-auto gap-x-4">
         <div tw="text-left col-span-1">
           <div tw="bl-text-xs text-gray-yellow-300">Verify update title</div>
           <input
