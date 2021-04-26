@@ -57,6 +57,7 @@ function UpdateModalContent({
   )
   const queryClient = useQueryClient()
 
+  //Any updateId that isn't found in our data defaults to path /project/projectId?updateId=new
   useEffect(() => {
     if (id === 'new' && router.query.updateId !== 'new') {
       router.replace(`/project/${projectId}?updateId=new`, undefined, {

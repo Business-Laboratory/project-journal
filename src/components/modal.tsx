@@ -20,7 +20,7 @@ export function Modal({ children, ...props }: ModalProps) {
       {...props}
     >
       <DialogContent
-        tw="bg-gray-yellow-100 xl:py-16 xl:px-24 md:py-8 md:px-12 py-4 px-6 shadow-bl border-2 border-copper-300 rounded relative z-30"
+        tw="min-w-max bg-gray-yellow-100 py-16 px-24 shadow-bl border-2 border-copper-300 rounded relative z-30"
         aria-label="modal-content"
       >
         {children}
