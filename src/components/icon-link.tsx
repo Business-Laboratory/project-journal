@@ -8,11 +8,12 @@ type IconLinkProps = {
   pathName: string
   className?: string
   children: React.ReactNode
+  replace?: boolean
 }
-function IconLink({ pathName, className, children }: IconLinkProps) {
+function IconLink({ pathName, className, children, ...props }: IconLinkProps) {
   //Ring color is copper-400
   return (
-    <Link href={pathName} passHref>
+    <Link href={pathName} {...props} passHref>
       <a
         className={className}
         css={[
