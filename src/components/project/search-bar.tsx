@@ -121,7 +121,7 @@ function InnerCombobox({
         <ComboboxInput
           id={id}
           ref={inputRef}
-          tw="ml-3 w-full placeholder-gray-yellow-300 focus:outline-none"
+          tw="ml-3 w-full placeholder-gray-yellow-300 focus:outline-none disabled:bg-transparent"
           placeholder="Search project updates..."
           autoComplete="off"
           autocomplete={false}
@@ -186,15 +186,12 @@ const comboboxPopoverCss = (rect: DOMRect | null) => [
 ]
 
 const labelCss = (disabled: boolean) => [
-  disabled
-    ? tw`flex items-center w-full px-8 bl-text-base text-gray-yellow-600
-    ring-1 ring-inset ring-gray-yellow-600
-    focus-within:(ring-2 ring-copper-400)`
-    : tw`
+  tw`
     flex items-center w-full px-8 bl-text-base text-gray-yellow-600
     ring-1 ring-inset ring-gray-yellow-600
-    hover:(ring-2 ring-copper-300) focus-within:(ring-2 ring-copper-400)
+    focus-within:(ring-2 ring-copper-400)
   `,
+  !disabled ? tw`hover:(ring-2 ring-copper-300)` : null,
   css`
     padding-top: ${inputPaddingY};
     padding-bottom: ${inputPaddingY};
