@@ -12,9 +12,10 @@ import React, {
 } from 'react'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
+import Link from 'next/link'
 
 import { SearchBar, UpdateModal } from './index'
-import { PlusIcon, EditIcon } from 'icons'
+import { PlusIcon, EditIcon, UpdateLinkIcon } from 'icons'
 import { format } from 'date-fns'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
@@ -348,6 +349,7 @@ type UpdatesListProps = {
 }
 function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
   const wait = useWaitTimer()
+  const router = useRouter()
 
   if (status === 'error') {
     return <DataErrorMessage errorMessage="Unable to load updates" />
@@ -357,27 +359,76 @@ function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
     return <LoadingSpinner loadingMessage="Loading updates" />
   }
 
+  const routerHash = window.location.hash
+
   return updates?.length > 0 ? (
     <UpdatesContainer>
       {updates.map(({ id, hashLink, title, body, createdAt }) => {
         return (
           <UpdateContainer key={id} id={hashLink.replace('#', '')}>
-            <div tw="inline-flex items-center space-x-2">
-              {role === 'ADMIN' ? (
-                <IconLink
-                  pathName={`/project/${projectId}?updateId=${id}`}
-                  replace={true}
-                >
-                  <EditIcon tw="w-6 h-6" />
-                  <span tw="bl-text-3xl">{title}</span>
-                </IconLink>
-              ) : (
-                <span tw="bl-text-3xl">{title}</span>
-              )}
+            <div tw="inline-flex items-center justify-between w-full">
+              <div tw="inline-flex items-center space-x-2">
+                {role === 'ADMIN' ? (
+                  <IconLink
+                    pathName={`/project/${projectId}?updateId=${id}`}
+                    replace={true}
+                  >
+                    <EditIcon tw="w-6 h-6" />
+                    <span
+                      css={[
+                        routerHash === hashLink
+                          ? tw`bl-text-3xl underline`
+                          : tw`bl-text-3xl`,
+                      ]}
+                    >
+                      {title}
+                    </span>
+                  </IconLink>
+                ) : (
+                  <span
+                    css={[
+                      routerHash === hashLink
+                        ? tw`bl-text-3xl underline`
+                        : tw`bl-text-3xl`,
+                    ]}
+                  >
+                    {title}
+                  </span>
+                )}
 
-              <span tw="bl-text-sm self-end pb-2">
-                {format(createdAt, 'M/d/yy')}
-              </span>
+                <span tw="bl-text-sm self-end pb-2">
+                  {format(createdAt, 'M/d/yy')}
+                </span>
+              </div>
+              <Link href={`./${router.query.id}${hashLink}`} passHref>
+                {/* Ring color is copper-400*/}
+                <a
+                  css={[
+                    tw`focus:outline-none`,
+                    css`
+                      &.focus-visible {
+                        --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
+                          var(--tw-ring-offset-width)
+                          var(--tw-ring-offset-color);
+                        --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
+                          calc(2px + var(--tw-ring-offset-width))
+                          var(--tw-ring-color);
+                        box-shadow: var(--tw-ring-offset-shadow),
+                          var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+                        --tw-ring-opacity: 1;
+                        --tw-ring-color: rgba(
+                          171,
+                          133,
+                          94,
+                          var(--tw-ring-opacity)
+                        );
+                      }
+                    `,
+                  ]}
+                >
+                  <UpdateLinkIcon tw="w-6 h-6 fill-current text-gray-yellow-600 hover:text-copper-300" />
+                </a>
+              </Link>
             </div>
             <ReactMarkdown plugins={[gfm]}>{body}</ReactMarkdown>
           </UpdateContainer>

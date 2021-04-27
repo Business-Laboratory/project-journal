@@ -43,11 +43,13 @@ export function SearchBar({
           ({ value }) => value === selectedValue
         )
         const hashLink = selectedUpdate?.hashLink
+
         if (hashLink) {
           setSearchTerm('')
           setBlurring(true)
           router.push(`./${router.query.id}${hashLink}`)
         }
+        setSearchTerm('')
       }}
     >
       <InnerCombobox
@@ -172,7 +174,7 @@ function useBlurOnIdle(
 // styles
 
 const comboboxPopoverCss = (rect: DOMRect | null) => [
-  tw`py-1 bg-white border rounded border-copper-400 shadow-bl`,
+  tw`py-1 bg-gray-yellow-100 border rounded border-copper-400 shadow-bl`,
   css`
     margin-top: calc(${inputPaddingY} + ${theme('spacing.2')});
   `,
