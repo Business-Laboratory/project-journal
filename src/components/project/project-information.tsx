@@ -62,7 +62,12 @@ export function ProjectInformation({
   return (
     <ProjectInformationContainer>
       <div tw="w-9/12 mx-auto py-10 space-y-8">
-        <SearchBar updates={updates} status={status} />
+        <SearchBar
+          updates={updates}
+          disabled={
+            status === 'loading' || status === 'error' || updates.length === 0
+          }
+        />
         {user?.role === 'ADMIN' && (
           <IconLink
             pathName={`/project/${projectId}?updateId=new`}
