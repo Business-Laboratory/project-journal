@@ -315,6 +315,9 @@ function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
     return <LoadingSpinner loadingMessage="Loading updates" />
   }
 
+  const router = useRouter()
+  const routerHash = router.asPath.slice(router.asPath.indexOf('#'))
+
   return updates?.length > 0 ? (
     <UpdatesContainer>
       {updates.map(({ id, hashLink, title, body, createdAt }) => {
@@ -324,10 +327,26 @@ function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
               {role === 'ADMIN' ? (
                 <IconLink pathName={`/project/${projectId}/#`}>
                   <EditIcon tw="w-6 h-6" />
-                  <span tw="bl-text-3xl">{title}</span>
+                  <span
+                    css={[
+                      routerHash === hashLink
+                        ? tw`bl-text-3xl underline`
+                        : tw`bl-text-3xl`,
+                    ]}
+                  >
+                    {title}
+                  </span>
                 </IconLink>
               ) : (
-                <span tw="bl-text-3xl">{title}</span>
+                <span
+                  css={[
+                    currentHashLink === hashLink
+                      ? tw`bl-text-3xl underline`
+                      : tw`bl-text-3xl`,
+                  ]}
+                >
+                  {title}
+                </span>
               )}
 
               <span tw="bl-text-sm self-end pb-2">

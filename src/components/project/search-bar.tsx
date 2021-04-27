@@ -16,6 +16,8 @@ import { SearchIcon, SearchIconDisabled } from 'icons'
 
 import type { Updates } from 'pages/project/[id]'
 
+import { useCurrentHashLink } from './hash-link-context'
+
 const inputPaddingY = theme('spacing.3')
 
 type SearchBarProps = {
