@@ -27,8 +27,6 @@ import { useWaitTimer } from '@utils/use-wait-timer'
 
 import type { Updates } from 'pages/project/[id]'
 
-import { useCurrentHashLink } from './hash-link-context'
-
 // Main component
 
 type ProjectInformationProps = {
