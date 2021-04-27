@@ -56,7 +56,7 @@ function Card({ id, name, description, imageUrl }: CardProps) {
     <Link href={`/project/${id}`} passHref>
       <a
         css={[
-          tw` grid grid-cols-3 col-auto overflow-hidden border-2 rounded border-copper-300 shadow-bl focus:outline-none`,
+          tw`grid grid-cols-3 col-auto overflow-hidden border-2 rounded border-copper-300 shadow-bl focus:outline-none`,
           tw`transition duration-300 ease-in-out hover:shadow-bl-lg`,
           css`
             min-height: 10rem;

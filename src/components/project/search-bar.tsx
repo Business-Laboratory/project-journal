@@ -1,5 +1,5 @@
 import tw, { css, theme } from 'twin.macro'
-import { useRef, useState, useMemo } from 'react'
+import React, { useRef, useState, useMemo, useEffect } from 'react'
 import {
   Combobox,
   ComboboxInput,
@@ -7,6 +7,7 @@ import {
   ComboboxList,
   ComboboxOption,
   ComboboxOptionText,
+  useComboboxContext,
 } from '@reach/combobox'
 import { useRouter } from 'next/router'
 import { useRect } from '@reach/rect'
@@ -16,86 +17,49 @@ import { SearchIcon, SearchIconDisabled } from 'icons'
 
 import type { Updates } from 'pages/project/[id]'
 
-import { useCurrentHashLink } from './hash-link-context'
-
 const inputPaddingY = theme('spacing.3')
 
 type SearchBarProps = {
   updates: Updates
   id?: string
-  status: string
+  disabled?: boolean
 }
 export function SearchBar({
   updates,
   id = 'projects-search-bar',
-  status,
+  disabled = false,
 }: SearchBarProps) {
   const router = useRouter()
-  const labelRef = useRef<HTMLLabelElement | null>(null)
-  const inputRef = useRef<HTMLInputElement | null>(null)
-  const rect = useRect(labelRef)
   const [searchTerm, setSearchTerm] = useState('')
   const matchedUpdates = useMatchedUpdates(updates, searchTerm)
+  const [blurring, setBlurring] = useState(false)
 
   return (
     <Combobox
       aria-label="search projects"
       openOnFocus
       onSelect={(selectedValue) => {
-        setSearchTerm(selectedValue)
         const selectedUpdate = matchedUpdates.find(
           ({ value }) => value === selectedValue
         )
         const hashLink = selectedUpdate?.hashLink
         if (hashLink) {
-          inputRef.current?.blur()
+          setSearchTerm('')
+          setBlurring(true)
           router.push(`./${router.query.id}${hashLink}`)
         }
         setSearchTerm('')
       }}
     >
-      <label ref={labelRef} htmlFor={id} css={labelCss(status, updates)}>
-        {status === 'loading' || status === 'error' || updates.length === 0 ? (
-          <SearchIconDisabled tw="w-5 h-5" />
-        ) : (
-          <SearchIcon tw="w-5 h-5" />
-        )}
-        <ComboboxInput
-          disabled={
-            status === 'loading' || status === 'error' || updates.length === 0
-              ? true
-              : false
-          }
-          id={id}
-          ref={inputRef}
-          tw="ml-3 w-full placeholder-gray-yellow-300 focus:outline-none"
-          onChange={(e) => setSearchTerm(e.currentTarget.value)}
-          placeholder="Search project updates..."
-          autoComplete="off"
-          autocomplete={false}
-          value={searchTerm}
-        />
-      </label>
-
-      <ComboboxPopover css={comboboxPopoverCss(rect)}>
-        <ComboboxList>
-          {matchedUpdates.length > 0 ? (
-            matchedUpdates.slice(0, 10).map(({ value }, idx) => {
-              return (
-                <ComboboxOption
-                  key={idx} // key has to be index to that using the arrow keys has the correct order
-                  css={comboboxOptionCss}
-                  value={value}
-                >
-                  <ComboboxOptionText />
-                </ComboboxOption>
-              )
-            })
-          ) : (
-            <span css={optionCss}>No results</span>
-          )}
-        </ComboboxList>
-      </ComboboxPopover>
+      <InnerCombobox
+        updates={matchedUpdates}
+        id={id}
+        disabled={disabled}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        blurring={blurring}
+        setBlurring={setBlurring}
+      />
     </Combobox>
   )
 }
@@ -123,6 +87,89 @@ function useMatchedUpdates(updates: Updates, searchTerm: string) {
   }, [searchTerm, updateValuesAndHashLinks])
 }
 
+type InnerComboboxProps = Omit<SearchBarProps, 'updates'> & {
+  updates: ReturnType<typeof useMatchedUpdates>
+  searchTerm: string
+  setSearchTerm: React.Dispatch<React.SetStateAction<string>>
+  blurring: boolean
+  setBlurring: (blurring: boolean) => void
+}
+function InnerCombobox({
+  updates,
+  id,
+  disabled = false,
+  searchTerm,
+  setSearchTerm,
+  blurring,
+  setBlurring,
+}: InnerComboboxProps) {
+  const labelRef = useRef<HTMLLabelElement | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const rect = useRect(labelRef)
+
+  // blur the input after an option has been selected – this can't
+  // be added to `onSelect`, because Reach refocuses after clicks
+  useBlurOnIdle(inputRef, blurring, setBlurring)
+
+  return (
+    <>
+      <label ref={labelRef} htmlFor={id} css={labelCss(disabled)}>
+        {disabled ? (
+          <SearchIconDisabled tw="w-5 h-5" />
+        ) : (
+          <SearchIcon tw="w-5 h-5" />
+        )}
+        <ComboboxInput
+          id={id}
+          ref={inputRef}
+          tw="ml-3 w-full placeholder-gray-yellow-300 focus:outline-none disabled:bg-transparent"
+          placeholder="Search project updates..."
+          autoComplete="off"
+          autocomplete={false}
+          disabled={disabled}
+          onChange={(e) => setSearchTerm(e.currentTarget.value)}
+          value={searchTerm}
+        />
+      </label>
+
+      <ComboboxPopover css={comboboxPopoverCss(rect)}>
+        <ComboboxList>
+          {updates.length > 0 ? (
+            updates.slice(0, 10).map(({ value }, idx) => {
+              return (
+                <ComboboxOption
+                  key={idx} // key has to be index to that using the arrow keys has the correct order
+                  css={comboboxOptionCss}
+                  value={value}
+                >
+                  <ComboboxOptionText />
+                </ComboboxOption>
+              )
+            })
+          ) : (
+            <span css={optionCss}>No results</span>
+          )}
+        </ComboboxList>
+      </ComboboxPopover>
+    </>
+  )
+}
+
+function useBlurOnIdle(
+  inputRef: React.MutableRefObject<HTMLInputElement | null>,
+  blurring: boolean,
+  setBlurring: (blurring: boolean) => void
+) {
+  const { state } = useComboboxContext()
+
+  useEffect(() => {
+    if (blurring && state === 'IDLE') {
+      inputRef.current?.blur()
+      setBlurring(false)
+    }
+  }, [blurring, inputRef, setBlurring, state])
+}
+
 // styles
 
 const comboboxPopoverCss = (rect: DOMRect | null) => [
@@ -139,16 +186,13 @@ const comboboxPopoverCss = (rect: DOMRect | null) => [
     : null,
 ]
 
-const labelCss = (status: string, updates: Updates) => [
-  status === 'loading' || status === 'error' || updates.length === 0
-    ? tw`flex items-center w-full px-8 bl-text-base text-gray-yellow-600
-    ring-1 ring-inset ring-gray-yellow-600
-    focus-within:(ring-2 ring-copper-400)`
-    : tw`
+const labelCss = (disabled: boolean) => [
+  tw`
     flex items-center w-full px-8 bl-text-base text-gray-yellow-600
     ring-1 ring-inset ring-gray-yellow-600
-    hover:(ring-2 ring-copper-300) focus-within:(ring-2 ring-copper-400)
+    focus-within:(ring-2 ring-copper-400)
   `,
+  !disabled ? tw`hover:(ring-2 ring-copper-300)` : null,
   css`
     padding-top: ${inputPaddingY};
     padding-bottom: ${inputPaddingY};

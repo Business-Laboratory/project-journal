@@ -13,18 +13,18 @@ import React, {
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
 
-import { SearchBar } from './index'
+import { SearchBar, UpdateModal } from './index'
 import { PlusIcon, EditIcon, UpdateLinkIcon } from 'icons'
 import { format } from 'date-fns'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
+import { useRouter } from 'next/router'
 import { useSetCurrentHashLink } from './hash-link-context'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
 import { useWaitTimer } from '@utils/use-wait-timer'
 
 import type { Updates } from 'pages/project/[id]'
-import { useRouter } from 'next/router'
 
 // Main component
 
@@ -39,12 +39,40 @@ export function ProjectInformation({
   status,
 }: ProjectInformationProps) {
   const user = useAuth()
+  const [open, setOpen] = useState(false)
+  const router = useRouter()
+  let updateId = router.query.updateId
+  if (!updateId || Array.isArray(updateId)) {
+    updateId = undefined
+  }
+
+  useEffect(() => {
+    if (!updateId && open) {
+      setOpen(false)
+    }
+    if (!updateId) return
+    setOpen(true)
+  }, [updateId, updates, open])
+
+  const close = () => {
+    setOpen(false)
+    router.replace(`/project/${projectId}`, undefined, { shallow: true })
+  }
+
   return (
     <ProjectInformationContainer>
       <div tw="w-9/12 mx-auto py-10 space-y-8">
-        <SearchBar updates={updates} status={status} />
+        <SearchBar
+          updates={updates}
+          disabled={
+            status === 'loading' || status === 'error' || updates.length === 0
+          }
+        />
         {user?.role === 'ADMIN' && (
-          <IconLink pathName={`/project/${projectId}/#`}>
+          <IconLink
+            pathName={`/project/${projectId}?updateId=new`}
+            replace={true}
+          >
             <PlusIcon tw="w-6 h-6" />
             <span tw="bl-text-2xl">Add update</span>
           </IconLink>
@@ -56,6 +84,20 @@ export function ProjectInformation({
           status={status}
         />
       </div>
+      {!!updateId ? (
+        <UpdateModal
+          isOpen={open}
+          close={close}
+          projectId={projectId}
+          update={
+            updates.find(({ id }) => id === Number(updateId)) ?? {
+              id: 'new',
+              title: '',
+              body: '',
+            }
+          }
+        />
+      ) : null}
     </ProjectInformationContainer>
   )
 }
@@ -326,7 +368,10 @@ function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
             <div tw="inline-flex items-center justify-between w-full">
               <div tw="inline-flex items-center space-x-2">
                 {role === 'ADMIN' ? (
-                  <IconLink pathName={`/project/${projectId}/#`}>
+                  <IconLink
+                    pathName={`/project/${projectId}?updateId=${id}`}
+                    replace={true}
+                  >
                     <EditIcon tw="w-6 h-6" />
                     <span
                       css={[
