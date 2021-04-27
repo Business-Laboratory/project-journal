@@ -27,6 +27,8 @@ import { useWaitTimer } from '@utils/use-wait-timer'
 
 import type { Updates } from 'pages/project/[id]'
 
+import { useCurrentHashLink } from './hash-link-context'
+
 // Main component
 
 type ProjectInformationProps = {
@@ -349,6 +351,7 @@ type UpdatesListProps = {
 }
 function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
   const wait = useWaitTimer()
+  const router = useRouter()
 
   if (status === 'error') {
     return <DataErrorMessage errorMessage="Unable to load updates" />
@@ -358,8 +361,7 @@ function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
     return <LoadingSpinner loadingMessage="Loading updates" />
   }
 
-  const router = useRouter()
-  const routerHash = router.asPath.slice(router.asPath.indexOf('#'))
+  const routerHash = window.location.hash
 
   return updates?.length > 0 ? (
     <UpdatesContainer>

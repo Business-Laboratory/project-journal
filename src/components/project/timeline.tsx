@@ -37,6 +37,7 @@ export function Timeline({ updates, status }: TimelineProps) {
     updates,
     datesContainerRef
   )
+  const currentHashLink = useCurrentHashLink()
 
   if (status === 'loading' || status === 'error' || updates.length === 0) {
     return (
@@ -46,7 +47,6 @@ export function Timeline({ updates, status }: TimelineProps) {
 
   // Find the update with the closest date to the update with the currentHashLink
   // this is what we will highlight
-  const currentHashLink = useCurrentHashLink()
   const currentUpdate = updates.find(
     (element) => element.hashLink === currentHashLink
   )
