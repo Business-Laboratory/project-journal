@@ -43,6 +43,7 @@ export function SearchBar({
           ({ value }) => value === selectedValue
         )
         const hashLink = selectedUpdate?.hashLink
+        console.log(hashLink)
         if (hashLink) {
           setSearchTerm('')
           setBlurring(true)
