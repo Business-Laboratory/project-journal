@@ -5,6 +5,7 @@ import SearchIcon from './search-icon.svg'
 import SearchIconDisabled from './search-icon-disabled.svg'
 import SpinnerIcon from './spinner.svg'
 import GearIcon from './gear-icon.svg'
+import UpdateLinkIcon from './update-link-icon.svg'
 
 export {
   LogoIcon,
@@ -14,4 +15,5 @@ export {
   SearchIconDisabled,
   SpinnerIcon,
   GearIcon,
+  UpdateLinkIcon,
 }

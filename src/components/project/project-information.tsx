@@ -14,7 +14,7 @@ import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
 
 import { SearchBar } from './index'
-import { PlusIcon, EditIcon } from 'icons'
+import { PlusIcon, EditIcon, UpdateLinkIcon } from 'icons'
 import { format } from 'date-fns'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
@@ -323,10 +323,22 @@ function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
       {updates.map(({ id, hashLink, title, body, createdAt }) => {
         return (
           <UpdateContainer key={id} id={hashLink.replace('#', '')}>
-            <div tw="inline-flex items-center space-x-2">
-              {role === 'ADMIN' ? (
-                <IconLink pathName={`/project/${projectId}/#`}>
-                  <EditIcon tw="w-6 h-6" />
+            <div tw="inline-flex items-center justify-between w-full">
+              <div tw="inline-flex items-center space-x-2">
+                {role === 'ADMIN' ? (
+                  <IconLink pathName={`/project/${projectId}/#`}>
+                    <EditIcon tw="w-6 h-6" />
+                    <span
+                      css={[
+                        routerHash === hashLink
+                          ? tw`bl-text-3xl underline`
+                          : tw`bl-text-3xl`,
+                      ]}
+                    >
+                      {title}
+                    </span>
+                  </IconLink>
+                ) : (
                   <span
                     css={[
                       routerHash === hashLink
@@ -336,22 +348,13 @@ function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
                   >
                     {title}
                   </span>
-                </IconLink>
-              ) : (
-                <span
-                  css={[
-                    routerHash === hashLink
-                      ? tw`bl-text-3xl underline`
-                      : tw`bl-text-3xl`,
-                  ]}
-                >
-                  {title}
-                </span>
-              )}
+                )}
 
-              <span tw="bl-text-sm self-end pb-2">
-                {format(createdAt, 'M/d/yy')}
-              </span>
+                <span tw="bl-text-sm self-end pb-2">
+                  {format(createdAt, 'M/d/yy')}
+                </span>
+              </div>
+              <UpdateLinkIcon tw="w-6 h-6 fill-current text-gray-yellow-600 hover:text-copper-300" />
             </div>
             <ReactMarkdown plugins={[gfm]}>{body}</ReactMarkdown>
           </UpdateContainer>
