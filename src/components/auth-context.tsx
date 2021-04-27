@@ -15,11 +15,6 @@ export { AuthProvider, useAuth }
 function AuthProvider({ children }: { children: React.ReactNode }) {
   const user = useGetUser()
 
-  // TODO: add loading screen instead of bailing
-  if (user.status === 'loading') {
-    return null
-  }
-
   if (user.status === 'error') {
     let message = 'Something went wrong'
     if (user.error instanceof Error) {

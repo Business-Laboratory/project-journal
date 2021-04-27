@@ -19,11 +19,22 @@ export type Updates = ReturnType<typeof useUpdates>
 export default function Project() {
   const { query } = useRouter()
   const { id } = query
-  if (id === undefined || Array.isArray(id)) {
+  // doesn't render anything when id is undefined, which is the case when
+  // next tries to build the page statically
+  if (id === undefined) {
+    return null
+  }
+
+  const numberId = Number(id)
+  if (!id || Array.isArray(id) || Number.isNaN(numberId)) {
     throw new Error(`Invalid id: ${id}`)
   }
-  const { data, status } = useProject(Number(id))
 
+  return <ProjectById id={numberId} />
+}
+
+function ProjectById({ id }: { id: number }) {
+  const { data, status } = useProject(Number(id))
   // convert the string dates to dates and add the hash for the links
   const updates = useUpdates(data?.updates ?? [])
 

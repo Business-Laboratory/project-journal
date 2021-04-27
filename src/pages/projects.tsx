@@ -27,7 +27,7 @@ export default function Projects() {
           </IconLink>
         ) : null}
 
-        <CardGrid userName={user?.name} />
+        <CardGrid user={user} />
       </main>
     </>
   )
@@ -40,7 +40,7 @@ type CardProps = {
   imageUrl: string | null
 }
 function Card({ id, name, description, imageUrl }: CardProps) {
-  //Ring color is copper-400
+  // ring color is copper-400
   return (
     <Link href={`/project/${id}`} passHref>
       <a
@@ -104,23 +104,26 @@ type Project = {
 }
 
 type CardGridProps = {
-  userName: string | undefined | null
+  user: ReturnType<typeof useAuth>
 }
-function CardGrid({ userName }: CardGridProps) {
+function CardGrid({ user }: CardGridProps) {
   const { data, status } = useProjects()
-
-  const wait = useWaitTimer()
+  const wait = useWaitTimer() // timeout to show a spinner
 
   if (status === 'error') {
     return <DataErrorMessage errorMessage="Unable to load projects" />
   }
 
-  if (wait === 'finished' && status === 'loading') {
-    return <LoadingSpinner loadingMessage="Loading projects" />
+  // when the user or the projects data is still loading, return nothing for 1 second, and then a spinner
+  if (user === null || status === 'loading') {
+    if (wait === 'finished') {
+      return <LoadingSpinner loadingMessage="Loading projects" />
+    } else {
+      return null
+    }
   }
 
-  const userNameFormatted = userName ? userName : 'you'
-
+  const userNameFormatted = user?.name ?? 'you'
   const projects = data ?? []
 
   return projects.length > 0 ? (
