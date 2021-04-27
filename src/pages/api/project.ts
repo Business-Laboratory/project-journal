@@ -5,7 +5,6 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import type { PrepareAPIData } from '@types'
 import type { User } from '@prisma/client'
 
-// TODO: apply PrepareAPIData to all APIs
 export type ProjectData = PrepareAPIData<ReturnType<typeof getProject>>
 
 /**

@@ -3,10 +3,10 @@ import { generateSasUrl } from '@lib/azure-storage-blob'
 import { checkAuthentication } from '@utils/api/check-authentication'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
-import type { UnwrapPromise } from '@types'
+import type { PrepareAPIData } from '@types'
 import type { User } from '@prisma/client'
 
-export type ProjectsData = UnwrapPromise<ReturnType<typeof getProjects>>
+export type ProjectsData = PrepareAPIData<ReturnType<typeof getProjects>>
 
 /**
  * Gets projects based on their role:

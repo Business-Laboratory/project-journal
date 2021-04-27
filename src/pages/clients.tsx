@@ -1,14 +1,13 @@
 // Alternate Admin Home view that displays clients
 import 'twin.macro'
+import { Fragment } from 'react'
 import Head from 'next/head'
 import { PlusIcon, EditIcon } from 'icons'
-import { Fragment } from 'react'
-import { QueryFunction, useQuery } from 'react-query'
-import { ClientsData } from './api/clients'
 import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
 import { useWaitTimer } from '@utils/use-wait-timer'
+import { useClients } from '@queries/useClients'
 
 export default function Clients() {
   return (
@@ -28,7 +27,7 @@ export default function Clients() {
 }
 
 function ClientList() {
-  const { data, status } = useQuery('clients', fetchClients)
+  const { data, status } = useClients()
 
   const wait = useWaitTimer()
 
@@ -68,12 +67,4 @@ function ClientList() {
   ) : status === 'success' ? (
     <h1 tw="bl-text-3xl max-w-prose text-center">No clients are available</h1>
   ) : null
-}
-
-const fetchClients: QueryFunction<ClientsData> = async () => {
-  const res = await fetch(`/api/clients`)
-  if (!res.ok) {
-    throw new Error(`Something went wrong fetching clients`)
-  }
-  return res.json()
 }

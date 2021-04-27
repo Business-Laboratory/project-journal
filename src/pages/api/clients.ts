@@ -2,10 +2,10 @@ import { prisma } from '@lib/prisma'
 import { checkAuthentication } from '@utils/api/check-authentication'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
-import type { UnwrapPromise } from '@types'
+import type { PrepareAPIData } from '@types'
 import type { User } from '@prisma/client'
 
-export type ClientsData = UnwrapPromise<ReturnType<typeof getClients>>
+export type ClientsData = PrepareAPIData<ReturnType<typeof getClients>>
 
 /**
  * Gets projects based on their role:

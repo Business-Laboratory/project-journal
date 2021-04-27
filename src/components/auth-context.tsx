@@ -2,10 +2,10 @@ import 'twin.macro'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { signOut, useSession } from 'next-auth/client'
 import { useRouter } from 'next/router'
-import { QueryStatus, useQuery } from 'react-query'
+import { Button } from '@components/button'
+import { useUser } from '@queries/useUser'
 
-import { Button } from './button'
-import type { QueryFunction } from 'react-query'
+import type { QueryStatus } from 'react-query'
 import type { UserData } from 'pages/api/user'
 
 const AuthContext = createContext<UserData | null | undefined>(undefined)
@@ -62,10 +62,7 @@ function useGetUser() {
   const [session, loading] = useSession()
   const routeCheck = useRedirect(session, loading)
 
-  const email = session?.user?.email ?? ''
-  const user = useQuery(['user', { email }], fetchUser, {
-    enabled: Boolean(email), // only fetch the user's data if they're logged in with an email
-  })
+  const user = useUser(session?.user?.email ?? '')
 
   // next-auth loading or any redirecting means that the data is still loading
   const status: QueryStatus =
@@ -100,27 +97,4 @@ function useRedirect(...args: ReturnType<typeof useSession>) {
   }, [loading, router, session])
 
   return routeCheck
-}
-
-type UserQueryKey = ['user', { email: string }]
-const fetchUser: QueryFunction<UserData, UserQueryKey> = async ({
-  queryKey,
-}) => {
-  const [, { email }] = queryKey
-
-  if (!email) {
-    throw new Error(`No email provided`)
-  }
-
-  const res = await fetch(`/api/user`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
-  })
-  if (res.status === 401) {
-    throw new Error(`User is not authorized to use this app`)
-  } else if (!res.ok) {
-    throw new Error(`Something went wrong`)
-  }
-  return res.json()
 }

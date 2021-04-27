@@ -4,15 +4,12 @@ import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
 import { PlusIcon } from 'icons'
-import { useQuery } from 'react-query'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
 import { useWaitTimer } from '@utils/use-wait-timer'
-
-import type { QueryFunction } from 'react-query'
-import type { ProjectsData } from './api/projects'
+import { useProjects } from '@queries/useProjects'
 
 export default function Projects() {
   const user = useAuth()
@@ -34,14 +31,6 @@ export default function Projects() {
       </main>
     </>
   )
-}
-
-const fetchProjects: QueryFunction<ProjectsData> = async () => {
-  const res = await fetch(`/api/projects`)
-  if (!res.ok) {
-    throw new Error(`Something went wrong`)
-  }
-  return res.json()
 }
 
 type CardProps = {
@@ -118,7 +107,7 @@ type CardGridProps = {
   userName: string | undefined | null
 }
 function CardGrid({ userName }: CardGridProps) {
-  const { data, status } = useQuery('projects', fetchProjects)
+  const { data, status } = useProjects()
 
   const wait = useWaitTimer()
 

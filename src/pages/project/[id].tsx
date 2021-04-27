@@ -1,6 +1,5 @@
 import { css } from 'twin.macro'
 import { useMemo } from 'react'
-import { useQuery } from 'react-query'
 import Header from 'next/head'
 import { useRouter } from 'next/router'
 
@@ -11,9 +10,9 @@ import {
   HashLinkProvider,
 } from '@components/project'
 import { appBarHeight } from '@components/app-bar'
+import { useProject } from '@queries/useProject'
 
-import type { QueryFunction } from 'react-query'
-import type { ProjectData } from '../api/project'
+import type { ProjectData } from 'pages/api/project'
 
 export type Updates = ReturnType<typeof useUpdates>
 
@@ -23,10 +22,7 @@ export default function Project() {
   if (id === undefined || Array.isArray(id)) {
     throw new Error(`Invalid id: ${id}`)
   }
-  const { data, status } = useQuery(
-    ['project', { id: Number(id) }],
-    fetchProject
-  )
+  const { data, status } = useProject(Number(id))
 
   // convert the string dates to dates and add the hash for the links
   const updates = useUpdates(data?.updates ?? [])
@@ -84,25 +80,4 @@ function useUpdates(originalUpdates: ProjectData['updates']) {
       })) ?? [],
     [originalUpdates]
   )
-}
-
-type ProjectQueryKey = ['project', { id: number }]
-const fetchProject: QueryFunction<ProjectData, ProjectQueryKey> = async ({
-  queryKey,
-}) => {
-  const [, { id }] = queryKey
-
-  if (!id) {
-    throw new Error(`No project provided`)
-  }
-
-  const res = await fetch(`/api/project`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id }),
-  })
-  if (!res.ok) {
-    throw new Error(`Something went wrong`)
-  }
-  return res.json()
 }
