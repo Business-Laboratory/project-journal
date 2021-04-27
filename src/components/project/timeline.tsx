@@ -15,6 +15,7 @@ import {
   addQuarters,
   addYears,
   getQuarter,
+  closestTo,
 } from 'date-fns'
 import { getDocumentFontSize } from '@utils/get-document-font-size'
 import { useCurrentHashLink } from './hash-link-context'
@@ -43,6 +44,19 @@ export function Timeline({ updates, status }: TimelineProps) {
     )
   }
 
+  // Find the update with the closest date to the update with the currentHashLink
+  // this is what we will highlight
+  const currentHashLink = useCurrentHashLink()
+  const currentUpdate = updates.find(
+    (element) => element.hashLink === currentHashLink
+  )
+  const groupedDatesOnly = groupedUpdateDates
+    .flat()
+    .map((element) => element.createdAt)
+  const highlightDate = currentUpdate
+    ? closestTo(currentUpdate.createdAt, groupedDatesOnly)
+    : undefined
+
   return (
     <nav tw="relative w-20 h-full overflow-hidden bg-gray-yellow-600 border-r-2 border-gray-yellow-300">
       <Bar />
@@ -61,11 +75,16 @@ export function Timeline({ updates, status }: TimelineProps) {
       >
         {groupedUpdateDates.map((updates, idx) => (
           <CircleWrapper key={idx}>
-            {updates.map(({ id, title, hashLink }) => (
+            {updates.map(({ id, title, hashLink, createdAt }) => (
               <UpdateCircle
                 key={id}
                 hashLink={hashLink}
                 aria-label={`Go to update ${title}`}
+                highlight={
+                  highlightDate
+                    ? createdAt.getTime() === highlightDate.getTime()
+                    : false
+                }
               />
             ))}
           </CircleWrapper>
@@ -133,10 +152,15 @@ function CircleWrapper({ children }: { children: React.ReactNode }) {
 // A note on the padding/width and height. We need a touch area of 48px -> 3rem.
 // p-5 is 1.25 rem on each side, so 2.5rem. w-2 and h-2 are each 0.5rem
 // 2.5rem + 0.5rem = 3rem, which is the size of the touch area we want
-function UpdateCircle({ hashLink }: { hashLink: string }) {
+function UpdateCircle({
+  hashLink,
+  highlight,
+}: {
+  hashLink: string
+  highlight: boolean
+}) {
   const { query } = useRouter()
-  const currentHashLink = useCurrentHashLink()
-  const highlight = currentHashLink !== null && hashLink === currentHashLink
+
   return (
     <Link href={`./${query.id}${hashLink}`} passHref>
       <a
