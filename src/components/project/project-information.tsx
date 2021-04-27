@@ -340,7 +340,7 @@ function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
               ) : (
                 <span
                   css={[
-                    currentHashLink === hashLink
+                    routerHash === hashLink
                       ? tw`bl-text-3xl underline`
                       : tw`bl-text-3xl`,
                   ]}
