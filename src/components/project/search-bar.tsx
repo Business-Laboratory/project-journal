@@ -32,7 +32,6 @@ export function SearchBar({
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const matchedUpdates = useMatchedUpdates(updates, searchTerm)
-  const inputRef = useRef<HTMLInputElement | null>(null)
   const [blurring, setBlurring] = useState(false)
 
   return (
@@ -46,7 +45,6 @@ export function SearchBar({
         const hashLink = selectedUpdate?.hashLink
         if (hashLink) {
           setSearchTerm('')
-          inputRef.current?.blur()
           setBlurring(true)
           router.push(`./${router.query.id}${hashLink}`)
         }
@@ -58,7 +56,6 @@ export function SearchBar({
         disabled={disabled}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
-        inputRef={inputRef}
         blurring={blurring}
         setBlurring={setBlurring}
       />
@@ -66,11 +63,33 @@ export function SearchBar({
   )
 }
 
+/**
+ * Inspired by https://github.com/reach/reach-ui/blob/develop/packages/combobox/examples/utils.ts
+ * @param term
+ */
+function useMatchedUpdates(updates: Updates, searchTerm: string) {
+  const updateValuesAndHashLinks = useMemo(
+    () =>
+      updates.map(({ title, hashLink }) => ({
+        value: title,
+        hashLink,
+      })),
+    [updates]
+  )
+  return useMemo(() => {
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase()
+    return normalizedSearchTerm === ''
+      ? updateValuesAndHashLinks
+      : matchSorter(updateValuesAndHashLinks, searchTerm, {
+          keys: [(item) => item.value],
+        })
+  }, [searchTerm, updateValuesAndHashLinks])
+}
+
 type InnerComboboxProps = Omit<SearchBarProps, 'updates'> & {
   updates: ReturnType<typeof useMatchedUpdates>
   searchTerm: string
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>
-  inputRef: React.MutableRefObject<HTMLInputElement | null>
   blurring: boolean
   setBlurring: (blurring: boolean) => void
 }
@@ -80,19 +99,16 @@ function InnerCombobox({
   disabled = false,
   searchTerm,
   setSearchTerm,
-  inputRef,
   blurring,
   setBlurring,
 }: InnerComboboxProps) {
   const labelRef = useRef<HTMLLabelElement | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null)
   const rect = useRect(labelRef)
-  const { state } = useComboboxContext()
 
-  useEffect(() => {
-    if (blurring && state === 'IDLE') {
-      setBlurring(false)
-    }
-  }, [blurring, setBlurring, state])
+  // blur the input after an option has been selected – this can't
+  // be added to `onSelect`, because Reach refocuses after clicks
+  useBlurOnIdle(inputRef, blurring, setBlurring)
 
   return (
     <>
@@ -112,12 +128,6 @@ function InnerCombobox({
           disabled={disabled}
           onChange={(e) => setSearchTerm(e.currentTarget.value)}
           value={searchTerm}
-          // reach ui wants to refocus the input after a click, this ensures it stays blurred
-          onFocus={() => {
-            if (blurring) {
-              inputRef.current?.blur()
-            }
-          }}
         />
       </label>
 
@@ -144,27 +154,19 @@ function InnerCombobox({
   )
 }
 
-/**
- * Inspired by https://github.com/reach/reach-ui/blob/develop/packages/combobox/examples/utils.ts
- * @param term
- */
-function useMatchedUpdates(updates: Updates, searchTerm: string) {
-  const updateValuesAndHashLinks = useMemo(
-    () =>
-      updates.map(({ title, hashLink }) => ({
-        value: title,
-        hashLink,
-      })),
-    [updates]
-  )
-  return useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase()
-    return normalizedSearchTerm === ''
-      ? updateValuesAndHashLinks
-      : matchSorter(updateValuesAndHashLinks, searchTerm, {
-          keys: [(item) => item.value],
-        })
-  }, [searchTerm, updateValuesAndHashLinks])
+function useBlurOnIdle(
+  inputRef: React.MutableRefObject<HTMLInputElement | null>,
+  blurring: boolean,
+  setBlurring: (blurring: boolean) => void
+) {
+  const { state } = useComboboxContext()
+
+  useEffect(() => {
+    if (blurring && state === 'IDLE') {
+      inputRef.current?.blur()
+      setBlurring(false)
+    }
+  }, [blurring, inputRef, setBlurring, state])
 }
 
 // styles
