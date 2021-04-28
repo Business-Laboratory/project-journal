@@ -1,11 +1,17 @@
 import tw, { css } from 'twin.macro'
 import Link from 'next/link'
+import { ParsedUrlQuery } from 'node:querystring'
 
 export { IconLink }
 export type { IconLinkProps }
 
 type IconLinkProps = {
-  pathName: string
+  pathName:
+    | string
+    | {
+        pathname: string
+        query: ParsedUrlQuery
+      }
   className?: string
   children: React.ReactNode
   replace?: boolean

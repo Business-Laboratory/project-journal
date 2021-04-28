@@ -9,51 +9,45 @@ import { CloseIcon } from 'icons'
 import { IconLink } from '@components/icon-link'
 import { useQueryClient } from 'react-query'
 
-type UpdateModalProps = {
-  isOpen: boolean
-  close: () => void
-  projectId: number
-  update:
-    | Update
-    | {
-        id: 'new'
-        title: string
-        body: string
-      }
-}
-export function UpdateModal({
-  isOpen,
-  close,
-  projectId,
-  update,
-}: UpdateModalProps) {
-  return (
-    <Modal isOpen={isOpen} onDismiss={close}>
-      <UpdateModalContent projectId={projectId} update={update} close={close} />
-    </Modal>
-  )
-}
-
 type NewUpdate = {
   id: 'new'
   title: string
   body: string
 }
+type ProjectModalProps = {
+  isOpen: boolean
+  close: () => void
+  projectId: number
+  data: string | Update | NewUpdate
+}
+export function ProjectModal({
+  isOpen,
+  close,
+  projectId,
+  data,
+}: ProjectModalProps) {
+  return (
+    <Modal isOpen={isOpen} onDismiss={close}>
+      <UpdateModalContent projectId={projectId} data={data} close={close} />
+    </Modal>
+  )
+}
+
 type UpdateModalContentProps = {
   projectId: number
-  update: Update | NewUpdate
+  data: Update | NewUpdate
   close: () => void
 }
 function UpdateModalContent({
   projectId,
-  update,
+  data,
   close,
   ...props
 }: UpdateModalContentProps) {
   const router = useRouter()
   const [{ id, title, body, saveState }, dispatch] = useReducer(
     updateReducer,
-    initialState(update)
+    initialState(data)
   )
   const queryClient = useQueryClient()
 

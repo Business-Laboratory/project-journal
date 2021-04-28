@@ -13,7 +13,7 @@ import React, {
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
 
-import { SearchBar, UpdateModal } from './index'
+import { SearchBar, ProjectModal } from './index'
 import { PlusIcon, EditIcon } from 'icons'
 import { format } from 'date-fns'
 import { useAuth } from '@components/auth-context'
@@ -45,6 +45,7 @@ export function ProjectInformation({
   if (!updateId || Array.isArray(updateId)) {
     updateId = undefined
   }
+  console.log(router.query)
 
   useEffect(() => {
     if (!updateId && open) {
@@ -65,7 +66,10 @@ export function ProjectInformation({
         <SearchBar updates={updates} status={status} />
         {user?.role === 'ADMIN' && (
           <IconLink
-            pathName={`/project/${projectId}?updateId=new`}
+            pathName={{
+              pathname: `/project/${projectId}`,
+              query: { edit: 'update', updateId: 'new' },
+            }}
             replace={true}
           >
             <PlusIcon tw="w-6 h-6" />
@@ -80,11 +84,11 @@ export function ProjectInformation({
         />
       </div>
       {!!updateId ? (
-        <UpdateModal
+        <ProjectModal
           isOpen={open}
           close={close}
           projectId={projectId}
-          update={
+          data={
             updates.find(({ id }) => id === Number(updateId)) ?? {
               id: 'new',
               title: '',
@@ -360,7 +364,10 @@ function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
             <div tw="inline-flex items-center space-x-2">
               {role === 'ADMIN' ? (
                 <IconLink
-                  pathName={`/project/${projectId}?updateId=${id}`}
+                  pathName={{
+                    pathname: `/project/${projectId}`,
+                    query: { edit: 'update', updateId: `${id}` },
+                  }}
                   replace={true}
                 >
                   <EditIcon tw="w-6 h-6" />

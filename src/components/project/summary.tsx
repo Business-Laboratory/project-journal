@@ -9,8 +9,11 @@ import { EditIcon, GearIcon } from 'icons'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
 import { useWaitTimer } from '@utils/use-wait-timer'
+import { ProjectModal } from './index'
 
 import type { ProjectData } from 'pages/api/project'
+import { useRouter } from 'next/router'
+import { useState } from 'react'
 
 type Team = ProjectData['team']
 
@@ -36,8 +39,18 @@ export function Summary({
   status,
 }: SummaryProps) {
   const user = useAuth()
-
+  const router = useRouter()
   const wait = useWaitTimer()
+  let edit = router.query.edit
+  if (!edit || Array.isArray(edit)) {
+    edit = undefined
+  }
+
+  const [open, setOpen] = useState(false)
+  const close = () => {
+    setOpen(false)
+    router.replace(`/project/${projectId}`, undefined, { shallow: true })
+  }
 
   if (status === 'error') {
     return (
@@ -105,7 +118,7 @@ export function Summary({
         ) : null}
         <div tw="space-y-2">
           {user?.role === 'ADMIN' ? (
-            <IconLink pathName={`/project/${projectId}/#`}>
+            <IconLink pathName={`/project/${projectId}?edit=description`}>
               <EditIcon tw="h-6 w-6" />
               <h2 tw="bl-text-3xl inline">Project Description</h2>
             </IconLink>
@@ -118,7 +131,7 @@ export function Summary({
         </div>
         <div tw="space-y-2">
           {user?.role === 'ADMIN' ? (
-            <IconLink pathName={`/project/${projectId}/#`}>
+            <IconLink pathName={`/project/${projectId}?edit=roadmap`}>
               <EditIcon tw="h-6 w-6" />
               <h2 tw="bl-text-3xl inline">Project Roadmap</h2>
             </IconLink>
@@ -141,6 +154,20 @@ export function Summary({
           </div>
         </div>
       </div>
+      {!!edit ? (
+        <ProjectModal
+          isOpen={open}
+          close={close}
+          projectId={projectId}
+          data={
+            edit === 'description'
+              ? summary?.description ?? ''
+              : edit === 'roadmap'
+              ? summary?.roadmap ?? ''
+              : ''
+          }
+        />
+      ) : null}
     </aside>
   )
 }
