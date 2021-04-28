@@ -15,11 +15,11 @@ import {
 import { appBarHeight } from '@components/app-bar'
 import { useProject } from '@queries/useProject'
 
-import type { ProjectData } from 'pages/api/project'
 import { QueryStatus } from 'react-query'
 import { useAuth } from '@components/auth-context'
 import { useUpdates } from '@queries/useUpdates'
 import { Role } from '.prisma/client'
+import type { UpdatesData } from 'pages/api/updates'
 
 export type Updates = ReturnType<typeof useUpdatesOld>
 
@@ -139,7 +139,7 @@ function getProjectTitle(status: QueryStatus, name?: string) {
   return `${name ?? 'Untitled Project'} | Project Journal`
 }
 
-function useUpdatesOld(originalUpdates: ProjectData['updates']) {
+function useUpdatesOld(originalUpdates: UpdatesData) {
   return useMemo(
     () =>
       originalUpdates.map((update) => ({

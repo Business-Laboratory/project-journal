@@ -2,12 +2,15 @@ import tw from 'twin.macro'
 import { useRouter } from 'next/router'
 import React, { useEffect, useReducer, useState } from 'react'
 
-import { Update } from '@prisma/client'
 import { Modal } from '@components/modal'
 import { Button } from '@components/button'
 import { CloseIcon } from 'icons'
 import { IconLink } from '@components/icon-link'
 import { useQueryClient } from 'react-query'
+
+import type { Updates } from 'pages/project/[id]'
+
+type Update = Updates[0]
 
 type UpdateModalProps = {
   isOpen: boolean
