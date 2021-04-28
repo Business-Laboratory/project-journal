@@ -8,7 +8,14 @@ import { useUser } from '@queries/useUser'
 import type { QueryStatus } from 'react-query'
 import type { UserData } from 'pages/api/user'
 
-const AuthContext = createContext<UserData | null | undefined>(undefined)
+// this is typed out because I was having trouble removing the nulls from
+// the data that comes from useSession
+type User = UserData & {
+  email: string | null
+  name: string | null
+  image: string | null
+}
+const AuthContext = createContext<User | null | undefined>(undefined)
 
 export { AuthProvider, useAuth }
 
@@ -63,7 +70,14 @@ function useGetUser() {
   const status: QueryStatus =
     loading || routeCheck === 'unchecked' ? 'loading' : user.status
 
-  return { ...user, status }
+  let data: User | undefined = undefined
+  if (session?.user && user?.data) {
+    const { email = '', name = '', image = '' } = session.user
+    const { id, role } = user.data
+    data = { email, name, image, id, role }
+  }
+
+  return { ...user, data, status }
 }
 
 function useRedirect(...args: ReturnType<typeof useSession>) {

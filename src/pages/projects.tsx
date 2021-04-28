@@ -40,20 +40,21 @@ function CardGrid({ user }: CardGridProps) {
   const { data, status } = useProjects()
   const wait = useWaitTimer() // timeout to show a spinner
 
+  // the user has to be loaded before we even display the spinner
+  if (user === null) {
+    return null
+  }
+
   if (status === 'error') {
     return <DataErrorMessage errorMessage="Unable to load projects" />
   }
 
   // when the user or the projects data is still loading, return nothing for 1 second, and then a spinner
-  if (user === null || status === 'loading') {
-    if (wait === 'finished') {
-      return <LoadingSpinner loadingMessage="Loading projects" />
-    } else {
-      return null
-    }
+  if (status === 'loading' && wait === 'finished') {
+    return <LoadingSpinner loadingMessage="Loading projects" />
   }
 
-  const userNameFormatted = user?.name ?? 'you'
+  const userNameFormatted = user.name ?? 'you'
   const projects = data ?? []
 
   return projects.length > 0 ? (

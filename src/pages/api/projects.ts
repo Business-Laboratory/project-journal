@@ -4,7 +4,7 @@ import { checkAuthentication } from '@utils/api/check-authentication'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
 import type { PrepareAPIData } from '@types'
-import type { User } from '@prisma/client'
+import type { UserData } from '@utils/api/check-authentication'
 
 export type ProjectsData = PrepareAPIData<ReturnType<typeof getProjects>>
 
@@ -31,7 +31,7 @@ export default async function handler(
   }
 }
 
-async function getProjects(user: User) {
+async function getProjects(user: UserData) {
   let where = undefined
   // if the role is a user, get the client id to apply to the where clause
   if (user.role === 'USER') {

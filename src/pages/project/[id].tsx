@@ -44,7 +44,7 @@ function ProjectById({ id }: { id: number }) {
   const user = useAuth()
   // convert the string dates to dates and add the hash for the links
   const updates = useUpdates(data?.updates ?? [])
-  const userRole = user?.role ?? 'USER'
+  const userRole = user?.role ?? null
 
   return (
     <>
@@ -59,13 +59,17 @@ function ProjectById({ id }: { id: number }) {
           grid-template-columns: 80px auto 500px;
         `}
       >
-        {user === null || status !== 'success' || data === undefined ? (
+        {userRole === null || status !== 'success' || data === undefined ? (
           <>
             <HashLinkProvider>
               <LoadingTimeline />
-              <LoadingProjectInformation status={status} />
+              <LoadingProjectInformation
+                projectId={id}
+                status={status}
+                userRole={userRole}
+              />
             </HashLinkProvider>
-            <LoadingSummary status={status} />
+            <LoadingSummary status={status} userRole={userRole} />
           </>
         ) : (
           <>

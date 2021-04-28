@@ -31,16 +31,32 @@ export { ProjectInformation, LoadingProjectInformation }
 
 // Main component
 
-function LoadingProjectInformation({ status }: { status: QueryStatus }) {
+type LoadingProjectInformationProps = {
+  projectId: number
+  status: QueryStatus
+  userRole: Role | null
+}
+function LoadingProjectInformation({
+  projectId,
+  status,
+  userRole,
+}: LoadingProjectInformationProps) {
   const wait = useWaitTimer()
 
   return (
     <ProjectInformationContainer>
       <SearchBar updates={[]} disabled />
-      {status === 'error' ? (
-        <DataErrorMessage errorMessage="Unable to load updates" />
-      ) : wait === 'finished' ? (
-        <LoadingSpinner loadingMessage="Loading updates" />
+      {userRole !== null ? (
+        <>
+          {userRole === 'ADMIN' ? (
+            <AddUpdateButton projectId={projectId} />
+          ) : null}
+          {status === 'error' ? (
+            <DataErrorMessage errorMessage="Unable to load updates" />
+          ) : wait === 'finished' ? (
+            <LoadingSpinner loadingMessage="Loading updates" />
+          ) : null}
+        </>
       ) : null}
     </ProjectInformationContainer>
   )
@@ -79,15 +95,7 @@ function ProjectInformation({
   return (
     <ProjectInformationContainer>
       <SearchBar updates={updates} />
-      {userRole === 'ADMIN' ? (
-        <IconLink
-          pathName={`/project/${projectId}?updateId=new`}
-          replace={true}
-        >
-          <PlusIcon tw="w-6 h-6" />
-          <span tw="bl-text-2xl">Add update</span>
-        </IconLink>
-      ) : null}
+      {userRole === 'ADMIN' ? <AddUpdateButton projectId={projectId} /> : null}
       <UpdatesList
         updates={updates}
         userRole={userRole}
@@ -185,6 +193,15 @@ function useOnScroll(onScroll: OnScrollFunction) {
     )
   }
   onScrollRef.current = onScroll
+}
+
+function AddUpdateButton({ projectId }: { projectId: number }) {
+  return (
+    <IconLink pathName={`/project/${projectId}?updateId=new`} replace={true}>
+      <PlusIcon tw="w-6 h-6" />
+      <span tw="bl-text-2xl">Add update</span>
+    </IconLink>
+  )
 }
 
 // container for all of the updates which provisions refs for each of the children through context providers

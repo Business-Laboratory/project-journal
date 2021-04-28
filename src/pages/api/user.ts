@@ -1,12 +1,8 @@
-import { checkAuthentication } from '@utils/api/check-authentication'
+import { checkAuthentication, UserData } from '@utils/api/check-authentication'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
-import type { UnwrapPromise } from '@types'
 
-export type UserData = Exclude<
-  UnwrapPromise<typeof checkAuthentication>,
-  undefined
->
+export type { UserData }
 
 export default async function handler(
   req: NextApiRequest,

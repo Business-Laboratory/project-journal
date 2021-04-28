@@ -11,22 +11,31 @@ import { useWaitTimer } from '@utils/use-wait-timer'
 
 import type { ProjectData } from 'pages/api/project'
 import type { QueryStatus } from 'react-query'
-import { Role } from '@prisma/client'
+import type { Role } from '@prisma/client'
 
 export { Summary, LoadingSummary }
 
 type Team = ProjectData['team']
 
-function LoadingSummary({ status }: { status: QueryStatus }) {
+type LoadingSummaryProps = {
+  status: QueryStatus
+  userRole: Role | null
+}
+function LoadingSummary({ status, userRole }: LoadingSummaryProps) {
   const wait = useWaitTimer()
+
+  // until the user has been loaded, we don't need to display any of the loading information
+  if (userRole === null) {
+    return <SummaryWrapper />
+  }
 
   // when the user or the projects data is still loading, return nothing for 1 second, and then a spinner
   return (
     // need precise rem to match the y coordinate of the loading updates spinner
-    <aside
+    <SummaryWrapper
       css={[
         css`
-          padding-top: 7.625rem;
+          padding-top: ${userRole === 'ADMIN' ? 11.875 : 7.625}rem;
         `,
       ]}
     >
@@ -35,7 +44,7 @@ function LoadingSummary({ status }: { status: QueryStatus }) {
       ) : wait === 'finished' ? (
         <LoadingSpinner loadingMessage="Loading project summary" />
       ) : null}
-    </aside>
+    </SummaryWrapper>
   )
 }
 
@@ -60,7 +69,7 @@ function Summary({
   team,
 }: SummaryProps) {
   return (
-    <aside tw="relative h-full px-14 overflow-y-auto">
+    <SummaryWrapper>
       <div tw="space-y-8 py-10">
         {userRole === 'ADMIN' ? (
           <IconLink pathName={`/project/${projectId}/#`}>
@@ -124,6 +133,17 @@ function Summary({
           </div>
         </div>
       </div>
+    </SummaryWrapper>
+  )
+}
+
+function SummaryWrapper({
+  children,
+  className,
+}: React.ComponentPropsWithoutRef<'article'>) {
+  return (
+    <aside tw="relative h-full px-14 overflow-y-auto" className={className}>
+      {children}
     </aside>
   )
 }

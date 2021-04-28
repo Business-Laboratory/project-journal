@@ -13,7 +13,7 @@ import {
 import { useAuth } from '@components/auth-context'
 import { LogoIcon } from 'icons'
 
-import type { Role } from '.prisma/client'
+import type { Role } from '@prisma/client'
 
 import '@reach/menu-button/styles.css'
 

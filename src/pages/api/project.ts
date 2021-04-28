@@ -3,7 +3,7 @@ import { checkAuthentication } from '@utils/api/check-authentication'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
 import type { PrepareAPIData } from '@types'
-import type { User } from '@prisma/client'
+import type { UserData } from '@utils/api/check-authentication'
 
 export type ProjectData = PrepareAPIData<ReturnType<typeof getProject>>
 
@@ -31,7 +31,7 @@ export default async function handler(
   }
 }
 
-async function getProject(user: User, id: number) {
+async function getProject(user: UserData, id: number) {
   const userId = user.id
   const userRole = user.role
   const project = await prisma.project.findUnique({

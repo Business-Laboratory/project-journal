@@ -3,7 +3,8 @@ import { checkAuthentication } from '@utils/api/check-authentication'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
 import type { PrepareAPIData } from '@types'
-import type { User } from '@prisma/client'
+
+import type { UserData } from '@utils/api/check-authentication'
 
 export type ClientsData = PrepareAPIData<ReturnType<typeof getClients>>
 
@@ -31,7 +32,7 @@ export default async function handler(
   }
 }
 
-async function getClients(user: User) {
+async function getClients(user: UserData) {
   if (user.role !== 'ADMIN') return
 
   const clients = await prisma.client.findMany({
