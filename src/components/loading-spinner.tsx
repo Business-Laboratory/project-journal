@@ -7,6 +7,7 @@ export type { LoadingSpinnerProps }
 type LoadingSpinnerProps = {
   loadingMessage?: string
 }
+// TODO: put the wait in here
 function LoadingSpinner({ loadingMessage }: LoadingSpinnerProps) {
   return (
     <div tw="space-y-4">

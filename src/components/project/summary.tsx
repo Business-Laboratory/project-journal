@@ -11,6 +11,9 @@ import { DataErrorMessage } from '@components/data-error-message'
 import { useWaitTimer } from '@utils/use-wait-timer'
 
 import type { ProjectData } from 'pages/api/project'
+import type { QueryStatus } from 'react-query'
+
+export { Summary, LoadingSummary }
 
 type Team = ProjectData['team']
 
@@ -22,34 +25,18 @@ type SummaryProps = {
   clientName: string
   clientEmployees: Team // TODO: update this. There's probably a better way to do this, but I'm just replacing what was here
   team: Team
-  status: string
 }
 
-export function Summary({
-  projectId,
-  name,
-  imageUrl,
-  summary,
-  clientName,
-  clientEmployees,
-  team,
-  status,
-}: SummaryProps) {
-  const user = useAuth()
-
+function LoadingSummary({ status }: { status: QueryStatus }) {
   const wait = useWaitTimer()
 
   if (status === 'error') {
     return (
       <aside
         css={[
-          user?.role === 'ADMIN'
-            ? css`
-                padding-top: 11.875rem;
-              `
-            : css`
-                padding-top: 7.625rem;
-              `,
+          css`
+            padding-top: 7.625rem;
+          `,
         ]}
       >
         <DataErrorMessage errorMessage="Unable to load summary" />
@@ -57,29 +44,43 @@ export function Summary({
     )
   }
 
-  if (wait === 'finished' && status === 'loading') {
-    //Need precise rem to match the y coordinate of the loading updates spinner
-    return (
-      <aside
-        css={[
-          user?.role === 'ADMIN'
-            ? css`
-                padding-top: 11.875rem;
-              `
-            : css`
-                padding-top: 7.625rem;
-              `,
-        ]}
-      >
+  // when the user or the projects data is still loading, return nothing for 1 second, and then a spinner
+  return (
+    // need precise rem to match the y coordinate of the loading updates spinner
+    <aside
+      css={[
+        css`
+          padding-top: 7.625rem;
+        `,
+      ]}
+    >
+      {wait === 'finished' ? (
         <LoadingSpinner loadingMessage="Loading project summary" />
-      </aside>
-    )
+      ) : null}
+    </aside>
+  )
+}
+
+function Summary({
+  projectId,
+  name,
+  imageUrl,
+  summary,
+  clientName,
+  clientEmployees,
+  team,
+}: SummaryProps) {
+  const user = useAuth()
+
+  // TODO: pass this in as a prop
+  if (user === null) {
+    return null
   }
 
   return (
     <aside tw="relative h-full px-14 overflow-y-auto">
       <div tw="space-y-8 py-10">
-        {user?.role === 'ADMIN' ? (
+        {user.role === 'ADMIN' ? (
           <IconLink pathName={`/project/${projectId}/#`}>
             <GearIcon tw="h-6 w-6" />
             {name === '' ? (
@@ -104,7 +105,7 @@ export function Summary({
           </div>
         ) : null}
         <div tw="space-y-2">
-          {user?.role === 'ADMIN' ? (
+          {user.role === 'ADMIN' ? (
             <IconLink pathName={`/project/${projectId}/#`}>
               <EditIcon tw="h-6 w-6" />
               <h2 tw="bl-text-3xl inline">Project Description</h2>
@@ -117,7 +118,7 @@ export function Summary({
           ) : null}
         </div>
         <div tw="space-y-2">
-          {user?.role === 'ADMIN' ? (
+          {user.role === 'ADMIN' ? (
             <IconLink pathName={`/project/${projectId}/#`}>
               <EditIcon tw="h-6 w-6" />
               <h2 tw="bl-text-3xl inline">Project Roadmap</h2>

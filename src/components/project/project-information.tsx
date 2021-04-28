@@ -25,19 +25,34 @@ import { DataErrorMessage } from '@components/data-error-message'
 import { useWaitTimer } from '@utils/use-wait-timer'
 
 import type { Updates } from 'pages/project/[id]'
+import type { QueryStatus } from 'react-query'
+
+export { ProjectInformation, LoadingProjectInformation }
 
 // Main component
+
+function LoadingProjectInformation({ status }: { status: QueryStatus }) {
+  const wait = useWaitTimer()
+
+  return (
+    <ProjectInformationContainer>
+      <div tw="w-9/12 mx-auto py-10 space-y-8">
+        <SearchBar updates={[]} disabled />
+        {status === 'error' ? (
+          <DataErrorMessage errorMessage="Unable to load updates" />
+        ) : wait === 'finished' ? (
+          <LoadingSpinner loadingMessage="Loading updates" />
+        ) : null}
+      </div>
+    </ProjectInformationContainer>
+  )
+}
 
 type ProjectInformationProps = {
   projectId: number
   updates: Updates
-  status: string
 }
-export function ProjectInformation({
-  projectId,
-  updates,
-  status,
-}: ProjectInformationProps) {
+function ProjectInformation({ projectId, updates }: ProjectInformationProps) {
   const user = useAuth()
   const [open, setOpen] = useState(false)
   const router = useRouter()
@@ -54,6 +69,11 @@ export function ProjectInformation({
     setOpen(true)
   }, [updateId, updates, open])
 
+  // TODO: pass this in as a prop
+  if (user === null) {
+    return null
+  }
+
   const close = () => {
     setOpen(false)
     router.replace(`/project/${projectId}`, undefined, { shallow: true })
@@ -62,13 +82,8 @@ export function ProjectInformation({
   return (
     <ProjectInformationContainer>
       <div tw="w-9/12 mx-auto py-10 space-y-8">
-        <SearchBar
-          updates={updates}
-          disabled={
-            status === 'loading' || status === 'error' || updates.length === 0
-          }
-        />
-        {user?.role === 'ADMIN' && (
+        <SearchBar updates={updates} />
+        {user.role === 'ADMIN' && (
           <IconLink
             pathName={`/project/${projectId}?updateId=new`}
             replace={true}
@@ -77,12 +92,7 @@ export function ProjectInformation({
             <span tw="bl-text-2xl">Add update</span>
           </IconLink>
         )}
-        <UpdatesList
-          updates={updates}
-          role={user?.role}
-          projectId={projectId}
-          status={status}
-        />
+        <UpdatesList updates={updates} role={user.role} projectId={projectId} />
       </div>
       {!!updateId ? (
         <UpdateModal
@@ -344,19 +354,8 @@ type UpdatesListProps = {
   updates: Updates
   role: string | undefined | null
   projectId: number
-  status: string
 }
-function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
-  const wait = useWaitTimer()
-
-  if (status === 'error') {
-    return <DataErrorMessage errorMessage="Unable to load updates" />
-  }
-
-  if (wait === 'finished' && status === 'loading') {
-    return <LoadingSpinner loadingMessage="Loading updates" />
-  }
-
+function UpdatesList({ updates, role, projectId }: UpdatesListProps) {
   return updates?.length > 0 ? (
     <UpdatesContainer>
       {updates.map(({ id, hashLink, title, body, createdAt }) => {
@@ -384,9 +383,9 @@ function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
         )
       })}
     </UpdatesContainer>
-  ) : status === 'success' ? (
+  ) : (
     <h1 tw="bl-text-3xl max-w-prose">No updates have been added</h1>
-  ) : null
+  )
 }
 
 // update container, which gets the hook provisioned for it and applies it to the top level element

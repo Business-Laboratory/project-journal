@@ -1,5 +1,5 @@
 import tw, { css, theme } from 'twin.macro'
-import { useEffect, useRef, forwardRef, useState, useMemo } from 'react'
+import React, { useEffect, useRef, forwardRef, useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import {
@@ -22,60 +22,69 @@ import { useCurrentHashLink } from './hash-link-context'
 import type { Interval } from 'date-fns'
 import type { Updates } from 'pages/project/[id]'
 
-// types
+export { Timeline, LoadingTimeline }
 
 type DelineatorType = 'weeks' | 'months' | 'quarters' | 'halfYears' | 'years'
 
+function LoadingTimeline() {
+  return <NavWrapper />
+}
+
 type TimelineProps = {
   updates: Updates
-  status: string
 }
-export function Timeline({ updates, status }: TimelineProps) {
+function Timeline({ updates }: TimelineProps) {
   const datesContainerRef = useRef<null | HTMLDivElement>(null)
   const { delineatorDates, groupedUpdateDates } = useTimelineDates(
     updates,
     datesContainerRef
   )
 
-  if (status === 'loading' || status === 'error' || updates.length === 0) {
-    return (
-      <nav tw="relative w-20 h-full overflow-hidden bg-gray-yellow-600 border-r-2 border-gray-yellow-300" />
-    )
-  }
-
   return (
-    <nav tw="relative w-20 h-full overflow-hidden bg-gray-yellow-600 border-r-2 border-gray-yellow-300">
-      <Bar />
-      <FlexWrapper ref={datesContainerRef}>
-        {delineatorDates.dates.map((date) => (
-          <DateDelineator
-            key={date.valueOf()}
-            date={date}
-            format={delineatorDates.type}
-          />
-        ))}
-      </FlexWrapper>
-      <FlexWrapper
-        // add this padding and gap so that the circles are evenly spaced between the delineators
-        tw="py-5 space-y-5"
-      >
-        {groupedUpdateDates.map((updates, idx) => (
-          <CircleWrapper key={idx}>
-            {updates.map(({ id, title, hashLink }) => (
-              <UpdateCircle
-                key={id}
-                hashLink={hashLink}
-                aria-label={`Go to update ${title}`}
+    <NavWrapper>
+      {updates.length > 0 ? (
+        <>
+          <Bar />
+          <FlexWrapper ref={datesContainerRef}>
+            {delineatorDates.dates.map((date) => (
+              <DateDelineator
+                key={date.valueOf()}
+                date={date}
+                format={delineatorDates.type}
               />
             ))}
-          </CircleWrapper>
-        ))}
-      </FlexWrapper>
-    </nav>
+          </FlexWrapper>
+          <FlexWrapper
+            // add this padding and gap so that the circles are evenly spaced between the delineators
+            tw="py-5 space-y-5"
+          >
+            {groupedUpdateDates.map((updates, idx) => (
+              <CircleWrapper key={idx}>
+                {updates.map(({ id, title, hashLink }) => (
+                  <UpdateCircle
+                    key={id}
+                    hashLink={hashLink}
+                    aria-label={`Go to update ${title}`}
+                  />
+                ))}
+              </CircleWrapper>
+            ))}
+          </FlexWrapper>
+        </>
+      ) : null}
+    </NavWrapper>
   )
 }
 
 // components
+
+function NavWrapper({ children }: { children?: React.ReactNode }) {
+  return (
+    <nav tw="relative w-20 h-full overflow-hidden bg-gray-yellow-600 border-r-2 border-gray-yellow-300">
+      {children}
+    </nav>
+  )
+}
 
 function Bar() {
   return (

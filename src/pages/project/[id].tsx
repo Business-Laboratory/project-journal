@@ -8,11 +8,16 @@ import {
   ProjectInformation,
   Summary,
   HashLinkProvider,
+  LoadingSummary,
+  LoadingTimeline,
+  LoadingProjectInformation,
 } from '@components/project'
 import { appBarHeight } from '@components/app-bar'
 import { useProject } from '@queries/useProject'
 
 import type { ProjectData } from 'pages/api/project'
+import { QueryStatus } from 'react-query'
+import { useAuth } from '@components/auth-context'
 
 export type Updates = ReturnType<typeof useUpdates>
 
@@ -35,17 +40,15 @@ export default function Project() {
 
 function ProjectById({ id }: { id: number }) {
   const { data, status } = useProject(Number(id))
+  // we need to be loading all of the loading indicators if the user hasn't loaded, since it effects the layout
+  const user = useAuth()
   // convert the string dates to dates and add the hash for the links
   const updates = useUpdates(data?.updates ?? [])
-
-  const project = data ?? null
-
-  if (project === null) return null
 
   return (
     <>
       <Header>
-        <title>{project.name ?? 'New Project'} | Project Journal</title>
+        <title>{getProjectTitle(status, data?.name ?? undefined)}</title>
       </Header>
       <main
         tw="fixed overflow-hidden h-full w-full"
@@ -56,28 +59,47 @@ function ProjectById({ id }: { id: number }) {
         `}
       >
         <HashLinkProvider>
-          <Timeline updates={updates} status={status} />
-          <ProjectInformation
-            projectId={Number(id)}
-            updates={updates}
-            status={status}
-          />
+          {user === null || status !== 'success' || data === undefined ? (
+            <LoadingTimeline />
+          ) : (
+            <Timeline updates={updates} />
+          )}
+          {user === null || status !== 'success' || data === undefined ? (
+            <LoadingProjectInformation status={status} />
+          ) : (
+            <ProjectInformation projectId={Number(id)} updates={updates} />
+          )}
         </HashLinkProvider>
-        <Summary
-          projectId={Number(id)}
-          name={project.name ?? ''}
-          imageUrl={project.imageUrl ?? ''}
-          summary={project.summary}
-          clientName={project.client?.name ?? ''}
-          clientEmployees={
-            project.client?.employees.map(({ user }) => user) ?? []
-          }
-          team={project.team}
-          status={status}
-        />
+        {user === null || status !== 'success' || data === undefined ? (
+          <LoadingSummary status={status} />
+        ) : (
+          <Summary
+            projectId={Number(id)}
+            name={data.name ?? ''}
+            imageUrl={data.imageUrl ?? ''}
+            summary={data.summary}
+            clientName={data.client?.name ?? ''}
+            clientEmployees={
+              data.client?.employees.map(({ user }) => user) ?? []
+            }
+            team={data.team}
+          />
+        )}
       </main>
     </>
   )
+}
+
+function getProjectTitle(status: QueryStatus, name?: string) {
+  if (status === 'loading') {
+    return 'Loading Project...'
+  }
+
+  if (status === 'error') {
+    return 'Project Failed To Load'
+  }
+
+  return `${name ?? 'Untitled Project'} | Project Journal`
 }
 
 function useUpdates(originalUpdates: ProjectData['updates']) {

@@ -33,6 +33,48 @@ export default function Projects() {
   )
 }
 
+type CardGridProps = {
+  user: ReturnType<typeof useAuth>
+}
+function CardGrid({ user }: CardGridProps) {
+  const { data, status } = useProjects()
+  const wait = useWaitTimer() // timeout to show a spinner
+
+  if (status === 'error') {
+    return <DataErrorMessage errorMessage="Unable to load projects" />
+  }
+
+  // when the user or the projects data is still loading, return nothing for 1 second, and then a spinner
+  if (user === null || status === 'loading') {
+    if (wait === 'finished') {
+      return <LoadingSpinner loadingMessage="Loading projects" />
+    } else {
+      return null
+    }
+  }
+
+  const userNameFormatted = user?.name ?? 'you'
+  const projects = data ?? []
+
+  return projects.length > 0 ? (
+    <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
+      {projects.map((project, idx) => (
+        <Card
+          key={project.id}
+          id={project.id}
+          name={project.name ?? `Untitled Project (${idx + 1})`}
+          description={project.summary?.description ?? null}
+          imageUrl={project.imageUrl}
+        />
+      ))}
+    </div>
+  ) : status === 'success' ? (
+    <h1 tw="bl-text-3xl max-w-prose text-center">
+      There are currently no projects assigned to {userNameFormatted}
+    </h1>
+  ) : null
+}
+
 type CardProps = {
   id: number
   name: string
@@ -92,55 +134,4 @@ function Card({ id, name, description, imageUrl }: CardProps) {
       </a>
     </Link>
   )
-}
-
-type Project = {
-  name: string | null
-  imageUrl: string | null
-  summary: {
-    description: string | null
-  } | null
-  id: number
-}
-
-type CardGridProps = {
-  user: ReturnType<typeof useAuth>
-}
-function CardGrid({ user }: CardGridProps) {
-  const { data, status } = useProjects()
-  const wait = useWaitTimer() // timeout to show a spinner
-
-  if (status === 'error') {
-    return <DataErrorMessage errorMessage="Unable to load projects" />
-  }
-
-  // when the user or the projects data is still loading, return nothing for 1 second, and then a spinner
-  if (user === null || status === 'loading') {
-    if (wait === 'finished') {
-      return <LoadingSpinner loadingMessage="Loading projects" />
-    } else {
-      return null
-    }
-  }
-
-  const userNameFormatted = user?.name ?? 'you'
-  const projects = data ?? []
-
-  return projects.length > 0 ? (
-    <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
-      {projects.map((project: Project, idx) => (
-        <Card
-          key={project.id}
-          id={project.id}
-          name={project.name ?? `Untitled Project (${idx + 1})`}
-          description={project.summary?.description ?? null}
-          imageUrl={project.imageUrl}
-        />
-      ))}
-    </div>
-  ) : status === 'success' ? (
-    <h1 tw="bl-text-3xl max-w-prose text-center">
-      There are currently no projects assigned to {userNameFormatted}
-    </h1>
-  ) : null
 }
