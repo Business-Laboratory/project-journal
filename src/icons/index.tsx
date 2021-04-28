@@ -8,6 +8,7 @@ import GearIcon from './gear-icon.svg'
 import UpdateLinkIcon from './update-link-icon.svg'
 import CloseIcon from './x-out.svg'
 import CameraIcon from './camera-icon.svg'
+import DeleteIcon from './delete-icon.svg'
 
 export {
   LogoIcon,
@@ -20,4 +21,5 @@ export {
   GearIcon,
   UpdateLinkIcon,
   CameraIcon,
+  DeleteIcon,
 }
