@@ -373,7 +373,7 @@ function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
                     pathName={`/project/${projectId}?updateId=${id}`}
                     replace={true}
                   >
-                    <EditIcon tw="w-6 h-6" />
+                    <EditIcon tw="w-6 h-6 fill-copper-300" />
                     <span
                       css={[
                         routerHash === hashLink
