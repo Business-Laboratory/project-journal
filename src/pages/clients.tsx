@@ -18,7 +18,7 @@ export default function Clients() {
       </Head>
       <main tw="pt-10 w-9/12 min-w-max mx-auto space-y-8">
         <IconLink pathName="#">
-          <PlusIcon tw="w-6 h-6" />
+          <PlusIcon tw="w-6 h-6 fill-copper-300" />
           <span tw="bl-text-2xl">Add client</span>
         </IconLink>
         <ClientList />
