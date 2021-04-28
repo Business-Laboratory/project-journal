@@ -41,11 +41,13 @@ export function ProjectInformation({
   const user = useAuth()
   const [open, setOpen] = useState(false)
   const router = useRouter()
-  let updateId = router.query.updateId
+  let { edit, updateId } = router.query
   if (!updateId || Array.isArray(updateId)) {
     updateId = undefined
   }
-  console.log(router.query)
+  if (!edit || Array.isArray(edit)) {
+    edit = undefined
+  }
 
   useEffect(() => {
     if (!updateId && open) {
@@ -83,7 +85,7 @@ export function ProjectInformation({
           status={status}
         />
       </div>
-      {!!updateId ? (
+      {!!updateId && edit === 'update' && user?.role === 'ADMIN' ? (
         <ProjectModal
           isOpen={open}
           close={close}

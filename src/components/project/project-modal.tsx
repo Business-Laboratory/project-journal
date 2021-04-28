@@ -14,11 +14,16 @@ type NewUpdate = {
   title: string
   body: string
 }
+type DescRoadmapEdit = {
+  id: number
+  title: string
+  body: string
+}
 type ProjectModalProps = {
   isOpen: boolean
   close: () => void
   projectId: number
-  data: string | Update | NewUpdate
+  data: Update | NewUpdate | DescRoadmapEdit
 }
 export function ProjectModal({
   isOpen,
@@ -28,37 +33,49 @@ export function ProjectModal({
 }: ProjectModalProps) {
   return (
     <Modal isOpen={isOpen} onDismiss={close}>
-      <UpdateModalContent projectId={projectId} data={data} close={close} />
+      <ProjectEditModalContent
+        projectId={projectId}
+        data={data}
+        close={close}
+      />
     </Modal>
   )
 }
 
-type UpdateModalContentProps = {
+type ProjectEditModalContentProps = {
   projectId: number
-  data: Update | NewUpdate
+  data: Update | NewUpdate | DescRoadmapEdit
   close: () => void
 }
-function UpdateModalContent({
+function ProjectEditModalContent({
   projectId,
   data,
   close,
   ...props
-}: UpdateModalContentProps) {
+}: ProjectEditModalContentProps) {
   const router = useRouter()
+  const { edit, updateId } = router.query
   const [{ id, title, body, saveState }, dispatch] = useReducer(
     updateReducer,
     initialState(data)
   )
   const queryClient = useQueryClient()
 
-  //Any updateId that isn't found in our data defaults to path /project/projectId?updateId=new
+  //Any updateId that isn't found in our data defaults to path /project/projectId?edit=update&updateId=new
   useEffect(() => {
-    if (id === 'new' && router.query.updateId !== 'new') {
-      router.replace(`/project/${projectId}?updateId=new`, undefined, {
-        shallow: true,
-      })
+    if (id === 'new' && updateId !== 'new' && edit === 'edit') {
+      router.replace(
+        {
+          pathname: `/project/${projectId}`,
+          query: { edit: 'update', updateId: 'new' },
+        },
+        undefined,
+        {
+          shallow: true,
+        }
+      )
     }
-  }, [id, router, projectId])
+  }, [id, router, edit, updateId, projectId])
 
   async function save() {
     dispatch({ type: 'SAVING' })
@@ -83,19 +100,25 @@ function UpdateModalContent({
           >
             <CloseIcon tw="w-4 h-4" />
           </IconLink>
-          <div tw="bl-text-xs text-gray-yellow-300">Update title</div>
-          <input
-            css={[
-              tw`w-full bl-text-3xl placeholder-gray-yellow-400`,
-              tw`focus:outline-none border-b border-gray-yellow-600`,
-            ]}
-            type="text"
-            value={title}
-            onChange={(e) =>
-              dispatch({ type: 'SET_TITLE', payload: e.target.value })
-            }
-            placeholder="Update #"
-          />
+          {edit === 'update' ? (
+            <>
+              <div tw="bl-text-xs text-gray-yellow-300">Update title</div>
+              <input
+                css={[
+                  tw`w-full bl-text-3xl placeholder-gray-yellow-400`,
+                  tw`focus:outline-none border-b border-gray-yellow-600`,
+                ]}
+                type="text"
+                value={title}
+                onChange={(e) =>
+                  dispatch({ type: 'SET_TITLE', payload: e.target.value })
+                }
+                placeholder="Update #"
+              />
+            </>
+          ) : (
+            <div tw="bl-text-3xl">{title}</div>
+          )}
         </div>
         <textarea
           // Padding bottom doesn't work.  Found this age old bug https://bugzilla.mozilla.org/show_bug.cgi?id=748518
@@ -111,10 +134,10 @@ function UpdateModalContent({
             onClick={() => save()}
             disabled={saveState === 'saving' || saveState === 'disabled'}
           >
-            Save update
+            Save {edit}
           </Button>
           {saveState === 'saving' ? (
-            <div tw="bl-text-lg uppercase">Saving update...</div>
+            <div tw="bl-text-lg uppercase">Saving {edit}...</div>
           ) : saveState === 'error' ? (
             <div tw="bl-text-lg uppercase text-matisse-red-200">
               Failed to save
@@ -122,7 +145,7 @@ function UpdateModalContent({
           ) : null}
         </div>
       </div>
-      {id !== 'new' ? (
+      {id !== 'new' && edit === 'update' ? (
         <DeleteSection id={id} title={title} close={close} />
       ) : null}
     </div>
