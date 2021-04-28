@@ -74,7 +74,7 @@ function UserMenu({ imageUrl }: MenuProps) {
         ]}
       >
         {user?.role === 'ADMIN' && (
-          <Link href="/edit-admins" passHref>
+          <Link href="/admins" passHref>
             <MenuLink css={menuItemTw} as="a">
               EDIT ADMINS
             </MenuLink>
