@@ -5,6 +5,7 @@ import type { UpdatesData } from 'pages/api/updates'
 
 export { useUpdates }
 
+export type Updates = ReturnType<typeof useUpdates>['data']
 function useUpdates(projectId: number) {
   return useQuery(['updates', { projectId }], fetchProjectUpdates)
 }

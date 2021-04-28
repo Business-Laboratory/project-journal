@@ -7,6 +7,7 @@ import { Button } from '@components/button'
 import { CloseIcon } from 'icons'
 import { IconLink } from '@components/icon-link'
 import { useQueryClient } from 'react-query'
+import { useDeleteUpdateMutation } from '@queries/useDeleteUpdateMutation'
 
 import type { Updates } from 'pages/project/[id]'
 
@@ -132,7 +133,12 @@ function UpdateModalContent({
         </div>
       </div>
       {id !== 'new' ? (
-        <DeleteSection id={id} title={title} close={close} />
+        <DeleteSection
+          projectId={projectId}
+          updateId={id}
+          title={title}
+          close={close}
+        />
       ) : null}
     </div>
   )
@@ -229,21 +235,27 @@ async function deleteUpdate({ id }: DeleteUpdateProps) {
 }
 
 type DeleteSectionProps = {
-  id: number
+  projectId: number
+  updateId: number
   title: string
   close: () => void
 }
-function DeleteSection({ id, title, close }: DeleteSectionProps) {
+function DeleteSection({
+  projectId,
+  updateId,
+  title,
+  close,
+}: DeleteSectionProps) {
   const [verifyTitle, setVerifyTitle] = useState('')
-  const [deleteState, setDeleteState] = useState<'standby' | 'error'>('standby')
-  const postDelete = async () => {
-    try {
-      await deleteUpdate({ id })
-      setDeleteState('standby')
-      close()
-    } catch {
-      setDeleteState('error')
+  const mutation = useDeleteUpdateMutation()
+
+  const titleIsUnverified = verifyTitle !== title
+
+  const handleDelete = () => {
+    if (titleIsUnverified) {
+      return
     }
+    mutation.mutate({ projectId, updateId }, { onSuccess: close })
   }
 
   return (
@@ -261,10 +273,15 @@ function DeleteSection({ id, title, close }: DeleteSectionProps) {
           />
         </div>
         <div tw="text-right col-span-1 pr-2 space-y-2">
-          <Button disabled={title !== verifyTitle} onClick={() => postDelete()}>
-            Delete update
+          <Button
+            disabled={titleIsUnverified || mutation.status === 'loading'}
+            onClick={handleDelete}
+          >
+            {mutation.status === 'loading'
+              ? 'Deleting update...'
+              : 'Delete update'}
           </Button>
-          {deleteState === 'error' ? (
+          {mutation.status === 'error' ? (
             <div tw="bl-text-lg text-matisse-red-200 uppercase">
               Failed to delete
             </div>
