@@ -62,6 +62,7 @@ async function getProjects(user: UserData) {
     include: {
       summary: {
         select: {
+          id: true,
           description: true,
         },
       },

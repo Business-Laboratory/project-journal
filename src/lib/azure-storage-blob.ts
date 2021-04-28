@@ -1,8 +1,4 @@
-import {
-  BlobServiceClient,
-  BlockBlobClient,
-  ContainerSASPermissions,
-} from '@azure/storage-blob'
+import { BlobServiceClient, ContainerSASPermissions } from '@azure/storage-blob'
 
 export {
   blobServiceClient,

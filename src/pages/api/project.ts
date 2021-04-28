@@ -35,6 +35,7 @@ export default async function handler(
 async function getProject(user: UserData, id: number) {
   const userId = user.id
   const userRole = user.role
+
   const project = await prisma.project.findUnique({
     where: {
       id,
@@ -56,13 +57,6 @@ async function getProject(user: UserData, id: number) {
       },
       team: true,
       summary: true,
-      updates: {
-        orderBy: [
-          {
-            createdAt: 'desc',
-          },
-        ],
-      },
     },
   })
 
