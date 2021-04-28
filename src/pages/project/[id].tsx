@@ -44,6 +44,7 @@ function ProjectById({ id }: { id: number }) {
   const user = useAuth()
   // convert the string dates to dates and add the hash for the links
   const updates = useUpdates(data?.updates ?? [])
+  const userRole = user?.role ?? 'USER'
 
   return (
     <>
@@ -58,32 +59,37 @@ function ProjectById({ id }: { id: number }) {
           grid-template-columns: 80px auto 500px;
         `}
       >
-        <HashLinkProvider>
-          {user === null || status !== 'success' || data === undefined ? (
-            <LoadingTimeline />
-          ) : (
-            <Timeline updates={updates} />
-          )}
-          {user === null || status !== 'success' || data === undefined ? (
-            <LoadingProjectInformation status={status} />
-          ) : (
-            <ProjectInformation projectId={Number(id)} updates={updates} />
-          )}
-        </HashLinkProvider>
         {user === null || status !== 'success' || data === undefined ? (
-          <LoadingSummary status={status} />
+          <>
+            <HashLinkProvider>
+              <LoadingTimeline />
+              <LoadingProjectInformation status={status} />
+            </HashLinkProvider>
+            <LoadingSummary status={status} />
+          </>
         ) : (
-          <Summary
-            projectId={Number(id)}
-            name={data.name ?? ''}
-            imageUrl={data.imageUrl ?? ''}
-            summary={data.summary}
-            clientName={data.client?.name ?? ''}
-            clientEmployees={
-              data.client?.employees.map(({ user }) => user) ?? []
-            }
-            team={data.team}
-          />
+          <>
+            <HashLinkProvider>
+              <Timeline updates={updates} />
+              <ProjectInformation
+                projectId={Number(id)}
+                userRole={userRole}
+                updates={updates}
+              />
+            </HashLinkProvider>
+            <Summary
+              projectId={Number(id)}
+              userRole={userRole}
+              name={data.name ?? ''}
+              imageUrl={data.imageUrl ?? ''}
+              summary={data.summary}
+              clientName={data.client?.name ?? ''}
+              clientEmployees={
+                data.client?.employees.map(({ user }) => user) ?? []
+              }
+              team={data.team}
+            />
+          </>
         )}
       </main>
     </>

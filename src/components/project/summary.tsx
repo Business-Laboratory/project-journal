@@ -3,7 +3,6 @@ import Image from 'next/image'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
 
-import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { EditIcon, GearIcon } from 'icons'
 import { LoadingSpinner } from '@components/loading-spinner'
@@ -12,37 +11,14 @@ import { useWaitTimer } from '@utils/use-wait-timer'
 
 import type { ProjectData } from 'pages/api/project'
 import type { QueryStatus } from 'react-query'
+import { Role } from '@prisma/client'
 
 export { Summary, LoadingSummary }
 
 type Team = ProjectData['team']
 
-type SummaryProps = {
-  projectId: number
-  name: string
-  imageUrl: string
-  summary: ProjectData['summary']
-  clientName: string
-  clientEmployees: Team // TODO: update this. There's probably a better way to do this, but I'm just replacing what was here
-  team: Team
-}
-
 function LoadingSummary({ status }: { status: QueryStatus }) {
   const wait = useWaitTimer()
-
-  if (status === 'error') {
-    return (
-      <aside
-        css={[
-          css`
-            padding-top: 7.625rem;
-          `,
-        ]}
-      >
-        <DataErrorMessage errorMessage="Unable to load summary" />
-      </aside>
-    )
-  }
 
   // when the user or the projects data is still loading, return nothing for 1 second, and then a spinner
   return (
@@ -54,15 +30,28 @@ function LoadingSummary({ status }: { status: QueryStatus }) {
         `,
       ]}
     >
-      {wait === 'finished' ? (
+      {status === 'error' ? (
+        <DataErrorMessage errorMessage="Unable to load summary" />
+      ) : wait === 'finished' ? (
         <LoadingSpinner loadingMessage="Loading project summary" />
       ) : null}
     </aside>
   )
 }
 
+type SummaryProps = {
+  projectId: number
+  userRole: Role
+  name: string
+  imageUrl: string
+  summary: ProjectData['summary']
+  clientName: string
+  clientEmployees: Team // TODO: update this. There's probably a better way to do this, but I'm just replacing what was here
+  team: Team
+}
 function Summary({
   projectId,
+  userRole,
   name,
   imageUrl,
   summary,
@@ -70,17 +59,10 @@ function Summary({
   clientEmployees,
   team,
 }: SummaryProps) {
-  const user = useAuth()
-
-  // TODO: pass this in as a prop
-  if (user === null) {
-    return null
-  }
-
   return (
     <aside tw="relative h-full px-14 overflow-y-auto">
       <div tw="space-y-8 py-10">
-        {user.role === 'ADMIN' ? (
+        {userRole === 'ADMIN' ? (
           <IconLink pathName={`/project/${projectId}/#`}>
             <GearIcon tw="h-6 w-6" />
             {name === '' ? (
@@ -105,7 +87,7 @@ function Summary({
           </div>
         ) : null}
         <div tw="space-y-2">
-          {user.role === 'ADMIN' ? (
+          {userRole === 'ADMIN' ? (
             <IconLink pathName={`/project/${projectId}/#`}>
               <EditIcon tw="h-6 w-6" />
               <h2 tw="bl-text-3xl inline">Project Description</h2>
@@ -118,7 +100,7 @@ function Summary({
           ) : null}
         </div>
         <div tw="space-y-2">
-          {user.role === 'ADMIN' ? (
+          {userRole === 'ADMIN' ? (
             <IconLink pathName={`/project/${projectId}/#`}>
               <EditIcon tw="h-6 w-6" />
               <h2 tw="bl-text-3xl inline">Project Roadmap</h2>

@@ -16,7 +16,6 @@ import gfm from 'remark-gfm'
 import { SearchBar, UpdateModal } from './index'
 import { PlusIcon, EditIcon } from 'icons'
 import { format } from 'date-fns'
-import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { useRouter } from 'next/router'
 import { useSetCurrentHashLink } from './hash-link-context'
@@ -26,6 +25,7 @@ import { useWaitTimer } from '@utils/use-wait-timer'
 
 import type { Updates } from 'pages/project/[id]'
 import type { QueryStatus } from 'react-query'
+import type { Role } from '@prisma/client'
 
 export { ProjectInformation, LoadingProjectInformation }
 
@@ -36,24 +36,26 @@ function LoadingProjectInformation({ status }: { status: QueryStatus }) {
 
   return (
     <ProjectInformationContainer>
-      <div tw="w-9/12 mx-auto py-10 space-y-8">
-        <SearchBar updates={[]} disabled />
-        {status === 'error' ? (
-          <DataErrorMessage errorMessage="Unable to load updates" />
-        ) : wait === 'finished' ? (
-          <LoadingSpinner loadingMessage="Loading updates" />
-        ) : null}
-      </div>
+      <SearchBar updates={[]} disabled />
+      {status === 'error' ? (
+        <DataErrorMessage errorMessage="Unable to load updates" />
+      ) : wait === 'finished' ? (
+        <LoadingSpinner loadingMessage="Loading updates" />
+      ) : null}
     </ProjectInformationContainer>
   )
 }
 
 type ProjectInformationProps = {
   projectId: number
+  userRole: Role
   updates: Updates
 }
-function ProjectInformation({ projectId, updates }: ProjectInformationProps) {
-  const user = useAuth()
+function ProjectInformation({
+  projectId,
+  userRole,
+  updates,
+}: ProjectInformationProps) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
   let updateId = router.query.updateId
@@ -69,11 +71,6 @@ function ProjectInformation({ projectId, updates }: ProjectInformationProps) {
     setOpen(true)
   }, [updateId, updates, open])
 
-  // TODO: pass this in as a prop
-  if (user === null) {
-    return null
-  }
-
   const close = () => {
     setOpen(false)
     router.replace(`/project/${projectId}`, undefined, { shallow: true })
@@ -81,19 +78,21 @@ function ProjectInformation({ projectId, updates }: ProjectInformationProps) {
 
   return (
     <ProjectInformationContainer>
-      <div tw="w-9/12 mx-auto py-10 space-y-8">
-        <SearchBar updates={updates} />
-        {user.role === 'ADMIN' && (
-          <IconLink
-            pathName={`/project/${projectId}?updateId=new`}
-            replace={true}
-          >
-            <PlusIcon tw="w-6 h-6" />
-            <span tw="bl-text-2xl">Add update</span>
-          </IconLink>
-        )}
-        <UpdatesList updates={updates} role={user.role} projectId={projectId} />
-      </div>
+      <SearchBar updates={updates} />
+      {userRole === 'ADMIN' ? (
+        <IconLink
+          pathName={`/project/${projectId}?updateId=new`}
+          replace={true}
+        >
+          <PlusIcon tw="w-6 h-6" />
+          <span tw="bl-text-2xl">Add update</span>
+        </IconLink>
+      ) : null}
+      <UpdatesList
+        updates={updates}
+        userRole={userRole}
+        projectId={projectId}
+      />
       {!!updateId ? (
         <UpdateModal
           isOpen={open}
@@ -143,9 +142,11 @@ function ProjectInformationContainer({
         `,
       ]}
     >
-      <OnScrollRefContext.Provider value={onScrollRef}>
-        {children}
-      </OnScrollRefContext.Provider>
+      <div tw="w-9/12 mx-auto py-10 space-y-8">
+        <OnScrollRefContext.Provider value={onScrollRef}>
+          {children}
+        </OnScrollRefContext.Provider>
+      </div>
     </article>
   )
 }
@@ -352,17 +353,17 @@ const applyToFirstChild = (
 
 type UpdatesListProps = {
   updates: Updates
-  role: string | undefined | null
+  userRole: Role
   projectId: number
 }
-function UpdatesList({ updates, role, projectId }: UpdatesListProps) {
+function UpdatesList({ updates, userRole, projectId }: UpdatesListProps) {
   return updates?.length > 0 ? (
     <UpdatesContainer>
       {updates.map(({ id, hashLink, title, body, createdAt }) => {
         return (
           <UpdateContainer key={id} id={hashLink.replace('#', '')}>
             <div tw="inline-flex items-center space-x-2">
-              {role === 'ADMIN' ? (
+              {userRole === 'ADMIN' ? (
                 <IconLink
                   pathName={`/project/${projectId}?updateId=${id}`}
                   replace={true}
