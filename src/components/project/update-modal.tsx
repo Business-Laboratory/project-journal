@@ -6,10 +6,10 @@ import { Modal } from '@components/modal'
 import { Button } from '@components/button'
 import { CloseIcon } from 'icons'
 import { IconLink } from '@components/icon-link'
-import { useQueryClient } from 'react-query'
 import { useDeleteUpdateMutation } from '@queries/useDeleteUpdateMutation'
 
 import type { Updates } from 'pages/project/[id]'
+import { useUpdateMutation } from '@queries/useUpdateMutation'
 
 type Update = Updates[0]
 
@@ -55,11 +55,11 @@ function UpdateModalContent({
   ...props
 }: UpdateModalContentProps) {
   const router = useRouter()
-  const [{ id, title, body, saveState }, dispatch] = useReducer(
+  const [{ id, title, body }, dispatch] = useReducer(
     updateReducer,
     initialState(update)
   )
-  const queryClient = useQueryClient()
+  const mutation = useUpdateMutation(projectId)
 
   //Any updateId that isn't found in our data defaults to path /project/projectId?updateId=new
   useEffect(() => {
@@ -71,14 +71,10 @@ function UpdateModalContent({
   }, [id, router, projectId])
 
   async function save() {
-    dispatch({ type: 'SAVING' })
-    try {
-      await postUpdate({ id, title, body, projectId })
-      queryClient.invalidateQueries('project')
-      close()
-    } catch {
-      dispatch({ type: 'FAILURE' })
+    if (mutation.status === 'loading') {
+      return
     }
+    mutation.mutate({ id, title, body, projectId }, { onSuccess: close })
   }
 
   return (
@@ -119,13 +115,11 @@ function UpdateModalContent({
           <Button
             variant="important"
             onClick={() => save()}
-            disabled={saveState === 'saving' || saveState === 'disabled'}
+            disabled={mutation.status === 'loading'}
           >
-            Save update
+            {mutation.status === 'loading' ? 'Saving update...' : 'Save update'}
           </Button>
-          {saveState === 'saving' ? (
-            <div tw="bl-text-lg uppercase">Saving update...</div>
-          ) : saveState === 'error' ? (
+          {mutation.status === 'error' ? (
             <div tw="bl-text-lg uppercase text-matisse-red-200">
               Failed to save
             </div>
@@ -201,39 +195,6 @@ function updateReducer(
   }
 }
 
-type PostUpdateProps = {
-  id: number | 'new'
-  title: string
-  body: string
-  projectId: number
-}
-async function postUpdate({ id, title, body, projectId }: PostUpdateProps) {
-  const res = await fetch(`/api/update`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, title, body, projectId }),
-  })
-  if (!res.ok) {
-    const response = await res.json()
-    throw new Error(response.error)
-  }
-}
-
-type DeleteUpdateProps = {
-  id: number
-}
-async function deleteUpdate({ id }: DeleteUpdateProps) {
-  const res = await fetch(`/api/update`, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id }),
-  })
-  if (!res.ok) {
-    const response = await res.json()
-    throw new Error(response.error)
-  }
-}
-
 type DeleteSectionProps = {
   projectId: number
   updateId: number
@@ -247,7 +208,7 @@ function DeleteSection({
   close,
 }: DeleteSectionProps) {
   const [verifyTitle, setVerifyTitle] = useState('')
-  const mutation = useDeleteUpdateMutation()
+  const mutation = useDeleteUpdateMutation(projectId)
 
   const titleIsUnverified = verifyTitle !== title
 
@@ -255,7 +216,7 @@ function DeleteSection({
     if (titleIsUnverified) {
       return
     }
-    mutation.mutate({ projectId, updateId }, { onSuccess: close })
+    mutation.mutate(updateId, { onSuccess: close })
   }
 
   return (

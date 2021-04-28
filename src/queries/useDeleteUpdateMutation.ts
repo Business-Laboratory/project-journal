@@ -2,38 +2,31 @@ import { useQueryClient, useMutation } from 'react-query'
 
 import type { Updates } from './useUpdates'
 
-export function useDeleteUpdateMutation() {
+export function useDeleteUpdateMutation(projectId: number) {
   const queryClient = useQueryClient()
+  const updateKey = ['updates', { projectId }]
   return useMutation(deleteUpdate, {
-    onSuccess: async (_, { projectId, updateId }) => {
+    onSuccess: async (_, id) => {
       await queryClient.cancelQueries('updates')
-      const updateKey = ['updates', { projectId }]
       const previousUpdates = queryClient.getQueryData<Updates>(updateKey) ?? []
-      const deleteUpdateIdIdx = previousUpdates.findIndex(
-        ({ id }) => id === updateId
-      )
-      if (deleteUpdateIdIdx === -1) {
-        throw new Error(`Update with id ${updateId} not found in query cache`)
+      const deleteIdIdx = previousUpdates.findIndex((u) => u.id === id)
+      if (deleteIdIdx === -1) {
+        throw new Error(`Update with id ${id} not found in query cache`)
       }
       let newUpdates = [...previousUpdates]
-      newUpdates.splice(deleteUpdateIdIdx, 1)
+      newUpdates.splice(deleteIdIdx, 1)
       queryClient.setQueryData(updateKey, newUpdates)
     },
-    onSettled: (_, error, { projectId }) => {
-      queryClient.invalidateQueries(['updates', { projectId }])
+    onSettled: () => {
+      queryClient.invalidateQueries(updateKey)
     },
   })
 }
-
-type DeleteUpdateProps = {
-  projectId: number
-  updateId: number
-}
-async function deleteUpdate({ projectId, updateId }: DeleteUpdateProps) {
+async function deleteUpdate(id: number) {
   const res = await fetch(`/api/update`, {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id: updateId }),
+    body: JSON.stringify({ id: id }),
   })
   if (!res.ok) {
     const data = await res.json()
