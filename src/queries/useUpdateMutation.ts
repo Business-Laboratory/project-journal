@@ -7,7 +7,7 @@ import type { Update } from 'pages/api/update'
 export function useUpdateMutation(projectId: number) {
   const queryClient = useQueryClient()
   const updateKey = ['updates', { projectId }]
-  return useMutation(postUpdate, {
+  return useMutation(createOrUpdateUpdate, {
     onSuccess: async (update, { id }) => {
       await queryClient.cancelQueries('updates')
       const previousUpdates = queryClient.getQueryData<Updates>(updateKey) ?? []
@@ -31,13 +31,13 @@ export function useUpdateMutation(projectId: number) {
   })
 }
 
-type PostUpdateProps = {
+type UpdateData = {
   id: number | 'new'
   title: string
   body: string
   projectId: number
 }
-async function postUpdate(data: PostUpdateProps) {
+async function createOrUpdateUpdate(data: UpdateData) {
   const res = await fetch(`/api/update`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

@@ -1,8 +1,8 @@
 import tw from 'twin.macro'
 import { useRouter } from 'next/router'
-import React, { useEffect, useReducer, useState } from 'react'
+import React, { useEffect, useReducer } from 'react'
 
-import { Modal } from '@components/modal'
+import { DeleteSection, Modal } from '@components/modal'
 import { Button } from '@components/button'
 import { CloseIcon } from 'icons'
 import { IconLink } from '@components/icon-link'
@@ -53,7 +53,6 @@ function ProjectEditModalContent({
   projectId,
   data,
   close,
-  ...props
 }: ProjectEditModalContentProps) {
   const router = useRouter()
   const { edit, updateId } = router.query
@@ -96,6 +95,8 @@ function ProjectEditModalContent({
     }
   }
 
+  const deleteMutation = useDeleteUpdateMutation(projectId)
+
   return (
     <div tw="space-y-16">
       <div tw="space-y-8 text-right">
@@ -129,7 +130,7 @@ function ProjectEditModalContent({
           )}
         </div>
         <textarea
-          // Padding bottom doesn't work.  Found this age old bug https://bugzilla.mozilla.org/show_bug.cgi?id=748518
+          // Padding bottom doesn't work. Found this age old bug https://bugzilla.mozilla.org/show_bug.cgi?id=748518
           tw="w-full h-64 py-6 px-5 overflow-y-scroll resize-none focus:outline-none border border-gray-yellow-600"
           value={body}
           onChange={(e) =>
@@ -153,69 +154,15 @@ function ProjectEditModalContent({
       </div>
       {id !== 'new' && edit === 'update' ? (
         <DeleteSection
-          projectId={projectId}
-          updateId={id}
-          title={title}
-          close={close}
-          post={() => deleteUpdate({ id })}
+          verificationText={title}
+          onDelete={() => {
+            deleteMutation.mutate(id, {
+              onSuccess: close,
+            })
+          }}
+          status={deleteMutation.status}
         />
       ) : null}
-    </div>
-  )
-}
-
-type DeleteSectionProps = {
-  projectId: number
-  updateId: number
-  title: string
-  close: () => void
-  post: () => Promise<void>
-}
-export function DeleteSection({
-  projectId,
-  updateId,
-  title,
-  close,
-  post,
-}: DeleteSectionProps) {
-  const [verifyTitle, setVerifyTitle] = useState('')
-  const mutation = useDeleteUpdateMutation(projectId)
-
-  const handelDelete = async () => {
-    await mutation.mutate(updateId, {
-      onSuccess: close,
-    })
-  }
-
-  return (
-    <div tw="space-y-10">
-      <div tw="w-full border-b border-dashed border-matisse-red-200" />
-      <div tw="w-full grid grid-cols-2 col-auto gap-x-4">
-        <div tw="text-left col-span-1">
-          <div tw="bl-text-xs text-gray-yellow-300">Verify update title</div>
-          <input
-            tw="w-full placeholder-gray-yellow-400 border-b border-gray-yellow-600 focus:outline-none"
-            type="text"
-            value={verifyTitle}
-            onChange={(e) => setVerifyTitle(e.target.value)}
-            placeholder="Update #"
-          />
-        </div>
-        <div tw="text-center ml-auto max-w-max col-span-1 space-y-2">
-          <Button
-            disabled={title !== verifyTitle || mutation.status === 'loading'}
-            onClick={() => handelDelete()}
-            variant="danger"
-          >
-            {mutation.status === 'loading' ? 'Deleting...' : 'Delete update'}
-          </Button>
-          {mutation.status === 'error' ? (
-            <div tw="bl-text-lg text-matisse-red-200 uppercase">
-              Failed to delete
-            </div>
-          ) : null}
-        </div>
-      </div>
     </div>
   )
 }
@@ -274,21 +221,6 @@ function updateReducer(
       const saveState: SaveState = 'error'
       return { ...state, saveState }
     }
-  }
-}
-
-type DeleteUpdateProps = {
-  id: number
-}
-async function deleteUpdate({ id }: DeleteUpdateProps) {
-  const res = await fetch(`/api/update`, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id }),
-  })
-  if (!res.ok) {
-    const response = await res.json()
-    throw new Error(response.error)
   }
 }
 
