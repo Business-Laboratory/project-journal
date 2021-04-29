@@ -119,18 +119,18 @@ model Update {
   body      String
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @default(now()) @map(name: "updated_at")
-  project   Project? @relation(fields: [projectId], references: [id])
-  projectId Int?     @map(name: "project_id")
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId Int      @map(name: "project_id")
 
   @@map(name: "updates")
 }
 
 model Summary {
-  id          Int      @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   description String?
   roadmap     String?
-  project     Project? @relation(fields: [projectId], references: [id])
-  projectId   Int?     @map(name: "project_id")
+  project     Project @relation(fields: [projectId], references: [id])
+  projectId   Int     @map(name: "project_id")
 
   @@map(name: "summaries")
 }
