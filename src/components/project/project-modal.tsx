@@ -1,6 +1,6 @@
 import tw from 'twin.macro'
 import { useRouter } from 'next/router'
-import React, { useEffect, useReducer, useState } from 'react'
+import React, { useEffect, useReducer } from 'react'
 
 import { Update } from '@prisma/client'
 import { Modal } from '@components/modal'
@@ -8,6 +8,7 @@ import { Button } from '@components/button'
 import { CloseIcon } from 'icons'
 import { IconLink } from '@components/icon-link'
 import { useQueryClient } from 'react-query'
+import { DeleteSection } from './index'
 
 type NewUpdate = {
   id: 'new'
@@ -80,7 +81,15 @@ function ProjectEditModalContent({
   async function save() {
     dispatch({ type: 'SAVING' })
     try {
-      await postUpdate({ id, title, body, projectId })
+      if (edit === 'update') {
+        await postUpdate({ id, title, body, projectId })
+      }
+      if (
+        (edit === 'description' || edit === 'roadmap') &&
+        typeof id === 'number'
+      ) {
+        await postSummaryEdit({ id, edit, body })
+      }
       queryClient.invalidateQueries('project')
       close()
     } catch {
@@ -146,7 +155,12 @@ function ProjectEditModalContent({
         </div>
       </div>
       {id !== 'new' && edit === 'update' ? (
-        <DeleteSection id={id} title={title} close={close} />
+        <DeleteSection
+          id={id}
+          title={title}
+          close={close}
+          post={() => deleteUpdate({ id })}
+        />
       ) : null}
     </div>
   )
@@ -242,49 +256,19 @@ async function deleteUpdate({ id }: DeleteUpdateProps) {
   }
 }
 
-type DeleteSectionProps = {
+type PostSummaryEditProps = {
   id: number
-  title: string
-  close: () => void
+  edit: 'description' | 'roadmap'
+  body: string
 }
-function DeleteSection({ id, title, close }: DeleteSectionProps) {
-  const [verifyTitle, setVerifyTitle] = useState('')
-  const [deleteState, setDeleteState] = useState<'standby' | 'error'>('standby')
-  const postDelete = async () => {
-    try {
-      await deleteUpdate({ id })
-      setDeleteState('standby')
-      close()
-    } catch {
-      setDeleteState('error')
-    }
+async function postSummaryEdit({ id, edit, body }: PostSummaryEditProps) {
+  const res = await fetch(`/api/summary`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, edit, body }),
+  })
+  if (!res.ok) {
+    const response = await res.json()
+    throw new Error(response.error)
   }
-
-  return (
-    <div tw="space-y-12">
-      <div tw="w-full border-b border-dashed border-matisse-red-200" />
-      <div tw="w-full grid grid-cols-2 col-auto gap-x-4">
-        <div tw="text-left col-span-1">
-          <div tw="bl-text-xs text-gray-yellow-300">Verify update title</div>
-          <input
-            tw="w-full placeholder-gray-yellow-400 border-b border-gray-yellow-600 focus:outline-none"
-            type="text"
-            value={verifyTitle}
-            onChange={(e) => setVerifyTitle(e.target.value)}
-            placeholder="Update #"
-          />
-        </div>
-        <div tw="text-right col-span-1 pr-2 space-y-2">
-          <Button disabled={title !== verifyTitle} onClick={() => postDelete()}>
-            Delete update
-          </Button>
-          {deleteState === 'error' ? (
-            <div tw="bl-text-lg text-matisse-red-200 uppercase">
-              Failed to delete
-            </div>
-          ) : null}
-        </div>
-      </div>
-    </div>
-  )
 }
