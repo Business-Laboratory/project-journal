@@ -4,7 +4,12 @@ import { preprocessUpdate } from './useUpdates'
 import type { Updates } from './useUpdates'
 import type { Update } from 'pages/api/update'
 
-export function useUpdateMutation(projectId: number) {
+export { useUpdateMutation }
+export type UpdateBody = Parameters<
+  ReturnType<typeof useUpdateMutation>['mutate']
+>[0]
+
+function useUpdateMutation(projectId: number) {
   const queryClient = useQueryClient()
   const updateKey = ['updates', { projectId }]
   return useMutation(createOrUpdateUpdate, {

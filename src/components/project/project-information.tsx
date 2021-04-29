@@ -14,7 +14,7 @@ import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
 import Link from 'next/link'
 
-import { SearchBar, ProjectModal } from './index'
+import { SearchBar, UpdateModal } from './index'
 import { PlusIcon, EditIcon, UpdateLinkIcon } from 'icons'
 import { format } from 'date-fns'
 import { IconLink } from '@components/icon-link'
@@ -27,6 +27,7 @@ import { useWaitTimer } from '@utils/use-wait-timer'
 import type { Updates } from '@queries/useUpdates'
 import type { QueryStatus } from 'react-query'
 import type { Role } from '@prisma/client'
+import { createUpdatePath } from './update-modal'
 
 export { ProjectInformation, LoadingProjectInformation }
 
@@ -73,52 +74,20 @@ function ProjectInformation({
   userRole,
   updates,
 }: ProjectInformationProps) {
-  const [open, setOpen] = useState(false)
-  const router = useRouter()
-  let { edit, updateId } = router.query
-  if (!updateId || Array.isArray(updateId)) {
-    updateId = undefined
-  }
-  if (!edit || Array.isArray(edit)) {
-    edit = undefined
-  }
-
-  useEffect(() => {
-    if (!updateId && open) {
-      setOpen(false)
-    }
-    if (!updateId) return
-    setOpen(true)
-  }, [updateId, updates, open])
-
-  const close = () => {
-    setOpen(false)
-    router.replace(`/project/${projectId}`, undefined, { shallow: true })
-  }
-
   return (
     <ProjectInformationContainer>
       <SearchBar updates={updates} />
-      {userRole === 'ADMIN' ? <AddUpdateButton projectId={projectId} /> : null}
+      {userRole === 'ADMIN' ? (
+        <>
+          <AddUpdateButton projectId={projectId} />
+          <UpdateModal projectId={projectId} updates={updates} />
+        </>
+      ) : null}
       <UpdatesList
         updates={updates}
         userRole={userRole}
         projectId={projectId}
       />
-      {!!updateId && edit === 'update' && userRole === 'ADMIN' ? (
-        <ProjectModal
-          isOpen={open}
-          close={close}
-          projectId={projectId}
-          data={
-            updates.find(({ id }) => id === Number(updateId)) ?? {
-              id: 'new',
-              title: '',
-              body: '',
-            }
-          }
-        />
-      ) : null}
     </ProjectInformationContainer>
   )
 }
@@ -201,13 +170,7 @@ function useOnScroll(onScroll: OnScrollFunction) {
 
 function AddUpdateButton({ projectId }: { projectId: number }) {
   return (
-    <IconLink
-      pathName={{
-        pathname: `/project/${projectId}`,
-        query: { edit: 'update', updateId: 'new' },
-      }}
-      replace={true}
-    >
+    <IconLink pathName={createUpdatePath(projectId, 'new')} replace={true}>
       <PlusIcon tw="w-6 h-6 fill-copper-300" />
       <span tw="bl-text-2xl">Add update</span>
     </IconLink>
@@ -397,10 +360,7 @@ function UpdatesList({ updates, userRole, projectId }: UpdatesListProps) {
               <div tw="inline-flex items-center space-x-2">
                 {userRole === 'ADMIN' ? (
                   <IconLink
-                    pathName={{
-                      pathname: `/project/${projectId}`,
-                      query: { edit: 'update', updateId: `${id}` },
-                    }}
+                    pathName={createUpdatePath(projectId, id)}
                     replace={true}
                   >
                     <EditIcon tw="w-6 h-6 fill-copper-300" />
