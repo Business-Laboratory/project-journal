@@ -1,6 +1,7 @@
 // Assign and remove admin users
-import 'twin.macro'
+import tw, { css } from 'twin.macro'
 import Head from 'next/head'
+import { Fragment } from 'react'
 import { IconLink } from '@components/icon-link'
 import { EditIcon } from 'icons'
 import { AdminsData } from './api/admins'
@@ -15,7 +16,7 @@ export default function DefaultComponent() {
       <Head>
         <title>Admins | Project Journal</title>
       </Head>
-      <main tw="pt-10 w-9/12 min-w-max mx-auto space-y-8">
+      <main tw="pt-10  max-w-max mx-auto space-y-8">
         <IconLink pathName="#">
           <EditIcon tw="w-6 h-6 fill-copper-300" />
           <span tw="bl-text-3xl">Admins</span>
@@ -28,7 +29,7 @@ export default function DefaultComponent() {
 
 function AdminsGrid() {
   const { data, status } = useQuery('users', fetchAdmins)
-  console.log(data)
+
   const wait = useWaitTimer()
 
   if (status === 'error') {
@@ -42,7 +43,25 @@ function AdminsGrid() {
   const admins = data ?? []
 
   return admins.length > 0 ? (
-    <p>I'm a grid</p>
+    <>
+      <div
+        css={[
+          css`
+            grid-template-columns: repeat(2, minmax(10rem, max-content));
+          `,
+          tw`grid gap-x-3 gap-y-2 bl-text-lg`,
+        ]}
+      >
+        <span tw="col-span-1">Name</span>
+        <span tw="col-span-1">Email</span>
+        {admins.map(({ id, name, email }) => (
+          <Fragment key={id}>
+            <span tw="bl-text-base col-span-1">{name}</span>
+            <span tw="bl-text-base col-span-1">{email}</span>
+          </Fragment>
+        ))}
+      </div>
+    </>
   ) : status === 'success' ? (
     <h1 tw="bl-text-3xl max-w-prose text-center">No admins are available</h1>
   ) : null
