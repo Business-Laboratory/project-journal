@@ -18,7 +18,7 @@ export default function Clients() {
       </Head>
       <main tw="pt-10 w-9/12 min-w-max mx-auto space-y-8">
         <IconLink pathName="#">
-          <PlusIcon tw="w-6 h-6" />
+          <PlusIcon tw="w-6 h-6 fill-copper-300" />
           <span tw="bl-text-2xl">Add client</span>
         </IconLink>
         <ClientList />
@@ -47,7 +47,7 @@ function ClientList() {
       {clients.map(({ id, name, employees }) => (
         <div key={id} tw="space-y-4">
           <IconLink pathName="#">
-            <EditIcon tw="w-6 h-6" />
+            <EditIcon tw="w-6 h-6 fill-copper-300" />
             <span tw="bl-text-3xl">{name}</span>
           </IconLink>
           <div tw="grid grid-cols-3 gap-x-3 gap-y-2 bl-text-lg">
