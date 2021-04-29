@@ -7,9 +7,9 @@ import { Button } from '@components/button'
 import { CloseIcon } from 'icons'
 import { IconLink } from '@components/icon-link'
 import { useDeleteUpdateMutation } from '@queries/useDeleteUpdateMutation'
-
-import type { Updates } from 'pages/project/[id]'
 import { useUpdateMutation } from '@queries/useUpdateMutation'
+
+import type { Updates } from '@queries/useUpdates'
 
 type Update = Updates[0]
 

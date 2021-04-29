@@ -9,13 +9,19 @@ import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
 import { useWaitTimer } from '@utils/use-wait-timer'
 
-import type { ProjectData } from 'pages/api/project'
 import type { QueryStatus } from 'react-query'
 import type { Role } from '@prisma/client'
+import type { Project } from '@queries/useProject'
 
 export { Summary, LoadingSummary }
 
-type Team = ProjectData['team']
+// types
+
+type Team = Project['team']
+type ClientEmployees = Exclude<
+  Project['client'],
+  null
+>['employees'][0]['user'][]
 
 type LoadingSummaryProps = {
   status: QueryStatus
@@ -53,9 +59,9 @@ type SummaryProps = {
   userRole: Role
   name: string
   imageUrl: string
-  summary: ProjectData['summary']
+  summary: Project['summary']
   clientName: string
-  clientEmployees: Team // TODO: update this. There's probably a better way to do this, but I'm just replacing what was here
+  clientEmployees: ClientEmployees // TODO: update this. There's probably a better way to do this, but I'm just replacing what was here
   team: Team
 }
 function Summary({

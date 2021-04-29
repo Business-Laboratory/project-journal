@@ -20,7 +20,7 @@ import { getDocumentFontSize } from '@utils/get-document-font-size'
 import { useCurrentHashLink } from './hash-link-context'
 
 import type { Interval } from 'date-fns'
-import type { Updates } from 'pages/project/[id]'
+import type { Updates } from '@queries/useUpdates'
 
 export { Timeline, LoadingTimeline }
 

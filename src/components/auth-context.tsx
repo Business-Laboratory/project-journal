@@ -6,7 +6,7 @@ import { Button } from '@components/button'
 import { useUser } from '@queries/useUser'
 
 import type { QueryStatus } from 'react-query'
-import type { UserData } from 'pages/api/user'
+import type { User as UserData } from '@queries/useUser'
 
 // this is typed out because I was having trouble removing the nulls from
 // the data that comes from useSession

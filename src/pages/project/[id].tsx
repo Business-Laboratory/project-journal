@@ -1,5 +1,5 @@
 import { css } from 'twin.macro'
-import { useMemo, memo } from 'react'
+import { memo } from 'react'
 import Header from 'next/head'
 import { useRouter } from 'next/router'
 
@@ -19,9 +19,6 @@ import { QueryStatus } from 'react-query'
 import { useAuth } from '@components/auth-context'
 import { useUpdates } from '@queries/useUpdates'
 import { Role } from '.prisma/client'
-import type { UpdatesData } from 'pages/api/updates'
-
-export type Updates = ReturnType<typeof useUpdatesOld>
 
 export default function Project() {
   const { query } = useRouter()
@@ -99,7 +96,7 @@ const TimelineAndProjectInformation = memo(
     const { data, status } = useUpdates(projectId)
 
     // convert the string dates to dates and add the hash for the links
-    const updates = useUpdatesOld(data ?? [])
+    const updates = data ?? []
 
     return (
       <HashLinkProvider>
@@ -137,17 +134,4 @@ function getProjectTitle(status: QueryStatus, name?: string) {
   }
 
   return `${name ?? 'Untitled Project'} | Project Journal`
-}
-
-function useUpdatesOld(originalUpdates: UpdatesData) {
-  return useMemo(
-    () =>
-      originalUpdates.map((update) => ({
-        ...update,
-        createdAt: new Date(update.createdAt),
-        updatedAt: new Date(update.updatedAt),
-        hashLink: `#update-${update.id}`,
-      })) ?? [],
-    [originalUpdates]
-  )
 }

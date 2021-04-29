@@ -2,8 +2,10 @@ import { useQuery } from 'react-query'
 
 import type { QueryFunction } from 'react-query'
 import type { UserData } from 'pages/api/user'
+import type { QueryData } from '@types'
 
 export { useUser }
+export type User = QueryData<typeof useUser>
 
 function useUser(email: string) {
   const user = useQuery(['user', { email }], fetchUser, {

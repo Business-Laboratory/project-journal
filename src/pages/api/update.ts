@@ -32,7 +32,7 @@ export default async function handler(
 
   if (method === 'POST') {
     try {
-      const update: Update = await addOrUpdateUpdate(id, title, body, projectId)
+      const update = await addOrUpdateUpdate(id, title, body, projectId)
       res.status(200).json(update)
     } catch (error) {
       res.status(501).json({ error })

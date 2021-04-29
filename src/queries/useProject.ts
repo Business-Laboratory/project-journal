@@ -1,14 +1,13 @@
+import { useMemo } from 'react'
 import { useQuery, useQueryClient } from 'react-query'
 
 import type { QueryFunction } from 'react-query'
 import type { ProjectData } from 'pages/api/project'
-import type { useProjects } from './useProjects'
-
-import { useMemo } from 'react'
+import type { Projects } from './useProjects'
+import type { QueryData } from '@types'
 
 export { useProject }
-
-type Projects = ReturnType<typeof useProjects>['data']
+export type Project = QueryData<typeof useProject>
 
 function useProject(id: number) {
   const placeholderData = useProjectPlaceholderData(id)

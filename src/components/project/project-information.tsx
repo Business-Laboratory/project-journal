@@ -23,7 +23,7 @@ import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
 import { useWaitTimer } from '@utils/use-wait-timer'
 
-import type { Updates } from 'pages/project/[id]'
+import type { Updates } from '@queries/useUpdates'
 import type { QueryStatus } from 'react-query'
 import type { Role } from '@prisma/client'
 
