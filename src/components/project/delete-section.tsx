@@ -2,6 +2,7 @@ import 'twin.macro'
 import React, { useState } from 'react'
 
 import { Button } from '@components/button'
+import { useQueryClient } from 'react-query'
 
 type DeleteSectionProps = {
   id: number
@@ -12,10 +13,12 @@ type DeleteSectionProps = {
 export function DeleteSection({ id, title, close, post }: DeleteSectionProps) {
   const [verifyTitle, setVerifyTitle] = useState('')
   const [deleteState, setDeleteState] = useState<'standby' | 'error'>('standby')
+  const queryClient = useQueryClient()
   const postDelete = async () => {
     try {
       await post()
       setDeleteState('standby')
+      queryClient.invalidateQueries('project')
       close()
     } catch {
       setDeleteState('error')
