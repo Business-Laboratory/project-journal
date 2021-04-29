@@ -18,8 +18,9 @@ function useProject(id: number) {
 
 function useProjectPlaceholderData(projectId: number): ProjectData | undefined {
   const queryClient = useQueryClient()
-  const projects = queryClient.getQueryData('projects') as Projects
+  const projects = queryClient.getQueryData<Projects>('projects')
   const project = projects?.find(({ id }) => id === projectId)
+
   return useMemo(() => {
     return project
       ? {
@@ -31,9 +32,9 @@ function useProjectPlaceholderData(projectId: number): ProjectData | undefined {
           summary: project.summary
             ? {
                 id: project.summary.id,
+                projectId: project.summary.projectId,
                 description: project.summary.description,
                 roadmap: null,
-                projectId: null,
               }
             : null,
         }

@@ -64,6 +64,7 @@ async function getProjects(user: UserData) {
         select: {
           id: true,
           description: true,
+          projectId: true,
         },
       },
     },
