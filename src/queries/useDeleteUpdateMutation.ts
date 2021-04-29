@@ -7,7 +7,7 @@ export function useDeleteUpdateMutation(projectId: number) {
   const updateKey = ['updates', { projectId }]
   return useMutation(deleteUpdate, {
     onSuccess: async (_, id) => {
-      await queryClient.cancelQueries('updates')
+      await queryClient.cancelQueries(updateKey)
       const previousUpdates = queryClient.getQueryData<Updates>(updateKey) ?? []
       const deleteIdIdx = previousUpdates.findIndex((u) => u.id === id)
       if (deleteIdIdx === -1) {

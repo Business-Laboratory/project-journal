@@ -14,7 +14,7 @@ function useUpdateMutation(projectId: number) {
   const updateKey = ['updates', { projectId }]
   return useMutation(createOrUpdateUpdate, {
     onSuccess: async (update, { id }) => {
-      await queryClient.cancelQueries('updates')
+      await queryClient.cancelQueries(updateKey)
       const previousUpdates = queryClient.getQueryData<Updates>(updateKey) ?? []
       let newUpdates = [...previousUpdates]
       const newUpdate = preprocessUpdate(update)
