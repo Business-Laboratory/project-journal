@@ -80,7 +80,7 @@ export function ProjectInformation({
             }}
             replace={true}
           >
-            <PlusIcon tw="w-6 h-6" />
+            <PlusIcon tw="w-6 h-6 fill-copper-300" />
             <span tw="bl-text-2xl">Add update</span>
           </IconLink>
         )}
@@ -382,7 +382,7 @@ function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
                     }}
                     replace={true}
                   >
-                    <EditIcon tw="w-6 h-6" />
+                    <EditIcon tw="w-6 h-6 fill-copper-300" />
                     <span
                       css={[
                         routerHash === hashLink

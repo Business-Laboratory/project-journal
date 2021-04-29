@@ -105,7 +105,7 @@ export function Summary({
       <div tw="space-y-8 py-10">
         {user?.role === 'ADMIN' ? (
           <IconLink pathName={`/project/${projectId}/#`}>
-            <GearIcon tw="h-6 w-6" />
+            <GearIcon tw="h-6 w-6 fill-copper-300" />
             {name === '' ? (
               <h1 tw="bl-text-4xl text-gray-yellow-300 inline capitalize">
                 Untitled project
