@@ -13,7 +13,7 @@ import { useRouter } from 'next/router'
 import { useRect } from '@reach/rect'
 import { matchSorter } from 'match-sorter'
 
-import { SearchIcon, SearchIconDisabled } from 'icons'
+import { SearchIcon } from 'icons'
 
 import type { Updates } from 'pages/project/[id]'
 
@@ -115,11 +115,12 @@ function InnerCombobox({
   return (
     <>
       <label ref={labelRef} htmlFor={id} css={labelCss(disabled)}>
-        {disabled ? (
-          <SearchIconDisabled tw="w-5 h-5" />
-        ) : (
-          <SearchIcon tw="w-5 h-5" />
-        )}
+        <SearchIcon
+          css={[
+            tw`w-5 h-5`,
+            disabled ? tw`fill-gray-yellow-300` : tw`fill-copper-300`,
+          ]}
+        />
         <ComboboxInput
           id={id}
           ref={inputRef}
