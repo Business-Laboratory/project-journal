@@ -12,9 +12,10 @@ import React, {
 } from 'react'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
+import Link from 'next/link'
 
-import { SearchBar, UpdateModal } from './index'
-import { PlusIcon, EditIcon } from 'icons'
+import { SearchBar, ProjectModal } from './index'
+import { PlusIcon, EditIcon, UpdateLinkIcon } from 'icons'
 import { format } from 'date-fns'
 import { IconLink } from '@components/icon-link'
 import { useRouter } from 'next/router'
@@ -74,9 +75,12 @@ function ProjectInformation({
 }: ProjectInformationProps) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
-  let updateId = router.query.updateId
+  let { edit, updateId } = router.query
   if (!updateId || Array.isArray(updateId)) {
     updateId = undefined
+  }
+  if (!edit || Array.isArray(edit)) {
+    edit = undefined
   }
 
   useEffect(() => {
@@ -101,12 +105,12 @@ function ProjectInformation({
         userRole={userRole}
         projectId={projectId}
       />
-      {!!updateId ? (
-        <UpdateModal
+      {!!updateId && edit === 'update' && userRole === 'ADMIN' ? (
+        <ProjectModal
           isOpen={open}
           close={close}
           projectId={projectId}
-          update={
+          data={
             updates.find(({ id }) => id === Number(updateId)) ?? {
               id: 'new',
               title: '',
@@ -197,8 +201,14 @@ function useOnScroll(onScroll: OnScrollFunction) {
 
 function AddUpdateButton({ projectId }: { projectId: number }) {
   return (
-    <IconLink pathName={`/project/${projectId}?updateId=new`} replace={true}>
-      <PlusIcon tw="w-6 h-6" />
+    <IconLink
+      pathName={{
+        pathname: `/project/${projectId}`,
+        query: { edit: 'update', updateId: 'new' },
+      }}
+      replace={true}
+    >
+      <PlusIcon tw="w-6 h-6 fill-copper-300" />
       <span tw="bl-text-2xl">Add update</span>
     </IconLink>
   )
@@ -374,27 +384,81 @@ type UpdatesListProps = {
   projectId: number
 }
 function UpdatesList({ updates, userRole, projectId }: UpdatesListProps) {
+  const router = useRouter()
+
+  const routerHash = window.location.hash
+
   return updates?.length > 0 ? (
     <UpdatesContainer>
       {updates.map(({ id, hashLink, title, body, createdAt }) => {
         return (
           <UpdateContainer key={id} id={hashLink.replace('#', '')}>
-            <div tw="inline-flex items-center space-x-2">
-              {userRole === 'ADMIN' ? (
-                <IconLink
-                  pathName={`/project/${projectId}?updateId=${id}`}
-                  replace={true}
-                >
-                  <EditIcon tw="w-6 h-6" />
-                  <span tw="bl-text-3xl">{title}</span>
-                </IconLink>
-              ) : (
-                <span tw="bl-text-3xl">{title}</span>
-              )}
+            <div tw="inline-flex items-center justify-between w-full">
+              <div tw="inline-flex items-center space-x-2">
+                {userRole === 'ADMIN' ? (
+                  <IconLink
+                    pathName={{
+                      pathname: `/project/${projectId}`,
+                      query: { edit: 'update', updateId: `${id}` },
+                    }}
+                    replace={true}
+                  >
+                    <EditIcon tw="w-6 h-6 fill-copper-300" />
+                    <span
+                      css={[
+                        routerHash === hashLink
+                          ? tw`bl-text-3xl underline`
+                          : tw`bl-text-3xl`,
+                      ]}
+                    >
+                      {title}
+                    </span>
+                  </IconLink>
+                ) : (
+                  <span
+                    css={[
+                      routerHash === hashLink
+                        ? tw`bl-text-3xl underline`
+                        : tw`bl-text-3xl`,
+                    ]}
+                  >
+                    {title}
+                  </span>
+                )}
 
-              <span tw="bl-text-sm self-end pb-2">
-                {format(createdAt, 'M/d/yy')}
-              </span>
+                <span tw="bl-text-sm self-end pb-2">
+                  {format(createdAt, 'M/d/yy')}
+                </span>
+              </div>
+              <Link href={`./${router.query.id}${hashLink}`} passHref>
+                {/* Ring color is copper-400*/}
+                <a
+                  css={[
+                    tw`focus:outline-none`,
+                    css`
+                      &.focus-visible {
+                        --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
+                          var(--tw-ring-offset-width)
+                          var(--tw-ring-offset-color);
+                        --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
+                          calc(2px + var(--tw-ring-offset-width))
+                          var(--tw-ring-color);
+                        box-shadow: var(--tw-ring-offset-shadow),
+                          var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+                        --tw-ring-opacity: 1;
+                        --tw-ring-color: rgba(
+                          171,
+                          133,
+                          94,
+                          var(--tw-ring-opacity)
+                        );
+                      }
+                    `,
+                  ]}
+                >
+                  <UpdateLinkIcon tw="w-6 h-6 fill-current text-gray-yellow-600 hover:text-copper-300" />
+                </a>
+              </Link>
             </div>
             <ReactMarkdown plugins={[gfm]}>{body}</ReactMarkdown>
           </UpdateContainer>

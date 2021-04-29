@@ -22,7 +22,7 @@ export default function Projects() {
       <main tw="pt-10 w-9/12 space-y-8 mx-auto max-w-lg lg:max-w-none">
         {user?.role === 'ADMIN' ? (
           <IconLink pathName="#">
-            <PlusIcon tw="w-6 h-6" />
+            <PlusIcon tw="w-6 h-6 fill-copper-300" />
             <span tw="bl-text-2xl">Add project</span>
           </IconLink>
         ) : null}

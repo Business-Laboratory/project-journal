@@ -15,6 +15,7 @@ import {
   addQuarters,
   addYears,
   getQuarter,
+  closestTo,
 } from 'date-fns'
 import { getDocumentFontSize } from '@utils/get-document-font-size'
 import { useCurrentHashLink } from './hash-link-context'
@@ -39,39 +40,53 @@ function Timeline({ updates }: TimelineProps) {
     updates,
     datesContainerRef
   )
+  const currentHashLink = useCurrentHashLink()
+
+  // Find the update with the closest date to the update with the currentHashLink
+  // this is what we will highlight
+  const currentUpdate = updates.find(
+    (element) => element.hashLink === currentHashLink
+  )
+  const groupedDatesOnly = groupedUpdateDates
+    .flat()
+    .map((element) => element.createdAt)
+  const highlightDate = currentUpdate
+    ? closestTo(currentUpdate.createdAt, groupedDatesOnly)
+    : undefined
 
   return (
     <NavWrapper>
-      {updates.length > 0 ? (
-        <>
-          <Bar />
-          <FlexWrapper ref={datesContainerRef}>
-            {delineatorDates.dates.map((date) => (
-              <DateDelineator
-                key={date.valueOf()}
-                date={date}
-                format={delineatorDates.type}
+      <Bar />
+      <FlexWrapper ref={datesContainerRef}>
+        {delineatorDates.dates.map((date) => (
+          <DateDelineator
+            key={date.valueOf()}
+            date={date}
+            format={delineatorDates.type}
+          />
+        ))}
+      </FlexWrapper>
+      <FlexWrapper
+        // add this padding and gap so that the circles are evenly spaced between the delineators
+        tw="py-5 space-y-5"
+      >
+        {groupedUpdateDates.map((updates, idx) => (
+          <CircleWrapper key={idx}>
+            {updates.map(({ id, title, hashLink, createdAt }) => (
+              <UpdateCircle
+                key={id}
+                hashLink={hashLink}
+                aria-label={`Go to update ${title}`}
+                highlight={
+                  highlightDate
+                    ? createdAt.getTime() === highlightDate.getTime()
+                    : false
+                }
               />
             ))}
-          </FlexWrapper>
-          <FlexWrapper
-            // add this padding and gap so that the circles are evenly spaced between the delineators
-            tw="py-5 space-y-5"
-          >
-            {groupedUpdateDates.map((updates, idx) => (
-              <CircleWrapper key={idx}>
-                {updates.map(({ id, title, hashLink }) => (
-                  <UpdateCircle
-                    key={id}
-                    hashLink={hashLink}
-                    aria-label={`Go to update ${title}`}
-                  />
-                ))}
-              </CircleWrapper>
-            ))}
-          </FlexWrapper>
-        </>
-      ) : null}
+          </CircleWrapper>
+        ))}
+      </FlexWrapper>
     </NavWrapper>
   )
 }
@@ -142,10 +157,15 @@ function CircleWrapper({ children }: { children: React.ReactNode }) {
 // A note on the padding/width and height. We need a touch area of 48px -> 3rem.
 // p-5 is 1.25 rem on each side, so 2.5rem. w-2 and h-2 are each 0.5rem
 // 2.5rem + 0.5rem = 3rem, which is the size of the touch area we want
-function UpdateCircle({ hashLink }: { hashLink: string }) {
+function UpdateCircle({
+  hashLink,
+  highlight,
+}: {
+  hashLink: string
+  highlight: boolean
+}) {
   const { query } = useRouter()
-  const currentHashLink = useCurrentHashLink()
-  const highlight = currentHashLink !== null && hashLink === currentHashLink
+
   return (
     <Link href={`./${query.id}${hashLink}`} passHref>
       <a

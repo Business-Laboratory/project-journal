@@ -13,7 +13,7 @@ import { useRouter } from 'next/router'
 import { useRect } from '@reach/rect'
 import { matchSorter } from 'match-sorter'
 
-import { SearchIcon, SearchIconDisabled } from 'icons'
+import { SearchIcon } from 'icons'
 
 import type { Updates } from '@queries/useUpdates'
 
@@ -43,11 +43,13 @@ export function SearchBar({
           ({ value }) => value === selectedValue
         )
         const hashLink = selectedUpdate?.hashLink
+
         if (hashLink) {
           setSearchTerm('')
           setBlurring(true)
           router.push(`./${router.query.id}${hashLink}`)
         }
+        setSearchTerm('')
       }}
     >
       <InnerCombobox
@@ -113,11 +115,12 @@ function InnerCombobox({
   return (
     <>
       <label ref={labelRef} htmlFor={id} css={labelCss(disabled)}>
-        {disabled ? (
-          <SearchIconDisabled tw="w-5 h-5" />
-        ) : (
-          <SearchIcon tw="w-5 h-5" />
-        )}
+        <SearchIcon
+          css={[
+            tw`w-5 h-5`,
+            disabled ? tw`fill-gray-yellow-300` : tw`fill-copper-300`,
+          ]}
+        />
         <ComboboxInput
           id={id}
           ref={inputRef}
@@ -172,7 +175,7 @@ function useBlurOnIdle(
 // styles
 
 const comboboxPopoverCss = (rect: DOMRect | null) => [
-  tw`py-1 bg-white border rounded border-copper-400 shadow-bl`,
+  tw`py-1 bg-gray-yellow-100 border rounded border-copper-400 shadow-bl`,
   css`
     margin-top: calc(${inputPaddingY} + ${theme('spacing.2')});
   `,

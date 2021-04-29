@@ -1,19 +1,25 @@
 import LogoIcon from './bl-logo.svg'
-import PlusIcon from './plus.svg'
+import PlusIcon from './plus-icon.svg'
+import PlusSmallIcon from './plus-small-icon.svg'
 import EditIcon from './edit-icon.svg'
 import SearchIcon from './search-icon.svg'
-import SearchIconDisabled from './search-icon-disabled.svg'
 import SpinnerIcon from './spinner.svg'
 import GearIcon from './gear-icon.svg'
+import UpdateLinkIcon from './update-link-icon.svg'
 import CloseIcon from './x-out.svg'
+import CameraIcon from './camera-icon.svg'
+import DeleteIcon from './delete-icon.svg'
 
 export {
   LogoIcon,
   PlusIcon,
+  PlusSmallIcon,
   EditIcon,
   SearchIcon,
   CloseIcon,
-  SearchIconDisabled,
   SpinnerIcon,
   GearIcon,
+  UpdateLinkIcon,
+  CameraIcon,
+  DeleteIcon,
 }
