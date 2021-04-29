@@ -2,6 +2,13 @@ import { prisma } from '@lib/prisma'
 import { checkAuthentication } from '@utils/api/check-authentication'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
+import type { PrepareAPIData } from '@types'
+
+export type UpdateSummaryBody =
+  | { id: number; description: string }
+  | { id: number; roadmap: string }
+  | { id: number; description: string; roadmap: string }
+export type Summary = PrepareAPIData<ReturnType<typeof updateSummary>>
 
 /**
  * Gets projects based on their role:
@@ -16,7 +23,6 @@ export default async function handler(
 ) {
   const user = await checkAuthentication(req, res)
   const { method } = req
-  const { id, edit, body } = req.body
   // bail if there's no user
   if (!user || user.role !== 'ADMIN') {
     res.status(401).json({ error: 'User not authorized.' })
@@ -27,46 +33,33 @@ export default async function handler(
     return
   }
 
-  if (method === 'POST' && edit === 'description') {
-    try {
-      const project = await postDescription(id, body)
-      res.status(200).json(project)
-    } catch (error) {
-      res.status(500).json({ error })
-    }
+  if (!isValidData(req.body)) {
+    res.status(400).json({ error: `Invalid data, ${req.body}` })
+    return
   }
-  if (method === 'POST' && edit === 'roadmap') {
+
+  if (method === 'POST') {
     try {
-      const project = await postRoadmap(id, body)
-      res.status(200).json(project)
+      const summary = await updateSummary(req.body)
+      res.status(200).json(summary)
     } catch (error) {
       res.status(500).json({ error })
     }
   }
 }
 
-async function postDescription(id: number, body: string) {
-  const descriptionUpdate = await prisma.summary.update({
+async function updateSummary({ id, ...data }: UpdateSummaryBody) {
+  return await prisma.summary.update({
     where: {
       id,
     },
-    data: {
-      description: body,
-    },
+    data,
   })
-
-  return descriptionUpdate
 }
+function isValidData(data: any): data is UpdateSummaryBody {
+  if (typeof data.id !== 'number') return false
+  const hasDescription = 'description' in data
+  const hasRoadmap = 'roadmap' in data
 
-async function postRoadmap(id: number, body: string) {
-  const roadmapUpdate = await prisma.summary.update({
-    where: {
-      id,
-    },
-    data: {
-      roadmap: body,
-    },
-  })
-
-  return roadmapUpdate
+  return hasDescription || hasRoadmap
 }

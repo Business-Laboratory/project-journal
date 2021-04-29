@@ -31,7 +31,7 @@ function useUpdateMutation(projectId: number) {
       queryClient.setQueryData(updateKey, newUpdates)
     },
     onSettled: () => {
-      queryClient.invalidateQueries(['updates', { projectId }])
+      queryClient.invalidateQueries(updateKey)
     },
   })
 }

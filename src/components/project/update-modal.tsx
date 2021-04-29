@@ -8,8 +8,6 @@ import {
   Modal,
   SaveButton,
 } from '@components/modal'
-import { CloseIcon } from 'icons'
-import { IconLink } from '@components/icon-link'
 import { useUpdateMutation } from '@queries/useUpdateMutation'
 import { useDeleteUpdateMutation } from '@queries/useDeleteUpdateMutation'
 
@@ -24,7 +22,6 @@ type UpdateModalProps = {
   updates: Updates
 }
 function UpdateModal({ projectId, updates }: UpdateModalProps) {
-  // const [isOpen, setIsOpen] = useState(false)
   const router = useRouter()
   const { edit, updateId } = router.query
 
@@ -70,6 +67,8 @@ function ProjectEditModalContent({
   const updateMutation = useUpdateMutation(projectId)
   const deleteMutation = useDeleteUpdateMutation(projectId)
 
+  const disabled = !title || !body || updateMutation.status === 'loading'
+
   return (
     <>
       <div tw="space-y-8 flex flex-col items-end">
@@ -94,12 +93,13 @@ function ProjectEditModalContent({
         <SaveButton
           tw="float-right"
           onClick={() => {
+            if (disabled) return
             updateMutation.mutate(
               { id, title, body, projectId },
               { onSuccess: onDismiss }
             )
           }}
-          disabled={!title || !body || updateMutation.status === 'loading'}
+          disabled={disabled}
           error={updateMutation.status === 'error'}
         >
           {updateMutation.status === 'loading'

@@ -10,11 +10,12 @@ import { EditIcon, GearIcon } from 'icons'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
 import { useWaitTimer } from '@utils/use-wait-timer'
-import { ProjectModal } from './index'
+import { SummaryModal } from './index'
 
 import type { QueryStatus } from 'react-query'
 import type { Role } from '@prisma/client'
 import type { Project } from '@queries/useProject'
+import { createDescriptionPath, createRoadmapProject } from './summary-modal'
 
 export { Summary, LoadingSummary }
 
@@ -77,26 +78,6 @@ function Summary({
   clientEmployees,
   team,
 }: SummaryProps) {
-  const router = useRouter()
-  let edit = router.query.edit
-  if (!edit || Array.isArray(edit)) {
-    edit = undefined
-  }
-  const [open, setOpen] = useState(false)
-
-  useEffect(() => {
-    if (!edit && open) {
-      setOpen(false)
-    }
-    if (!edit) return
-    setOpen(true)
-  }, [edit, open])
-
-  const close = () => {
-    setOpen(false)
-    router.replace(`/project/${projectId}`, undefined, { shallow: true })
-  }
-
   // Is there a situation where summary would ever be null?
   if (!summary) return null
 
@@ -130,10 +111,7 @@ function Summary({
         <div tw="space-y-2">
           {userRole === 'ADMIN' ? (
             <IconLink
-              pathName={{
-                pathname: `/project/${projectId}`,
-                query: { edit: 'description' },
-              }}
+              pathName={createDescriptionPath(projectId)}
               replace={true}
             >
               <EditIcon tw="h-6 w-6 fill-copper-300" />
@@ -148,13 +126,7 @@ function Summary({
         </div>
         <div tw="space-y-2">
           {userRole === 'ADMIN' ? (
-            <IconLink
-              pathName={{
-                pathname: `/project/${projectId}`,
-                query: { edit: 'roadmap' },
-              }}
-              replace={true}
-            >
+            <IconLink pathName={createRoadmapProject(projectId)} replace={true}>
               <EditIcon tw="h-6 w-6 fill-copper-300" />
               <h2 tw="bl-text-3xl inline">Project Roadmap</h2>
             </IconLink>
@@ -177,26 +149,8 @@ function Summary({
           </div>
         </div>
       </div>
-      {(edit === 'description' || edit === 'roadmap') &&
-      userRole === 'ADMIN' ? (
-        <ProjectModal
-          isOpen={open}
-          close={close}
-          projectId={projectId}
-          data={{
-            id: summary.id,
-            title:
-              edit === 'description'
-                ? 'Project Description'
-                : 'Project Roadmap',
-            // Also don't see any way description/roadmap will be null as
-            // they will be initialized as string
-            body:
-              edit === 'description'
-                ? summary.description ?? ''
-                : summary.roadmap ?? '',
-          }}
-        />
+      {userRole === 'ADMIN' ? (
+        <SummaryModal projectId={projectId} summary={summary} />
       ) : null}
     </SummaryWrapper>
   )
