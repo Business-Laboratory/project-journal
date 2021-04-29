@@ -14,7 +14,7 @@ import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
 import Link from 'next/link'
 
-import { SearchBar, UpdateModal } from './index'
+import { SearchBar, ProjectModal } from './index'
 import { PlusIcon, EditIcon, UpdateLinkIcon } from 'icons'
 import { format } from 'date-fns'
 import { useAuth } from '@components/auth-context'
@@ -42,9 +42,12 @@ export function ProjectInformation({
   const user = useAuth()
   const [open, setOpen] = useState(false)
   const router = useRouter()
-  let updateId = router.query.updateId
+  let { edit, updateId } = router.query
   if (!updateId || Array.isArray(updateId)) {
     updateId = undefined
+  }
+  if (!edit || Array.isArray(edit)) {
+    edit = undefined
   }
 
   useEffect(() => {
@@ -71,7 +74,10 @@ export function ProjectInformation({
         />
         {user?.role === 'ADMIN' && (
           <IconLink
-            pathName={`/project/${projectId}?updateId=new`}
+            pathName={{
+              pathname: `/project/${projectId}`,
+              query: { edit: 'update', updateId: 'new' },
+            }}
             replace={true}
           >
             <PlusIcon tw="w-6 h-6 fill-copper-300" />
@@ -85,12 +91,12 @@ export function ProjectInformation({
           status={status}
         />
       </div>
-      {!!updateId ? (
-        <UpdateModal
+      {!!updateId && edit === 'update' && user?.role === 'ADMIN' ? (
+        <ProjectModal
           isOpen={open}
           close={close}
           projectId={projectId}
-          update={
+          data={
             updates.find(({ id }) => id === Number(updateId)) ?? {
               id: 'new',
               title: '',
@@ -370,7 +376,10 @@ function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
               <div tw="inline-flex items-center space-x-2">
                 {role === 'ADMIN' ? (
                   <IconLink
-                    pathName={`/project/${projectId}?updateId=${id}`}
+                    pathName={{
+                      pathname: `/project/${projectId}`,
+                      query: { edit: 'update', updateId: `${id}` },
+                    }}
                     replace={true}
                   >
                     <EditIcon tw="w-6 h-6 fill-copper-300" />

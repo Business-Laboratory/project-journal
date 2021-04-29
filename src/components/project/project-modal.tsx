@@ -1,6 +1,6 @@
 import tw from 'twin.macro'
 import { useRouter } from 'next/router'
-import React, { useEffect, useReducer, useState } from 'react'
+import React, { useEffect, useReducer } from 'react'
 
 import { Update } from '@prisma/client'
 import { Modal } from '@components/modal'
@@ -8,68 +8,88 @@ import { Button } from '@components/button'
 import { CloseIcon } from 'icons'
 import { IconLink } from '@components/icon-link'
 import { useQueryClient } from 'react-query'
-
-type UpdateModalProps = {
-  isOpen: boolean
-  close: () => void
-  projectId: number
-  update:
-    | Update
-    | {
-        id: 'new'
-        title: string
-        body: string
-      }
-}
-export function UpdateModal({
-  isOpen,
-  close,
-  projectId,
-  update,
-}: UpdateModalProps) {
-  return (
-    <Modal isOpen={isOpen} onDismiss={close}>
-      <UpdateModalContent projectId={projectId} update={update} close={close} />
-    </Modal>
-  )
-}
+import { DeleteSection } from './index'
 
 type NewUpdate = {
   id: 'new'
   title: string
   body: string
 }
-type UpdateModalContentProps = {
+type DescRoadmapEdit = {
+  id: number
+  title: string
+  body: string
+}
+type ProjectModalProps = {
+  isOpen: boolean
+  close: () => void
   projectId: number
-  update: Update | NewUpdate
+  data: Update | NewUpdate | DescRoadmapEdit
+}
+export function ProjectModal({
+  isOpen,
+  close,
+  projectId,
+  data,
+}: ProjectModalProps) {
+  return (
+    <Modal isOpen={isOpen} onDismiss={close}>
+      <ProjectEditModalContent
+        projectId={projectId}
+        data={data}
+        close={close}
+      />
+    </Modal>
+  )
+}
+
+type ProjectEditModalContentProps = {
+  projectId: number
+  data: Update | NewUpdate | DescRoadmapEdit
   close: () => void
 }
-function UpdateModalContent({
+function ProjectEditModalContent({
   projectId,
-  update,
+  data,
   close,
   ...props
-}: UpdateModalContentProps) {
+}: ProjectEditModalContentProps) {
   const router = useRouter()
+  const { edit, updateId } = router.query
   const [{ id, title, body, saveState }, dispatch] = useReducer(
     updateReducer,
-    initialState(update)
+    initialState(data)
   )
   const queryClient = useQueryClient()
 
-  //Any updateId that isn't found in our data defaults to path /project/projectId?updateId=new
+  //Any updateId that isn't found in our data defaults to path /project/projectId?edit=update&updateId=new
   useEffect(() => {
-    if (id === 'new' && router.query.updateId !== 'new') {
-      router.replace(`/project/${projectId}?updateId=new`, undefined, {
-        shallow: true,
-      })
+    if (id === 'new' && updateId !== 'new' && edit === 'edit') {
+      router.replace(
+        {
+          pathname: `/project/${projectId}`,
+          query: { edit: 'update', updateId: 'new' },
+        },
+        undefined,
+        {
+          shallow: true,
+        }
+      )
     }
-  }, [id, router, projectId])
+  }, [id, router, edit, updateId, projectId])
 
   async function save() {
     dispatch({ type: 'SAVING' })
     try {
-      await postUpdate({ id, title, body, projectId })
+      if (edit === 'update') {
+        await postUpdate({ id, title, body, projectId })
+      }
+      if (
+        (edit === 'description' || edit === 'roadmap') &&
+        typeof id === 'number'
+      ) {
+        await postSummaryEdit({ id, edit, body })
+      }
       queryClient.invalidateQueries('project')
       close()
     } catch {
@@ -89,19 +109,25 @@ function UpdateModalContent({
           >
             <CloseIcon tw="w-4 h-4" />
           </IconLink>
-          <div tw="bl-text-xs text-gray-yellow-300">Update title</div>
-          <input
-            css={[
-              tw`w-full bl-text-3xl placeholder-gray-yellow-400`,
-              tw`focus:outline-none border-b border-gray-yellow-600`,
-            ]}
-            type="text"
-            value={title}
-            onChange={(e) =>
-              dispatch({ type: 'SET_TITLE', payload: e.target.value })
-            }
-            placeholder="Update #"
-          />
+          {edit === 'update' ? (
+            <>
+              <div tw="bl-text-xs text-gray-yellow-300">Update title</div>
+              <input
+                css={[
+                  tw`w-full bl-text-3xl placeholder-gray-yellow-400`,
+                  tw`focus:outline-none border-b border-gray-yellow-600`,
+                ]}
+                type="text"
+                value={title}
+                onChange={(e) =>
+                  dispatch({ type: 'SET_TITLE', payload: e.target.value })
+                }
+                placeholder="Update #"
+              />
+            </>
+          ) : (
+            <div tw="bl-text-3xl">{title}</div>
+          )}
         </div>
         <textarea
           // Padding bottom doesn't work.  Found this age old bug https://bugzilla.mozilla.org/show_bug.cgi?id=748518
@@ -117,19 +143,22 @@ function UpdateModalContent({
             onClick={() => save()}
             disabled={saveState === 'saving' || saveState === 'disabled'}
           >
-            Save update
+            {saveState === 'saving' ? 'Saving...' : `Save ${edit}`}
           </Button>
-          {saveState === 'saving' ? (
-            <div tw="bl-text-lg uppercase">Saving update...</div>
-          ) : saveState === 'error' ? (
+          {saveState === 'error' ? (
             <div tw="bl-text-lg uppercase text-matisse-red-200">
               Failed to save
             </div>
           ) : null}
         </div>
       </div>
-      {id !== 'new' ? (
-        <DeleteSection id={id} title={title} close={close} />
+      {id !== 'new' && edit === 'update' ? (
+        <DeleteSection
+          id={id}
+          title={title}
+          close={close}
+          post={() => deleteUpdate({ id })}
+        />
       ) : null}
     </div>
   )
@@ -225,49 +254,19 @@ async function deleteUpdate({ id }: DeleteUpdateProps) {
   }
 }
 
-type DeleteSectionProps = {
+type PostSummaryEditProps = {
   id: number
-  title: string
-  close: () => void
+  edit: 'description' | 'roadmap'
+  body: string
 }
-function DeleteSection({ id, title, close }: DeleteSectionProps) {
-  const [verifyTitle, setVerifyTitle] = useState('')
-  const [deleteState, setDeleteState] = useState<'standby' | 'error'>('standby')
-  const postDelete = async () => {
-    try {
-      await deleteUpdate({ id })
-      setDeleteState('standby')
-      close()
-    } catch {
-      setDeleteState('error')
-    }
+async function postSummaryEdit({ id, edit, body }: PostSummaryEditProps) {
+  const res = await fetch(`/api/summary`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, edit, body }),
+  })
+  if (!res.ok) {
+    const response = await res.json()
+    throw new Error(response.error)
   }
-
-  return (
-    <div tw="space-y-12">
-      <div tw="w-full border-b border-dashed border-matisse-red-200" />
-      <div tw="w-full grid grid-cols-2 col-auto gap-x-4">
-        <div tw="text-left col-span-1">
-          <div tw="bl-text-xs text-gray-yellow-300">Verify update title</div>
-          <input
-            tw="w-full placeholder-gray-yellow-400 border-b border-gray-yellow-600 focus:outline-none"
-            type="text"
-            value={verifyTitle}
-            onChange={(e) => setVerifyTitle(e.target.value)}
-            placeholder="Update #"
-          />
-        </div>
-        <div tw="text-right col-span-1 pr-2 space-y-2">
-          <Button disabled={title !== verifyTitle} onClick={() => postDelete()}>
-            Delete update
-          </Button>
-          {deleteState === 'error' ? (
-            <div tw="bl-text-lg text-matisse-red-200 uppercase">
-              Failed to delete
-            </div>
-          ) : null}
-        </div>
-      </div>
-    </div>
-  )
 }

@@ -9,8 +9,11 @@ import { EditIcon, GearIcon } from 'icons'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
 import { useWaitTimer } from '@utils/use-wait-timer'
+import { ProjectModal } from './index'
 
 import type { ProjectData } from 'pages/api/project'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 
 type Team = ProjectData['team']
 
@@ -36,8 +39,26 @@ export function Summary({
   status,
 }: SummaryProps) {
   const user = useAuth()
-
+  const router = useRouter()
   const wait = useWaitTimer()
+  let edit = router.query.edit
+  if (!edit || Array.isArray(edit)) {
+    edit = undefined
+  }
+  const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    if (!edit && open) {
+      setOpen(false)
+    }
+    if (!edit) return
+    setOpen(true)
+  }, [edit, open])
+
+  const close = () => {
+    setOpen(false)
+    router.replace(`/project/${projectId}`, undefined, { shallow: true })
+  }
 
   if (status === 'error') {
     return (
@@ -76,6 +97,9 @@ export function Summary({
     )
   }
 
+  // Is there a situation where summary would ever be null?
+  if (!summary) return null
+
   return (
     <aside tw="relative h-full px-14 overflow-y-auto">
       <div tw="space-y-8 py-10">
@@ -105,27 +129,39 @@ export function Summary({
         ) : null}
         <div tw="space-y-2">
           {user?.role === 'ADMIN' ? (
-            <IconLink pathName={`/project/${projectId}/#`}>
+            <IconLink
+              pathName={{
+                pathname: `/project/${projectId}`,
+                query: { edit: 'description' },
+              }}
+              replace={true}
+            >
               <EditIcon tw="h-6 w-6 fill-copper-300" />
               <h2 tw="bl-text-3xl inline">Project Description</h2>
             </IconLink>
           ) : (
             <h2 tw="bl-text-3xl">Project Description</h2>
           )}
-          {summary?.description ? (
+          {summary.description ? (
             <MarkdownWrapper>{summary.description}</MarkdownWrapper>
           ) : null}
         </div>
         <div tw="space-y-2">
           {user?.role === 'ADMIN' ? (
-            <IconLink pathName={`/project/${projectId}/#`}>
+            <IconLink
+              pathName={{
+                pathname: `/project/${projectId}`,
+                query: { edit: 'roadmap' },
+              }}
+              replace={true}
+            >
               <EditIcon tw="h-6 w-6 fill-copper-300" />
               <h2 tw="bl-text-3xl inline">Project Roadmap</h2>
             </IconLink>
           ) : (
             <h2 tw="bl-text-3xl">Project Roadmap</h2>
           )}
-          {summary?.roadmap ? (
+          {summary.roadmap ? (
             <MarkdownWrapper>{summary.roadmap}</MarkdownWrapper>
           ) : null}
         </div>
@@ -141,6 +177,27 @@ export function Summary({
           </div>
         </div>
       </div>
+      {(edit === 'description' || edit === 'roadmap') &&
+      user?.role === 'ADMIN' ? (
+        <ProjectModal
+          isOpen={open}
+          close={close}
+          projectId={projectId}
+          data={{
+            id: summary.id,
+            title:
+              edit === 'description'
+                ? 'Project Description'
+                : 'Project Roadmap',
+            // Also don't see any way description/roadmap will be null as
+            // they will be initialized as string
+            body:
+              edit === 'description'
+                ? summary.description ?? ''
+                : summary.roadmap ?? '',
+          }}
+        />
+      ) : null}
     </aside>
   )
 }
