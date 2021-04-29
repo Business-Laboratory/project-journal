@@ -32,7 +32,7 @@ export default async function handler(
       const project = await postDescription(id, body)
       res.status(200).json(project)
     } catch (error) {
-      res.status(501).json({ error })
+      res.status(500).json({ error })
     }
   }
   if (method === 'POST' && edit === 'roadmap') {
@@ -40,7 +40,7 @@ export default async function handler(
       const project = await postRoadmap(id, body)
       res.status(200).json(project)
     } catch (error) {
-      res.status(501).json({ error })
+      res.status(500).json({ error })
     }
   }
 }

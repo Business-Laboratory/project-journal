@@ -12,12 +12,14 @@ type DeleteSectionProps = {
 }
 export function DeleteSection({ id, title, close, post }: DeleteSectionProps) {
   const [verifyTitle, setVerifyTitle] = useState('')
-  const [deleteState, setDeleteState] = useState<'standby' | 'error'>('standby')
+  const [deleteState, setDeleteState] = useState<
+    'standby' | 'deleting' | 'error'
+  >('standby')
   const queryClient = useQueryClient()
   const postDelete = async () => {
+    setDeleteState('deleting')
     try {
       await post()
-      setDeleteState('standby')
       queryClient.invalidateQueries('project')
       close()
     } catch {
@@ -26,7 +28,7 @@ export function DeleteSection({ id, title, close, post }: DeleteSectionProps) {
   }
 
   return (
-    <div tw="space-y-12">
+    <div tw="space-y-10">
       <div tw="w-full border-b border-dashed border-matisse-red-200" />
       <div tw="w-full grid grid-cols-2 col-auto gap-x-4">
         <div tw="text-left col-span-1">
@@ -39,9 +41,13 @@ export function DeleteSection({ id, title, close, post }: DeleteSectionProps) {
             placeholder="Update #"
           />
         </div>
-        <div tw="text-right col-span-1 pr-2 space-y-2">
-          <Button disabled={title !== verifyTitle} onClick={() => postDelete()}>
-            Delete update
+        <div tw="text-center ml-auto max-w-max col-span-1 space-y-2">
+          <Button
+            disabled={title !== verifyTitle}
+            onClick={() => postDelete()}
+            variant="danger"
+          >
+            {deleteState === 'deleting' ? 'Deleting...' : 'Delete update'}
           </Button>
           {deleteState === 'error' ? (
             <div tw="bl-text-lg text-matisse-red-200 uppercase">

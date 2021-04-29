@@ -143,11 +143,9 @@ function ProjectEditModalContent({
             onClick={() => save()}
             disabled={saveState === 'saving' || saveState === 'disabled'}
           >
-            Save {edit}
+            {saveState === 'saving' ? 'Saving...' : `Save ${edit}`}
           </Button>
-          {saveState === 'saving' ? (
-            <div tw="bl-text-lg uppercase">Saving {edit}...</div>
-          ) : saveState === 'error' ? (
+          {saveState === 'error' ? (
             <div tw="bl-text-lg uppercase text-matisse-red-200">
               Failed to save
             </div>
