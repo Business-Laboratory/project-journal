@@ -104,7 +104,12 @@ export function Summary({
     <aside tw="relative h-full px-14 overflow-y-auto">
       <div tw="space-y-8 py-10">
         {user?.role === 'ADMIN' ? (
-          <IconLink pathName={`/project/${projectId}/#`}>
+          <IconLink
+            pathName={{
+              pathname: `/project/${projectId}/`,
+              query: { edit: 'settings' },
+            }}
+          >
             <GearIcon tw="h-6 w-6 fill-copper-300" />
             {name === '' ? (
               <h1 tw="bl-text-4xl text-gray-yellow-300 inline capitalize">
