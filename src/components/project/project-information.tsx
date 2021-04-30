@@ -59,7 +59,7 @@ function ProjectInformation({
 }: ProjectInformationProps) {
   return (
     <ProjectInformationContainer>
-      <SearchBar updates={updates} />
+      <SearchBar updates={updates} disabled={updates.length === 0} />
       {userRole === 'ADMIN' ? (
         <>
           <AddUpdateButton projectId={projectId} />
