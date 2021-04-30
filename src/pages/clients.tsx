@@ -6,7 +6,6 @@ import { PlusIcon, EditIcon } from 'icons'
 import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
-import { useWaitTimer } from '@utils/use-wait-timer'
 import { useClients } from '@queries/useClients'
 
 export default function Clients() {
@@ -16,10 +15,6 @@ export default function Clients() {
         <title>Clients | Project Journal</title>
       </Head>
       <main tw="pt-10 w-9/12 min-w-max mx-auto space-y-8">
-        <IconLink pathName="#">
-          <PlusIcon tw="w-6 h-6 fill-copper-300" />
-          <span tw="bl-text-2xl">Add client</span>
-        </IconLink>
         <ClientList />
       </main>
     </>
@@ -29,17 +24,12 @@ export default function Clients() {
 function ClientList() {
   const { data, status } = useClients()
 
-  const wait = useWaitTimer()
-
   if (status === 'error') {
     return <DataErrorMessage errorMessage="Unable to load clients" />
   }
 
   if (status === 'loading') {
-    if (wait === 'finished') {
-      return <LoadingSpinner loadingMessage="Loading clients" />
-    }
-    return null
+    return <LoadingSpinner loadingMessage="Loading clients" />
   }
 
   const clients = data ?? []

@@ -8,7 +8,6 @@ import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
-import { useWaitTimer } from '@utils/use-wait-timer'
 import { useProjects } from '@queries/useProjects'
 
 export default function Projects() {
@@ -27,7 +26,6 @@ export default function Projects() {
 function CardGrid() {
   const user = useAuth()
   const { data, status } = useProjects()
-  const wait = useWaitTimer() // timeout to show a spinner
 
   if (status === 'error') {
     return <DataErrorMessage errorMessage="Unable to load projects" />
@@ -35,10 +33,7 @@ function CardGrid() {
 
   // when the user or the projects data is still loading, return nothing for 1 second, and then a spinner
   if (!user || status === 'loading') {
-    if (wait === 'finished') {
-      return <LoadingSpinner loadingMessage="Loading projects" />
-    }
-    return null
+    return <LoadingSpinner loadingMessage="Loading projects" />
   }
 
   const userNameFormatted = user.name ?? 'you'

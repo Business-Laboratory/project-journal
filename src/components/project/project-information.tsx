@@ -22,7 +22,6 @@ import { useRouter } from 'next/router'
 import { useSetCurrentHashLink } from './hash-link-context'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
-import { useWaitTimer } from '@utils/use-wait-timer'
 
 import type { Updates } from '@queries/useUpdates'
 import type { QueryStatus } from 'react-query'
@@ -37,15 +36,13 @@ type LoadingProjectInformationProps = {
   status: QueryStatus
 }
 function LoadingProjectInformation({ status }: LoadingProjectInformationProps) {
-  const wait = useWaitTimer()
-
   return (
     <ProjectInformationContainer>
       {status === 'error' ? (
         <DataErrorMessage errorMessage="Unable to load updates" />
-      ) : wait === 'finished' ? (
+      ) : (
         <LoadingSpinner loadingMessage="Loading updates" />
-      ) : null}
+      )}
     </ProjectInformationContainer>
   )
 }

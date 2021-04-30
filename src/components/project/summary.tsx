@@ -7,7 +7,6 @@ import { IconLink } from '@components/icon-link'
 import { EditIcon, GearIcon } from 'icons'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
-import { useWaitTimer } from '@utils/use-wait-timer'
 import { SummaryModal } from './index'
 
 import type { QueryStatus } from 'react-query'
@@ -29,17 +28,13 @@ type LoadingSummaryProps = {
   status: QueryStatus
 }
 function LoadingSummary({ status }: LoadingSummaryProps) {
-  const wait = useWaitTimer()
-
-  // when the user or the projects data is still loading, return nothing for 1 second, and then a spinner
   return (
-    // need precise rem to match the y coordinate of the loading updates spinner
     <SummaryWrapper>
       {status === 'error' ? (
         <DataErrorMessage errorMessage="Unable to load summary" />
-      ) : wait === 'finished' ? (
+      ) : (
         <LoadingSpinner loadingMessage="Loading project summary" />
-      ) : null}
+      )}
     </SummaryWrapper>
   )
 }
