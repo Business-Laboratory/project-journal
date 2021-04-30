@@ -66,7 +66,7 @@ function CardGrid() {
 
 function AddProjectLink() {
   return (
-    <IconLink pathName="#">
+    <IconLink href="#">
       <PlusIcon tw="w-6 h-6 fill-copper-300" />
       <span tw="bl-text-2xl">Add project</span>
     </IconLink>

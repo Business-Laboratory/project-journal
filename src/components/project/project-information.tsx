@@ -153,7 +153,7 @@ function useOnScroll(onScroll: OnScrollFunction) {
 
 function AddUpdateButton({ projectId }: { projectId: number }) {
   return (
-    <IconLink pathName={createUpdatePath(projectId, 'new')} replace={true}>
+    <IconLink href={createUpdatePath(projectId, 'new')} replace={true}>
       <PlusIcon tw="w-6 h-6 fill-copper-300" />
       <span tw="bl-text-2xl">Add update</span>
     </IconLink>
@@ -343,7 +343,7 @@ function UpdatesList({ updates, userRole, projectId }: UpdatesListProps) {
               <div tw="inline-flex items-center space-x-2">
                 {userRole === 'ADMIN' ? (
                   <IconLink
-                    pathName={createUpdatePath(projectId, id)}
+                    href={createUpdatePath(projectId, id)}
                     replace={true}
                   >
                     <EditIcon tw="w-6 h-6 fill-copper-300" />
