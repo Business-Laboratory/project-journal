@@ -2,6 +2,9 @@ import { prisma } from '@lib/prisma'
 import { checkAuthentication } from '@utils/api/check-authentication'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
+import type { PrepareAPIData } from '@types'
+
+export type Update = PrepareAPIData<ReturnType<typeof addOrUpdateUpdate>>
 
 /**
  * Gets projects based on their role:
@@ -29,23 +32,23 @@ export default async function handler(
 
   if (method === 'POST') {
     try {
-      const project = await postUpdate(id, title, body, projectId)
-      res.status(200).json(project)
+      const update = await addOrUpdateUpdate(id, title, body, projectId)
+      res.status(200).json(update)
     } catch (error) {
       res.status(501).json({ error })
     }
   }
   if (method === 'DELETE') {
     try {
-      const project = await deleteUpdate(id)
-      res.status(200).json(project)
+      await deleteUpdate(id)
+      res.status(200).end()
     } catch (error) {
       res.status(501).json({ error })
     }
   }
 }
 
-async function postUpdate(
+async function addOrUpdateUpdate(
   id: number | 'new',
   title: string,
   body: string,

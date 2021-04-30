@@ -1,6 +1,5 @@
 import { css } from 'twin.macro'
-import { useMemo } from 'react'
-import { useQuery } from 'react-query'
+import { memo } from 'react'
 import Header from 'next/head'
 import { useRouter } from 'next/router'
 
@@ -9,36 +8,46 @@ import {
   ProjectInformation,
   Summary,
   HashLinkProvider,
+  LoadingSummary,
+  LoadingTimeline,
+  LoadingProjectInformation,
 } from '@components/project'
 import { appBarHeight } from '@components/app-bar'
+import { useProject } from '@queries/useProject'
 
-import type { QueryFunction } from 'react-query'
-import type { ProjectData } from '../api/project'
-
-export type Updates = ReturnType<typeof useUpdates>
+import { QueryStatus } from 'react-query'
+import { useAuth } from '@components/auth-context'
+import { useUpdates } from '@queries/useUpdates'
+import { Role } from '.prisma/client'
 
 export default function Project() {
   const { query } = useRouter()
   const { id } = query
-  if (id === undefined || Array.isArray(id)) {
+  // doesn't render anything when id is undefined, which is the case when
+  // next tries to build the page statically
+  if (id === undefined) {
+    return null
+  }
+
+  const numberId = Number(id)
+  if (!id || Array.isArray(id) || Number.isNaN(numberId)) {
     throw new Error(`Invalid id: ${id}`)
   }
-  const { data, status } = useQuery(
-    ['project', { id: Number(id) }],
-    fetchProject
-  )
 
-  // convert the string dates to dates and add the hash for the links
-  const updates = useUpdates(data?.updates ?? [])
+  return <ProjectById projectId={numberId} />
+}
 
-  const project = data ?? null
+function ProjectById({ projectId }: { projectId: number }) {
+  const { data, status } = useProject(projectId)
+  // we need to be loading all of the loading indicators if the user hasn't loaded, since it effects the layout
+  const user = useAuth()
 
-  if (project === null) return null
+  const userRole = user?.role ?? null
 
   return (
     <>
       <Header>
-        <title>{project.name ?? 'New Project'} | Project Journal</title>
+        <title>{getProjectTitle(status, data?.name ?? undefined)}</title>
       </Header>
       <main
         tw="fixed overflow-hidden h-full w-full"
@@ -48,61 +57,76 @@ export default function Project() {
           grid-template-columns: 80px auto 500px;
         `}
       >
-        <HashLinkProvider>
-          <Timeline updates={updates} status={status} />
-          <ProjectInformation
-            projectId={Number(id)}
-            updates={updates}
-            status={status}
-          />
-        </HashLinkProvider>
-        <Summary
-          projectId={Number(id)}
-          name={project.name ?? ''}
-          imageUrl={project.imageUrl ?? ''}
-          summary={project.summary}
-          clientName={project.client?.name ?? ''}
-          clientEmployees={
-            project.client?.employees.map(({ user }) => user) ?? []
-          }
-          team={project.team}
-          status={status}
+        <TimelineAndProjectInformation
+          projectId={projectId}
+          userRole={userRole}
         />
+        {userRole === null || status !== 'success' || data === undefined ? (
+          <LoadingSummary status={status} />
+        ) : (
+          <Summary
+            projectId={projectId}
+            userRole={userRole}
+            name={data.name ?? ''}
+            imageUrl={data.imageUrl ?? ''}
+            summary={data.summary}
+            clientName={data.client?.name ?? ''}
+            clientEmployees={
+              data.client?.employees.map(({ user }) => user) ?? []
+            }
+            team={data.team}
+          />
+        )}
       </main>
     </>
   )
 }
 
-function useUpdates(originalUpdates: ProjectData['updates']) {
-  return useMemo(
-    () =>
-      originalUpdates.map((update) => ({
-        ...update,
-        createdAt: new Date(update.createdAt),
-        updatedAt: new Date(update.updatedAt),
-        hashLink: `#update-${update.id}`,
-      })) ?? [],
-    [originalUpdates]
-  )
+type TimelineAndProjectInformationProps = {
+  projectId: number
+  userRole: Role | null
 }
+// this function is memoized because it is simplest to render it inside of another function that has data
+// that doesn't directly relate to it, however we don't want this function to rerender in those cases
+const TimelineAndProjectInformation = memo(
+  function TimelineAndProjectInformation({
+    projectId,
+    userRole,
+  }: TimelineAndProjectInformationProps) {
+    const { data, status } = useUpdates(projectId)
+    // convert the string dates to dates and add the hash for the links
+    const updates = data ?? []
 
-type ProjectQueryKey = ['project', { id: number }]
-const fetchProject: QueryFunction<ProjectData, ProjectQueryKey> = async ({
-  queryKey,
-}) => {
-  const [, { id }] = queryKey
+    return (
+      <HashLinkProvider>
+        {userRole === null || status !== 'success' || data === undefined ? (
+          <>
+            <LoadingTimeline />
+            <LoadingProjectInformation status={status} />
+          </>
+        ) : (
+          <>
+            <Timeline updates={updates} />
+            <ProjectInformation
+              projectId={projectId}
+              userRole={userRole}
+              updates={updates}
+            />
+          </>
+        )}
+      </HashLinkProvider>
+    )
+  }
+)
 
-  if (!id) {
-    throw new Error(`No project provided`)
+function getProjectTitle(status: QueryStatus, name?: string) {
+  if (status === 'loading') {
+    return 'Loading Project...'
   }
 
-  const res = await fetch(`/api/project`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id }),
-  })
-  if (!res.ok) {
-    throw new Error(`Something went wrong`)
+  if (status === 'error') {
+    return 'Project Failed To Load'
   }
-  return res.json()
+
+  return `${name ?? 'Untitled Project'} | Project Journal`
 }

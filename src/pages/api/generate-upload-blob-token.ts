@@ -3,12 +3,6 @@ import { prisma } from '@lib/prisma'
 import { generateSasUrlForImageUpload } from '@lib/azure-storage-blob'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
-import type { UnwrapPromise } from '@types'
-
-export type UserData = Exclude<
-  UnwrapPromise<typeof checkAuthentication>,
-  undefined
->
 
 // This api will need to be amended to be a little more usable for generating tokens for all sorts of image uploads
 export default async function handler(

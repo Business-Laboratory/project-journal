@@ -1,5 +1,5 @@
 import tw, { css, theme } from 'twin.macro'
-import { useEffect, useRef, forwardRef, useState, useMemo } from 'react'
+import React, { useEffect, useRef, forwardRef, useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import {
@@ -21,29 +21,26 @@ import { getDocumentFontSize } from '@utils/get-document-font-size'
 import { useCurrentHashLink } from './hash-link-context'
 
 import type { Interval } from 'date-fns'
-import type { Updates } from 'pages/project/[id]'
+import type { Updates } from '@queries/useUpdates'
 
-// types
+export { Timeline, LoadingTimeline }
 
 type DelineatorType = 'weeks' | 'months' | 'quarters' | 'halfYears' | 'years'
 
+function LoadingTimeline() {
+  return <NavWrapper />
+}
+
 type TimelineProps = {
   updates: Updates
-  status: string
 }
-export function Timeline({ updates, status }: TimelineProps) {
+function Timeline({ updates }: TimelineProps) {
   const datesContainerRef = useRef<null | HTMLDivElement>(null)
   const { delineatorDates, groupedUpdateDates } = useTimelineDates(
     updates,
     datesContainerRef
   )
   const currentHashLink = useCurrentHashLink()
-
-  if (status === 'loading' || status === 'error' || updates.length === 0) {
-    return (
-      <nav tw="relative w-20 h-full overflow-hidden bg-gray-yellow-600 border-r-2 border-gray-yellow-300" />
-    )
-  }
 
   // Find the update with the closest date to the update with the currentHashLink
   // this is what we will highlight
@@ -58,7 +55,7 @@ export function Timeline({ updates, status }: TimelineProps) {
     : undefined
 
   return (
-    <nav tw="relative w-20 h-full overflow-hidden bg-gray-yellow-600 border-r-2 border-gray-yellow-300">
+    <NavWrapper>
       <Bar />
       <FlexWrapper ref={datesContainerRef}>
         {delineatorDates.dates.map((date) => (
@@ -90,11 +87,19 @@ export function Timeline({ updates, status }: TimelineProps) {
           </CircleWrapper>
         ))}
       </FlexWrapper>
-    </nav>
+    </NavWrapper>
   )
 }
 
 // components
+
+function NavWrapper({ children }: { children?: React.ReactNode }) {
+  return (
+    <nav tw="relative w-20 h-full overflow-hidden bg-gray-yellow-600 border-r-2 border-gray-yellow-300">
+      {children}
+    </nav>
+  )
+}
 
 function Bar() {
   return (
