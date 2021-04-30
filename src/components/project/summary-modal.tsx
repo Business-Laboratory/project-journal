@@ -8,16 +8,6 @@ import { Project } from '@queries/useProject'
 
 export { SummaryModal, createDescriptionPath, createRoadmapProject }
 
-type NewUpdate = {
-  id: 'new'
-  title: string
-  body: string
-}
-type DescRoadmapEdit = {
-  id: number
-  title: string
-  body: string
-}
 type SummaryModalProps = {
   projectId: number
   summary: Exclude<Project['summary'], null>

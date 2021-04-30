@@ -1,9 +1,7 @@
 import tw, { css } from 'twin.macro'
-import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
-import { useRouter } from 'next/router'
 
 import { IconLink } from '@components/icon-link'
 import { EditIcon, GearIcon } from 'icons'
@@ -29,26 +27,14 @@ type ClientEmployees = Exclude<
 
 type LoadingSummaryProps = {
   status: QueryStatus
-  userRole: Role | null
 }
-function LoadingSummary({ status, userRole }: LoadingSummaryProps) {
+function LoadingSummary({ status }: LoadingSummaryProps) {
   const wait = useWaitTimer()
-
-  // until the user has been loaded, we don't need to display any of the loading information
-  if (userRole === null) {
-    return <SummaryWrapper />
-  }
 
   // when the user or the projects data is still loading, return nothing for 1 second, and then a spinner
   return (
     // need precise rem to match the y coordinate of the loading updates spinner
-    <SummaryWrapper
-      css={[
-        css`
-          padding-top: ${userRole === 'ADMIN' ? 11.875 : 7.625}rem;
-        `,
-      ]}
-    >
+    <SummaryWrapper>
       {status === 'error' ? (
         <DataErrorMessage errorMessage="Unable to load summary" />
       ) : wait === 'finished' ? (
@@ -82,8 +68,8 @@ function Summary({
   if (!summary) return null
 
   return (
-    <SummaryWrapper>
-      <div tw="space-y-8 py-10">
+    <>
+      <SummaryWrapper>
         {userRole === 'ADMIN' ? (
           <IconLink pathName={`/project/${projectId}/#`}>
             <GearIcon tw="h-6 w-6 fill-copper-300" />
@@ -148,20 +134,18 @@ function Summary({
             <TeamSection title="Project Team" team={team} />
           </div>
         </div>
-      </div>
+      </SummaryWrapper>
+
       {userRole === 'ADMIN' ? (
         <SummaryModal projectId={projectId} summary={summary} />
       ) : null}
-    </SummaryWrapper>
+    </>
   )
 }
 
-function SummaryWrapper({
-  children,
-  className,
-}: React.ComponentPropsWithoutRef<'article'>) {
+function SummaryWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <aside tw="relative h-full px-14 overflow-y-auto" className={className}>
+    <aside tw="relative h-full px-14 overflow-y-auto space-y-8 py-10">
       {children}
     </aside>
   )

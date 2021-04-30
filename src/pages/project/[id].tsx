@@ -62,7 +62,7 @@ function ProjectById({ projectId }: { projectId: number }) {
           userRole={userRole}
         />
         {userRole === null || status !== 'success' || data === undefined ? (
-          <LoadingSummary status={status} userRole={userRole} />
+          <LoadingSummary status={status} />
         ) : (
           <Summary
             projectId={projectId}
@@ -94,7 +94,6 @@ const TimelineAndProjectInformation = memo(
     userRole,
   }: TimelineAndProjectInformationProps) {
     const { data, status } = useUpdates(projectId)
-
     // convert the string dates to dates and add the hash for the links
     const updates = data ?? []
 
@@ -103,11 +102,7 @@ const TimelineAndProjectInformation = memo(
         {userRole === null || status !== 'success' || data === undefined ? (
           <>
             <LoadingTimeline />
-            <LoadingProjectInformation
-              projectId={projectId}
-              status={status}
-              userRole={userRole}
-            />
+            <LoadingProjectInformation status={status} />
           </>
         ) : (
           <>

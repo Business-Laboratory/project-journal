@@ -34,31 +34,17 @@ export { ProjectInformation, LoadingProjectInformation }
 // Main component
 
 type LoadingProjectInformationProps = {
-  projectId: number
   status: QueryStatus
-  userRole: Role | null
 }
-function LoadingProjectInformation({
-  projectId,
-  status,
-  userRole,
-}: LoadingProjectInformationProps) {
+function LoadingProjectInformation({ status }: LoadingProjectInformationProps) {
   const wait = useWaitTimer()
 
   return (
     <ProjectInformationContainer>
-      <SearchBar updates={[]} disabled />
-      {userRole !== null ? (
-        <>
-          {userRole === 'ADMIN' ? (
-            <AddUpdateButton projectId={projectId} />
-          ) : null}
-          {status === 'error' ? (
-            <DataErrorMessage errorMessage="Unable to load updates" />
-          ) : wait === 'finished' ? (
-            <LoadingSpinner loadingMessage="Loading updates" />
-          ) : null}
-        </>
+      {status === 'error' ? (
+        <DataErrorMessage errorMessage="Unable to load updates" />
+      ) : wait === 'finished' ? (
+        <LoadingSpinner loadingMessage="Loading updates" />
       ) : null}
     </ProjectInformationContainer>
   )

@@ -1,5 +1,4 @@
 import { useQueryClient, useMutation } from 'react-query'
-import { preprocessUpdate } from './useUpdates'
 
 import type { Project } from './useProject'
 import type { UpdateSummaryBody, Summary } from 'pages/api/summary'

@@ -35,14 +35,18 @@ function ClientList() {
     return <DataErrorMessage errorMessage="Unable to load clients" />
   }
 
-  if (wait === 'finished' && status === 'loading') {
-    return <LoadingSpinner loadingMessage="Loading clients" />
+  if (status === 'loading') {
+    if (wait === 'finished') {
+      return <LoadingSpinner loadingMessage="Loading clients" />
+    }
+    return null
   }
 
   const clients = data ?? []
 
   return clients.length > 0 ? (
     <>
+      <AddClientLink />
       {clients.map(({ id, name, employees }) => (
         <div key={id} tw="space-y-4">
           <IconLink pathName="#">
@@ -64,7 +68,19 @@ function ClientList() {
         </div>
       ))}
     </>
-  ) : status === 'success' ? (
-    <h1 tw="bl-text-3xl max-w-prose text-center">No clients are available</h1>
-  ) : null
+  ) : (
+    <>
+      <AddClientLink />
+      <h1 tw="bl-text-3xl max-w-prose text-center">No clients are available</h1>
+    </>
+  )
+}
+
+function AddClientLink() {
+  return (
+    <IconLink pathName="#">
+      <PlusIcon tw="w-6 h-6 fill-copper-300" />
+      <span tw="bl-text-2xl">Add client</span>
+    </IconLink>
+  )
 }

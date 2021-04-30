@@ -12,68 +12,70 @@ import { useWaitTimer } from '@utils/use-wait-timer'
 import { useProjects } from '@queries/useProjects'
 
 export default function Projects() {
-  const user = useAuth()
-
   return (
     <>
       <Head>
         <title>Projects | Project Journal</title>
       </Head>
       <main tw="pt-10 w-9/12 space-y-8 mx-auto max-w-lg lg:max-w-none">
-        {user?.role === 'ADMIN' ? (
-          <IconLink pathName="#">
-            <PlusIcon tw="w-6 h-6 fill-copper-300" />
-            <span tw="bl-text-2xl">Add project</span>
-          </IconLink>
-        ) : null}
-
-        <CardGrid user={user} />
+        <CardGrid />
       </main>
     </>
   )
 }
 
-type CardGridProps = {
-  user: ReturnType<typeof useAuth>
-}
-function CardGrid({ user }: CardGridProps) {
+function CardGrid() {
+  const user = useAuth()
   const { data, status } = useProjects()
   const wait = useWaitTimer() // timeout to show a spinner
-
-  // the user has to be loaded before we even display the spinner
-  if (user === null) {
-    return null
-  }
 
   if (status === 'error') {
     return <DataErrorMessage errorMessage="Unable to load projects" />
   }
 
   // when the user or the projects data is still loading, return nothing for 1 second, and then a spinner
-  if (status === 'loading' && wait === 'finished') {
-    return <LoadingSpinner loadingMessage="Loading projects" />
+  if (!user || status === 'loading') {
+    if (wait === 'finished') {
+      return <LoadingSpinner loadingMessage="Loading projects" />
+    }
+    return null
   }
 
   const userNameFormatted = user.name ?? 'you'
   const projects = data ?? []
 
   return projects.length > 0 ? (
-    <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
-      {projects.map((project, idx) => (
-        <Card
-          key={project.id}
-          id={project.id}
-          name={project.name ?? `Untitled Project (${idx + 1})`}
-          description={project.summary?.description ?? null}
-          imageUrl={project.imageUrl}
-        />
-      ))}
-    </div>
-  ) : status === 'success' ? (
-    <h1 tw="bl-text-3xl max-w-prose text-center">
-      There are currently no projects assigned to {userNameFormatted}
-    </h1>
-  ) : null
+    <>
+      <AddProjectLink />
+      <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
+        {projects.map((project, idx) => (
+          <Card
+            key={project.id}
+            id={project.id}
+            name={project.name ?? `Untitled Project (${idx + 1})`}
+            description={project.summary?.description ?? null}
+            imageUrl={project.imageUrl}
+          />
+        ))}
+      </div>
+    </>
+  ) : (
+    <>
+      <AddProjectLink />
+      <h1 tw="bl-text-3xl max-w-prose text-center">
+        There are currently no projects assigned to {userNameFormatted}
+      </h1>
+    </>
+  )
+}
+
+function AddProjectLink() {
+  return (
+    <IconLink pathName="#">
+      <PlusIcon tw="w-6 h-6 fill-copper-300" />
+      <span tw="bl-text-2xl">Add project</span>
+    </IconLink>
+  )
 }
 
 type CardProps = {
