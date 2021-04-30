@@ -17,17 +17,13 @@ export default function DefaultComponent() {
         <title>Admins | Project Journal</title>
       </Head>
       <main tw="pt-10 max-w-max mx-auto space-y-8">
-        <IconLink pathName="#">
-          <EditIcon tw="w-6 h-6 fill-copper-300" />
-          <span tw="bl-text-3xl">Admins</span>
-        </IconLink>
-        <AdminsGrid />
+        <AdminsContent />
       </main>
     </>
   )
 }
 
-function AdminsGrid() {
+function AdminsContent() {
   const { data, status } = useQuery('users', fetchAdmins)
 
   const wait = useWaitTimer()
@@ -44,6 +40,7 @@ function AdminsGrid() {
 
   return admins.length > 0 ? (
     <>
+      <ContentTitle />
       <div
         css={[
           css`
@@ -63,8 +60,20 @@ function AdminsGrid() {
       </div>
     </>
   ) : status === 'success' ? (
-    <h1 tw="bl-text-3xl max-w-prose text-center">No admins are available</h1>
+    <>
+      <ContentTitle />
+      <h1 tw="bl-text-3xl max-w-prose text-center">No admins are available</h1>
+    </>
   ) : null
+}
+
+function ContentTitle() {
+  return (
+    <IconLink pathName="#">
+      <EditIcon tw="w-6 h-6 fill-copper-300" />
+      <span tw="bl-text-3xl">Admins</span>
+    </IconLink>
+  )
 }
 
 const fetchAdmins: QueryFunction<AdminsData> = async () => {
