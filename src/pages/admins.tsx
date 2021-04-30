@@ -16,7 +16,7 @@ export default function DefaultComponent() {
       <Head>
         <title>Admins | Project Journal</title>
       </Head>
-      <main tw="pt-10  max-w-max mx-auto space-y-8">
+      <main tw="pt-10 max-w-max mx-auto space-y-8">
         <IconLink pathName="#">
           <EditIcon tw="w-6 h-6 fill-copper-300" />
           <span tw="bl-text-3xl">Admins</span>
@@ -47,9 +47,9 @@ function AdminsGrid() {
       <div
         css={[
           css`
-            grid-template-columns: repeat(2, minmax(10rem, max-content));
+            grid-template-columns: repeat(2, minmax(0, max-content));
           `,
-          tw`grid gap-x-3 gap-y-2 bl-text-lg`,
+          tw`grid gap-x-12 gap-y-2 bl-text-lg`,
         ]}
       >
         <span tw="col-span-1">Name</span>
