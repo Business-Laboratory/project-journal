@@ -18,7 +18,6 @@ export { UpdateModal, createUpdatePath }
 
 type UpdateModalProps = {
   projectId: number
-  // TODO: Update the schema, because no update should be without a project id
   updates: Updates
 }
 function UpdateModal({ projectId, updates }: UpdateModalProps) {

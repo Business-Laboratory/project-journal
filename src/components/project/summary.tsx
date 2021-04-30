@@ -46,7 +46,7 @@ type SummaryProps = {
   imageUrl: string
   summary: Project['summary']
   clientName: string
-  clientEmployees: ClientEmployees // TODO: update this. There's probably a better way to do this, but I'm just replacing what was here
+  clientEmployees: ClientEmployees
   team: Team
 }
 function Summary({
