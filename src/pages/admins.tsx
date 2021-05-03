@@ -9,6 +9,7 @@ import { QueryFunction, useQuery } from 'react-query'
 import { useWaitTimer } from '@utils/use-wait-timer'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
+import { AdminsModal, createEditAdminsPath } from '@components/admins-modal'
 
 export default function DefaultComponent() {
   return (
@@ -69,10 +70,13 @@ function AdminsContent() {
 
 function ContentTitle() {
   return (
-    <IconLink pathName="#">
-      <EditIcon tw="w-6 h-6 fill-copper-300" />
-      <span tw="bl-text-3xl">Admins</span>
-    </IconLink>
+    <>
+      <IconLink pathName={createEditAdminsPath()}>
+        <EditIcon tw="w-6 h-6 fill-copper-300" />
+        <span tw="bl-text-3xl">Admins</span>
+      </IconLink>
+      <AdminsModal />
+    </>
   )
 }
 
