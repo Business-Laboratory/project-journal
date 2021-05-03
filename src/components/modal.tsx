@@ -1,4 +1,4 @@
-import tw, { css } from 'twin.macro'
+import tw, { css, theme } from 'twin.macro'
 import { useState } from 'react'
 import { DialogOverlay, DialogContent } from '@reach/dialog'
 import { Button } from '@components/button'
@@ -16,11 +16,28 @@ function Modal({ children, onDismiss, ...props }: DialogOverlayProps) {
     <DialogOverlay css={dialogCss} onDismiss={onDismiss} {...props}>
       <DialogContent css={dialogContentCss} aria-label="modal-content">
         <button
-          tw="absolute top-3 right-3"
+          className="group"
+          tw="absolute w-12 h-12 top-0 right-0 hover:text-copper-300 focus:outline-none"
+          css={[
+            // ring color is copper-400
+            css`
+              &.focus-visible > svg {
+                ${tw`ring-offset-4`}
+                --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
+                var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+                --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
+                  calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+                box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+                  var(--tw-shadow, 0 0 #0000);
+                --tw-ring-opacity: 1;
+                --tw-ring-color: rgba(171, 133, 94, var(--tw-ring-opacity));
+              }
+            `,
+          ]}
           onClick={onDismiss}
           aria-label="close modal"
         >
-          <CloseIcon tw="w-4 h-4" />
+          <CloseIcon tw="w-4 h-4 m-auto stroke-gray-yellow-400 group-hover:stroke-copper-300" />
         </button>
         {children}
       </DialogContent>
@@ -35,7 +52,7 @@ const dialogCss = [
     backdrop-filter: blur(4px);
   `,
 ]
-const dialogContentCss = tw`w-1/2 my-16 mx-auto outline-none min-w-max bg-gray-yellow-100 py-16 px-24 shadow-bl border-2 border-copper-300 rounded z-30`
+const dialogContentCss = tw`relative w-1/2 my-16 mx-auto outline-none min-w-max bg-gray-yellow-100 py-16 px-24 shadow-bl border-2 border-copper-300 rounded z-30`
 
 function MarkdownTextArea(props: React.ComponentPropsWithoutRef<'textarea'>) {
   return <textarea css={markdownTextAreaCss} {...props} />
