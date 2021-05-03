@@ -8,11 +8,11 @@ import { EditIcon, GearIcon } from 'icons'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
 import { SummaryModal } from './index'
+import { createDescriptionPath, createRoadmapProject } from './summary-modal'
 
 import type { QueryStatus } from 'react-query'
 import type { Role } from '@prisma/client'
 import type { Project } from '@queries/useProject'
-import { createDescriptionPath, createRoadmapProject } from './summary-modal'
 
 export { Summary, LoadingSummary }
 

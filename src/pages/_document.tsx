@@ -17,13 +17,6 @@ class MyDocument extends Document {
       <Html>
         <Head>
           <link
-            rel="preload"
-            href="/fonts/Anicons/AniconsGX.woff2"
-            as="font"
-            type="font/woff2"
-            crossOrigin=""
-          />
-          <link
             href="/fonts/Poppins/poppins-v15-latin-100.woff2"
             as="font"
             type="font/woff2"

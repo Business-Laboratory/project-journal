@@ -1,10 +1,10 @@
 import 'twin.macro'
 import { useRouter } from 'next/router'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { MarkdownTextArea, Modal, SaveButton } from '@components/modal'
-import { useUpdateSummary } from '@queries/useUpdateSummary'
 import { Project } from '@queries/useProject'
+import { useUpdateSummary } from '@queries/useUpdateSummary'
 
 export { SummaryModal, createDescriptionPath, createRoadmapProject }
 

@@ -1,6 +1,6 @@
 import 'twin.macro'
-import { useState } from 'react'
 import Header from 'next/head'
+import { useState } from 'react'
 import { signIn } from 'next-auth/client'
 
 import { Button } from '@components/button'

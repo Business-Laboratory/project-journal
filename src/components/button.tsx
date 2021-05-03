@@ -1,5 +1,5 @@
 import tw, { css } from 'twin.macro'
-import React, { forwardRef, useMemo } from 'react'
+import { forwardRef, useMemo } from 'react'
 
 export { Button }
 export type { ButtonProps }

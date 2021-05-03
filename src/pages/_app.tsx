@@ -1,11 +1,11 @@
 import type { AppProps } from 'next/app'
 import { GlobalStyles } from 'twin.macro'
 import { QueryClient, QueryClientProvider } from 'react-query'
-import 'focus-visible'
 
 import { AuthProvider } from '@components/auth-context'
 import { AppBar } from '@components/app-bar'
 
+import 'focus-visible'
 import '../styles/globals.css'
 
 type ComponentWithPageLayout = {

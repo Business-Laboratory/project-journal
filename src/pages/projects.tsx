@@ -3,11 +3,12 @@ import tw, { css, theme } from 'twin.macro'
 import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
+
 import { PlusIcon } from 'icons'
-import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
+import { useAuth } from '@components/auth-context'
 import { useProjects } from '@queries/useProjects'
 
 export default function Projects() {

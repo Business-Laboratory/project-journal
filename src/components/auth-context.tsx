@@ -2,6 +2,7 @@ import 'twin.macro'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { signOut, useSession } from 'next-auth/client'
 import { useRouter } from 'next/router'
+
 import { Button } from '@components/button'
 import { useUser } from '@queries/useUser'
 
