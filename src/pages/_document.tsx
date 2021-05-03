@@ -41,6 +41,7 @@ class MyDocument extends Document {
             crossOrigin=""
           />
           <link
+            rel="preload" // hint text on login page
             href="/fonts/Poppins/poppins-v15-latin-300.woff2"
             as="font"
             type="font/woff2"
@@ -53,6 +54,7 @@ class MyDocument extends Document {
             crossOrigin=""
           />
           <link
+            rel="preload" // default text and title in the app bar
             href="/fonts/Poppins/poppins-v15-latin-regular.woff2"
             as="font"
             type="font/woff2"
@@ -65,6 +67,7 @@ class MyDocument extends Document {
             crossOrigin=""
           />
           <link
+            rel="preload" // login page title and buttons
             href="/fonts/Poppins/poppins-v15-latin-500.woff2"
             as="font"
             type="font/woff2"
@@ -89,7 +92,6 @@ class MyDocument extends Document {
             crossOrigin=""
           />
           <link
-            rel="preload"
             href="/fonts/Poppins/poppins-v15-latin-700.woff2"
             as="font"
             type="font/woff2"
@@ -126,7 +128,7 @@ class MyDocument extends Document {
             crossOrigin=""
           />
           <link
-            rel="preload"
+            rel="preload" // load all the "body" text immediately
             href="/fonts/Work_Sans/work-sans-variableFont_wght-subset.woff2"
             as="font"
             type="font/woff2"
