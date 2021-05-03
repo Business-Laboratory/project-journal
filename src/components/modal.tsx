@@ -30,18 +30,19 @@ function Modal({ children, onDismiss, ...props }: DialogOverlayProps) {
 }
 
 const dialogCss = [
-  tw`bg-gray-yellow-200 bg-opacity-50 z-20 inset-0 fixed overflow-auto`,
+  // need z-10 because the app bar is in the same stacking context, and also z-10
+  tw`bg-gray-yellow-200 bg-opacity-50 z-10 inset-0 fixed overflow-auto`,
   // does not work in firefox
   css`
     backdrop-filter: blur(4px);
   `,
 ]
-const dialogContentCss = tw`relative w-1/2 my-16 mx-auto outline-none min-w-max bg-gray-yellow-100 py-16 px-24 shadow-bl border-2 border-copper-300 rounded z-30`
+const dialogContentCss = tw`relative w-1/2 my-16 mx-auto outline-none min-w-max bg-gray-yellow-100 py-16 px-24 shadow-bl border-2 border-copper-300 rounded`
 const closeIconButtonCss = [
   tw`absolute w-12 h-12 top-0 right-0 hover:text-copper-300 focus:outline-none`,
   css`
-    &.focus-visible {
-      ${tw`ring ring-copper-400 ring-inset ring-offset-8`}
+    &.focus-visible > svg {
+      ${tw`ring ring-copper-400`}
     }
   `,
 ]
