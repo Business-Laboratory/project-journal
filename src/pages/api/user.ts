@@ -1,8 +1,12 @@
-import { checkAuthentication, UserData } from '@utils/api/check-authentication'
+import {
+  checkAuthentication,
+  UserData as OriginalUserData,
+} from '@utils/api/check-authentication'
 
+import type { PrepareAPIData } from '@types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-export type { UserData }
+export type UserData = PrepareAPIData<OriginalUserData>
 
 export default async function handler(
   req: NextApiRequest,

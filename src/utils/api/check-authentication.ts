@@ -3,9 +3,10 @@ import { getSession } from 'next-auth/client'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
 import type { Session } from 'next-auth'
+import type { UnwrapPromise } from '@types'
 
 export { checkAuthentication }
-export type UserData = ReturnType<typeof getUser>
+export type UserData = UnwrapPromise<ReturnType<typeof getUser>>
 
 /**
  * Checks if the user is authenticated (has a session) and if they're role is not
