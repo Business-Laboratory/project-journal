@@ -66,7 +66,7 @@ function Summary({
     <>
       <SummaryWrapper>
         {userRole === 'ADMIN' ? (
-          <IconLink pathName={`/project/${projectId}/#`}>
+          <IconLink href={`/project/${projectId}/#`}>
             <GearIcon tw="h-6 w-6 fill-copper-300" />
             {name === '' ? (
               <h1 tw="bl-text-4xl text-gray-yellow-300 inline capitalize">
@@ -91,10 +91,7 @@ function Summary({
         ) : null}
         <div tw="space-y-2">
           {userRole === 'ADMIN' ? (
-            <IconLink
-              pathName={createDescriptionPath(projectId)}
-              replace={true}
-            >
+            <IconLink href={createDescriptionPath(projectId)} replace={true}>
               <EditIcon tw="h-6 w-6 fill-copper-300" />
               <h2 tw="bl-text-3xl inline">Project Description</h2>
             </IconLink>
@@ -107,7 +104,7 @@ function Summary({
         </div>
         <div tw="space-y-2">
           {userRole === 'ADMIN' ? (
-            <IconLink pathName={createRoadmapProject(projectId)} replace={true}>
+            <IconLink href={createRoadmapProject(projectId)} replace={true}>
               <EditIcon tw="h-6 w-6 fill-copper-300" />
               <h2 tw="bl-text-3xl inline">Project Roadmap</h2>
             </IconLink>

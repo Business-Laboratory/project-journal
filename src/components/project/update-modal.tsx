@@ -8,6 +8,7 @@ import {
   Modal,
   SaveButton,
 } from '@components/modal'
+import { TextInput } from '@components/text-input'
 import { useUpdateMutation } from '@queries/useUpdateMutation'
 import { useDeleteUpdateMutation } from '@queries/useDeleteUpdateMutation'
 
@@ -71,19 +72,13 @@ function ProjectEditModalContent({
   return (
     <>
       <div tw="space-y-8 flex flex-col items-end">
-        <label tw="flex flex-col w-full">
-          <span tw="bl-text-xs text-gray-yellow-300">Update title</span>
-          <input
-            css={[
-              tw`w-full bl-text-3xl placeholder-gray-yellow-400`,
-              tw`focus:outline-none border-b border-gray-yellow-600`,
-            ]}
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Update #"
-          />
-        </label>
+        <TextInput
+          tw="bl-text-3xl w-full"
+          label="Update title"
+          placeholder="Update #"
+          value={title}
+          onChange={(value) => setTitle(value)}
+        />
 
         <MarkdownTextArea
           value={body}
@@ -109,6 +104,7 @@ function ProjectEditModalContent({
       {id !== 'new' ? (
         <DeleteSection
           tw="mt-16"
+          label="Verify update title"
           verificationText={title}
           onDelete={() => {
             deleteMutation.mutate(id, {
