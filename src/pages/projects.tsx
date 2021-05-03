@@ -80,7 +80,6 @@ type CardProps = {
   imageUrl: string | null
 }
 function Card({ id, name, description, imageUrl }: CardProps) {
-  // ring color is copper-400
   return (
     <Link href={`/project/${id}`} passHref>
       <a
@@ -96,14 +95,7 @@ function Card({ id, name, description, imageUrl }: CardProps) {
               );
             }
             &.focus-visible {
-              --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
-                var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-              --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
-                calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-              box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
-                var(--tw-shadow, 0 0 #0000);
-              --tw-ring-opacity: 1;
-              --tw-ring-color: rgba(171, 133, 94, var(--tw-ring-opacity));
+              ${tw`ring-2 ring-copper-400 `}
             }
           `,
         ]}

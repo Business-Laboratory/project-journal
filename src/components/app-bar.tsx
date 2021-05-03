@@ -61,7 +61,6 @@ type NavLinkProps = {
   children: React.ReactNode
 }
 function NavLink({ pathName, href, children }: NavLinkProps) {
-  // ring color is copper-100
   return (
     <Link href={href} passHref>
       <a
@@ -128,7 +127,6 @@ type NavHomeProps = {
   children: React.ReactNode
 }
 function NavHome({ children }: NavHomeProps) {
-  //Ring color is copper-100
   return (
     <Link href="/" passHref>
       <a
@@ -147,13 +145,6 @@ const menuItemTw = tw`flex w-full px-3 py-1 text-xs uppercase cursor-pointer tex
 
 const appbarElementRingCss = css`
   &.focus-visible {
-    --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
-      var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-    --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
-      calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-    box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
-      var(--tw-shadow, 0 0 #0000);
-    --tw-ring-opacity: 1;
-    --tw-ring-color: rgba(251, 215, 183, var(--tw-ring-opacity));
+    ${tw`ring-2 ring-copper-100`}
   }
 `
