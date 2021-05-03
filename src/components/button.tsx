@@ -14,9 +14,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   ref
 ) {
   const buttonCss = useButtonCss(variant, disabled)
-  if (variant === 'important') {
-    console.log(buttonCss)
-  }
   return <button ref={ref} css={buttonCss} disabled={disabled} {...props} />
 })
 

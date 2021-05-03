@@ -5,35 +5,16 @@ import { Button } from '@components/button'
 import { TextInput } from '@components/text-input'
 import { CloseIcon } from 'icons'
 
+import type { DialogOverlayProps } from '@reach/dialog'
 import type { QueryStatus } from 'react-query'
 import type { ButtonProps } from '@components/button'
 
-import '@reach/dialog/styles.css'
-
 export { Modal, MarkdownTextArea, SaveButton }
 
-type ModalProps = {
-  children: React.ReactNode
-  isOpen: boolean
-  onDismiss: () => void
-}
-function Modal({ children, onDismiss, ...props }: ModalProps) {
+function Modal({ children, onDismiss, ...props }: DialogOverlayProps) {
   return (
-    <DialogOverlay
-      css={[
-        tw`bg-gray-yellow-200 bg-opacity-50 z-20`,
-        // does not work in firefox
-        css`
-          backdrop-filter: blur(4px);
-        `,
-      ]}
-      onDismiss={onDismiss}
-      {...props}
-    >
-      <DialogContent
-        tw="relative min-w-max bg-gray-yellow-100 py-16 px-24 shadow-bl border-2 border-copper-300 rounded z-30"
-        aria-label="modal-content"
-      >
+    <DialogOverlay css={dialogCss} onDismiss={onDismiss} {...props}>
+      <DialogContent css={dialogContentCss} aria-label="modal-content">
         <button
           tw="absolute top-3 right-3"
           onClick={onDismiss}
@@ -47,18 +28,26 @@ function Modal({ children, onDismiss, ...props }: ModalProps) {
   )
 }
 
+const dialogCss = [
+  tw`bg-gray-yellow-200 bg-opacity-50 z-20 inset-0 fixed overflow-auto`,
+  // does not work in firefox
+  css`
+    backdrop-filter: blur(4px);
+  `,
+]
+const dialogContentCss = tw`w-1/2 my-16 mx-auto outline-none min-w-max bg-gray-yellow-100 py-16 px-24 shadow-bl border-2 border-copper-300 rounded z-30`
+
 function MarkdownTextArea(props: React.ComponentPropsWithoutRef<'textarea'>) {
-  return (
-    <textarea
-      // Padding bottom doesn't work. Found this age old bug https://bugzilla.mozilla.org/show_bug.cgi?id=748518
-      tw="w-full h-64 py-6 px-5 overflow-y-scroll resize-none focus:outline-none border border-gray-yellow-600"
-      css={css`
-        min-width: 500px;
-      `}
-      {...props}
-    />
-  )
+  return <textarea css={markdownTextAreaCss} {...props} />
 }
+
+const markdownTextAreaCss = [
+  // padding bottom doesn't work. Found this age old bug https://bugzilla.mozilla.org/show_bug.cgi?id=748518
+  tw`w-full h-64 py-6 px-5 overflow-y-scroll resize-none focus:outline-none border border-gray-yellow-600`,
+  css`
+    min-width: 500px;
+  `,
+]
 
 function SaveButton({
   onClick,
@@ -97,7 +86,7 @@ export function DeleteSection({
   const isTitleUnverified = verificationText !== verifyText
 
   return (
-    <div tw="space-y-10" className={className}>
+    <section tw="space-y-10" className={className}>
       <div tw="w-full border-b border-dashed border-matisse-red-200" />
       <div tw="w-full grid grid-cols-2 col-auto gap-x-4">
         <TextInput
@@ -119,12 +108,12 @@ export function DeleteSection({
             {status === 'loading' ? 'Deleting...' : 'Delete update'}
           </Button>
           {status === 'error' ? (
-            <div tw="bl-text-lg text-matisse-red-200 uppercase">
+            <div role="alert" tw="bl-text-lg text-matisse-red-200 uppercase">
               Failed to delete
             </div>
           ) : null}
         </div>
       </div>
-    </div>
+    </section>
   )
 }
