@@ -1,4 +1,4 @@
-import tw, { css, theme } from 'twin.macro'
+import 'twin.macro'
 import { useState } from 'react'
 import Header from 'next/head'
 import { signIn } from 'next-auth/client'

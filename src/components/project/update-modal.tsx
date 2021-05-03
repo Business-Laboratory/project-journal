@@ -1,4 +1,4 @@
-import tw from 'twin.macro'
+import 'twin.macro'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 

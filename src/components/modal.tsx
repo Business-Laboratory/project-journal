@@ -1,4 +1,4 @@
-import tw, { css, theme } from 'twin.macro'
+import tw, { css } from 'twin.macro'
 import { useState } from 'react'
 import { DialogOverlay, DialogContent } from '@reach/dialog'
 import { Button } from '@components/button'
