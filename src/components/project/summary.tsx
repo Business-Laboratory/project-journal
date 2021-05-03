@@ -3,83 +3,69 @@ import Image from 'next/image'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
 
-import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { EditIcon, GearIcon } from 'icons'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
-import { useWaitTimer } from '@utils/use-wait-timer'
+import { SummaryModal } from './index'
 
-import type { ProjectData } from 'pages/api/project'
+import type { QueryStatus } from 'react-query'
+import type { Role } from '@prisma/client'
+import type { Project } from '@queries/useProject'
+import { createDescriptionPath, createRoadmapProject } from './summary-modal'
 
-type Team = ProjectData['team']
+export { Summary, LoadingSummary }
+
+// types
+
+type Team = Project['team']
+type ClientEmployees = Exclude<
+  Project['client'],
+  null
+>['employees'][0]['user'][]
+
+type LoadingSummaryProps = {
+  status: QueryStatus
+}
+function LoadingSummary({ status }: LoadingSummaryProps) {
+  return (
+    <SummaryWrapper>
+      {status === 'error' ? (
+        <DataErrorMessage errorMessage="Unable to load summary" />
+      ) : (
+        <LoadingSpinner loadingMessage="Loading project summary" />
+      )}
+    </SummaryWrapper>
+  )
+}
 
 type SummaryProps = {
   projectId: number
+  userRole: Role
   name: string
   imageUrl: string
-  summary: ProjectData['summary']
+  summary: Project['summary']
   clientName: string
-  clientEmployees: Team // TODO: update this. There's probably a better way to do this, but I'm just replacing what was here
+  clientEmployees: ClientEmployees
   team: Team
-  status: string
 }
-
-export function Summary({
+function Summary({
   projectId,
+  userRole,
   name,
   imageUrl,
   summary,
   clientName,
   clientEmployees,
   team,
-  status,
 }: SummaryProps) {
-  const user = useAuth()
-
-  const wait = useWaitTimer()
-
-  if (status === 'error') {
-    return (
-      <aside
-        css={[
-          user?.role === 'ADMIN'
-            ? css`
-                padding-top: 11.875rem;
-              `
-            : css`
-                padding-top: 7.625rem;
-              `,
-        ]}
-      >
-        <DataErrorMessage errorMessage="Unable to load summary" />
-      </aside>
-    )
-  }
-
-  if (wait === 'finished' && status === 'loading') {
-    //Need precise rem to match the y coordinate of the loading updates spinner
-    return (
-      <aside
-        css={[
-          user?.role === 'ADMIN'
-            ? css`
-                padding-top: 11.875rem;
-              `
-            : css`
-                padding-top: 7.625rem;
-              `,
-        ]}
-      >
-        <LoadingSpinner loadingMessage="Loading project summary" />
-      </aside>
-    )
-  }
+  // Is there a situation where summary would ever be null?
+  if (!summary) return null
 
   return (
-    <aside tw="relative h-full px-14 overflow-y-auto">
-      <div tw="space-y-8 py-10">
-        {user?.role === 'ADMIN' ? (
+    <>
+      <SummaryWrapper>
+        {userRole === 'ADMIN' ? (
           <IconLink pathName={`/project/${projectId}/#`}>
             <GearIcon tw="h-6 w-6 fill-copper-300" />
             {name === '' ? (
@@ -104,28 +90,31 @@ export function Summary({
           </div>
         ) : null}
         <div tw="space-y-2">
-          {user?.role === 'ADMIN' ? (
-            <IconLink pathName={`/project/${projectId}/#`}>
+          {userRole === 'ADMIN' ? (
+            <IconLink
+              pathName={createDescriptionPath(projectId)}
+              replace={true}
+            >
               <EditIcon tw="h-6 w-6 fill-copper-300" />
               <h2 tw="bl-text-3xl inline">Project Description</h2>
             </IconLink>
           ) : (
             <h2 tw="bl-text-3xl">Project Description</h2>
           )}
-          {summary?.description ? (
+          {summary.description ? (
             <MarkdownWrapper>{summary.description}</MarkdownWrapper>
           ) : null}
         </div>
         <div tw="space-y-2">
-          {user?.role === 'ADMIN' ? (
-            <IconLink pathName={`/project/${projectId}/#`}>
+          {userRole === 'ADMIN' ? (
+            <IconLink pathName={createRoadmapProject(projectId)} replace={true}>
               <EditIcon tw="h-6 w-6 fill-copper-300" />
               <h2 tw="bl-text-3xl inline">Project Roadmap</h2>
             </IconLink>
           ) : (
             <h2 tw="bl-text-3xl">Project Roadmap</h2>
           )}
-          {summary?.roadmap ? (
+          {summary.roadmap ? (
             <MarkdownWrapper>{summary.roadmap}</MarkdownWrapper>
           ) : null}
         </div>
@@ -140,7 +129,19 @@ export function Summary({
             <TeamSection title="Project Team" team={team} />
           </div>
         </div>
-      </div>
+      </SummaryWrapper>
+
+      {userRole === 'ADMIN' ? (
+        <SummaryModal projectId={projectId} summary={summary} />
+      ) : null}
+    </>
+  )
+}
+
+function SummaryWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <aside tw="relative h-full px-14 overflow-y-auto space-y-8 py-10">
+      {children}
     </aside>
   )
 }

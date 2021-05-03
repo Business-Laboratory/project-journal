@@ -3,17 +3,13 @@ import Link from 'next/link'
 import type { LinkProps } from 'next/link'
 import { signOut } from 'next-auth/client'
 import { useRouter } from 'next/router'
-import {
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  MenuLink,
-} from '@reach/menu-button'
+import { Menu, MenuButton, MenuList, MenuItem } from '@reach/menu-button'
 import { forwardRef } from 'react'
 
 import { useAuth } from '@components/auth-context'
 import { LogoIcon } from 'icons'
+
+import type { Role } from '@prisma/client'
 
 import '@reach/menu-button/styles.css'
 
@@ -22,8 +18,6 @@ const appBarHeight = theme('spacing.12')
 export { AppBar, appBarHeight }
 
 function AppBar() {
-  const { pathname } = useRouter()
-  // Will pull auth and projects/clients from context once implemented
   const user = useAuth()
 
   return (
@@ -35,30 +29,76 @@ function AppBar() {
     >
       <nav tw="inline-flex">
         <NavHome>Project Journal</NavHome>
-        {user?.role === 'ADMIN' &&
-        (pathname === '/projects' || pathname === '/clients') ? (
-          <div tw="ml-12 space-x-4">
-            <NavLink pathName={pathname} href={'/projects'}>
-              Projects
-            </NavLink>
-            <NavLink pathName={pathname} href={'/clients'}>
-              Clients
-            </NavLink>
-          </div>
-        ) : null}
+        {user?.role === 'ADMIN' ? <AdminNavLinks /> : null}
       </nav>
-      {user ? <UserMenu imageUrl={user.image ?? undefined} /> : null}
+      {user ? <UserMenu imageUrl={user.image} role={user.role} /> : null}
     </header>
   )
 }
 
-type MenuProps = {
-  imageUrl?: string
+type NavHomeProps = {
+  children: React.ReactNode
 }
-function UserMenu({ imageUrl }: MenuProps) {
-  const user = useAuth()
-  const router = useRouter()
+function NavHome({ children }: NavHomeProps) {
+  return (
+    <Link href="/" passHref>
+      <a
+        css={[
+          tw`font-bold bl-text-3xl text-gray-yellow-100 hover:text-copper-300 focus:outline-none`,
+          appbarElementRingCss,
+        ]}
+      >
+        {children}
+      </a>
+    </Link>
+  )
+}
 
+function AdminNavLinks() {
+  const { pathname } = useRouter()
+
+  return pathname === '/projects' || pathname === '/clients' ? (
+    <div tw="ml-12 space-x-4">
+      <NavLink pathName={pathname} href={'/projects'}>
+        Projects
+      </NavLink>
+      <NavLink pathName={pathname} href={'/clients'}>
+        Clients
+      </NavLink>
+    </div>
+  ) : null
+}
+
+type NavLinkProps = {
+  pathName: string
+  href: string
+  children: React.ReactNode
+}
+function NavLink({ pathName, href, children }: NavLinkProps) {
+  return (
+    <Link href={href} passHref>
+      <a
+        css={[
+          tw`bl-text-3xl focus:outline-none`,
+          pathName === href
+            ? tw`text-gray-yellow-100 hover:underline`
+            : tw`text-gray-yellow-300 hover:underline`,
+          appbarElementRingCss,
+        ]}
+      >
+        {children}
+      </a>
+    </Link>
+  )
+}
+
+type MenuProps = {
+  imageUrl: string | null
+  role: Role | null
+}
+
+function UserMenu({ imageUrl, role }: MenuProps) {
+  const router = useRouter()
   return (
     <Menu>
       <MenuButton tw="focus:outline-none focus:ring-2 focus:ring-copper-100 ">
@@ -77,11 +117,12 @@ function UserMenu({ imageUrl }: MenuProps) {
           `,
         ]}
       >
-        {user?.role === 'ADMIN' && (
+        {role === 'ADMIN' && (
           <MenuItem css={menuItemTw} onSelect={() => router.push('/admins')}>
             <CustomMenuLink href="/admins">EDIT ADMINS</CustomMenuLink>
           </MenuItem>
         )}
+
         <MenuItem
           css={menuItemTw}
           onSelect={() => {
@@ -94,49 +135,6 @@ function UserMenu({ imageUrl }: MenuProps) {
         </MenuItem>
       </MenuList>
     </Menu>
-  )
-}
-
-type NavHomeProps = {
-  children: React.ReactNode
-}
-function NavHome({ children }: NavHomeProps) {
-  //Ring color is copper-100
-  return (
-    <Link href="/" passHref>
-      <a
-        css={[
-          tw`font-bold bl-text-3xl text-gray-yellow-100 hover:text-copper-300 focus:outline-none`,
-          appbarElementRingCss,
-        ]}
-      >
-        {children}
-      </a>
-    </Link>
-  )
-}
-
-type NavLinkProps = {
-  pathName: string
-  href: string
-  children: React.ReactNode
-}
-function NavLink({ pathName, href, children }: NavLinkProps) {
-  //Ring color is copper-100
-  return (
-    <Link href={href} passHref>
-      <a
-        css={[
-          tw`bl-text-3xl focus:outline-none`,
-          pathName === href
-            ? tw`text-gray-yellow-100 hover:underline`
-            : tw`text-gray-yellow-300 hover:underline`,
-          appbarElementRingCss,
-        ]}
-      >
-        {children}
-      </a>
-    </Link>
   )
 }
 
@@ -157,6 +155,7 @@ const CustomMenuLink = forwardRef<HTMLAnchorElement, CustomMenuLinkProps>(
 
 const menuItemTw = tw`flex w-full px-3 py-1 text-xs uppercase cursor-pointer text-gray-yellow-200 hover:bg-gray-yellow-200 hover:text-gray-yellow-600 focus:bg-gray-yellow-200 focus:text-gray-yellow-600`
 
+//Ring color is copper-100
 const appbarElementRingCss = css`
   &.focus-visible {
     --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
