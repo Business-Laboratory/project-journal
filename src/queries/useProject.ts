@@ -6,7 +6,7 @@ import type { ProjectData } from 'pages/api/project'
 import type { Projects } from './useProjects'
 import type { QueryData } from '@types'
 
-export { useProject }
+export { useProject, usePrefetchProject }
 export type Project = QueryData<typeof useProject>
 
 function useProject(id: number) {
@@ -14,6 +14,20 @@ function useProject(id: number) {
   return useQuery(['project', { id }], fetchProject, {
     placeholderData,
   })
+}
+
+/**
+ * Prefetch the users updates
+ */
+function usePrefetchProject(id: number, staleTime = 10000) {
+  const queryClient = useQueryClient()
+  // The results of this query will be cached like a normal query
+  return async () =>
+    await queryClient.prefetchQuery(
+      ['project', { id }],
+      fetchProject,
+      { staleTime } // wait this long before another prefetch is attempted
+    )
 }
 
 function useProjectPlaceholderData(projectId: number): ProjectData | undefined {
