@@ -2,11 +2,11 @@ import { prisma } from '@lib/prisma'
 import { getSession } from 'next-auth/client'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
-import type { PrepareAPIData } from '@types'
+import type { UnwrapPromise } from '@types'
 import type { Session } from 'next-auth'
 
 export { checkAuthentication }
-export type UserData = PrepareAPIData<ReturnType<typeof getUser>>
+export type UserData = UnwrapPromise<ReturnType<typeof getUser>>
 
 /**
  * Checks if the user is authenticated (has a session) and if they're role is not

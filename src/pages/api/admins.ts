@@ -2,10 +2,10 @@ import { prisma } from '@lib/prisma'
 import { checkAuthentication } from '@utils/api/check-authentication'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
-import type { UnwrapPromise } from '@types'
-import type { User } from '@prisma/client'
+import type { PrepareAPIData } from '@types'
+import type { UserData } from '@utils/api/check-authentication'
 
-export type AdminsData = UnwrapPromise<ReturnType<typeof getAdmins>>
+export type AdminsData = PrepareAPIData<ReturnType<typeof getAdmins>>
 
 /**
  * Gets projects based on their role:
@@ -19,6 +19,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const user = await checkAuthentication(req, res)
+
   // bail if there's no user
   if (!user) return
 
@@ -31,7 +32,7 @@ export default async function handler(
   }
 }
 
-async function getAdmins(user: User) {
+async function getAdmins(user: UserData) {
   if (user.role !== 'ADMIN') return
 
   const admins = await prisma.user.findMany({
