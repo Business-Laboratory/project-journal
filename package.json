@@ -14,11 +14,6 @@
     "pull-env": "vercel env pull .env",
     "prepare": "husky install"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged"
-    }
-  },
   "dependencies": {
     "@azure/storage-blob": "^12.5.0",
     "@emotion/react": "^11.1.5",
