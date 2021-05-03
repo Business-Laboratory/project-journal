@@ -9,6 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint --ignore-path .gitignore --ext .js,.ts,.tsx .",
+    "format:staged": "pretty-quick --staged",
     "test": "jest --watch",
     "analyze": "cross-env ANALYZE=true npm run build",
     "pull-env": "vercel env pull .env",
