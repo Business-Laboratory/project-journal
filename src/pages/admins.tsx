@@ -41,7 +41,7 @@ function AdminsContent() {
 
   return admins.length > 0 ? (
     <>
-      <ContentTitle />
+      <ContentTitle currentAdmins={admins} />
       <div
         css={[
           css`
@@ -62,20 +62,23 @@ function AdminsContent() {
     </>
   ) : status === 'success' ? (
     <>
-      <ContentTitle />
+      <ContentTitle currentAdmins={admins} />
       <h1 tw="bl-text-3xl max-w-prose text-center">No admins are available</h1>
     </>
   ) : null
 }
 
-function ContentTitle() {
+type ContentTitleProps = {
+  currentAdmins: AdminsData
+}
+function ContentTitle({ currentAdmins }: ContentTitleProps) {
   return (
     <>
       <IconLink pathName={createEditAdminsPath()}>
         <EditIcon tw="w-6 h-6 fill-copper-300" />
         <span tw="bl-text-3xl">Admins</span>
       </IconLink>
-      <AdminsModal />
+      <AdminsModal currentAdmins={currentAdmins} />
     </>
   )
 }
