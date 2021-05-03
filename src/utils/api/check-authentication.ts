@@ -42,7 +42,7 @@ function setUnauthorized(res: NextApiResponse) {
 }
 
 async function getUser(session: Session) {
-  const { email = '' } = session.user
+  const email = session.user?.email ?? ''
   if (!email) {
     throw new Error(`User does not have an email`)
   }
