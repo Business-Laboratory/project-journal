@@ -2,6 +2,7 @@ import tw, { css } from 'twin.macro'
 import { useState } from 'react'
 import { DialogOverlay, DialogContent } from '@reach/dialog'
 import { Button } from '@components/button'
+import { TextInput } from '@components/text-input'
 import { CloseIcon } from 'icons'
 
 import type { QueryStatus } from 'react-query'
@@ -80,12 +81,14 @@ function SaveButton({
 
 type DeleteSectionProps = {
   className?: string
+  label: string
   verificationText: string
   onDelete: () => void
   status: QueryStatus
 }
 export function DeleteSection({
   className,
+  label,
   verificationText,
   status,
   onDelete,
@@ -97,16 +100,13 @@ export function DeleteSection({
     <div tw="space-y-10" className={className}>
       <div tw="w-full border-b border-dashed border-matisse-red-200" />
       <div tw="w-full grid grid-cols-2 col-auto gap-x-4">
-        <div tw="text-left col-span-1">
-          <div tw="bl-text-xs text-gray-yellow-300">Verify update title</div>
-          <input
-            tw="w-full placeholder-gray-yellow-400 border-b border-gray-yellow-600 focus:outline-none"
-            type="text"
-            value={verifyText}
-            onChange={(e) => setVerifyText(e.target.value)}
-            placeholder={verificationText}
-          />
-        </div>
+        <TextInput
+          tw="text-left col-span-1"
+          label={label}
+          placeholder={verificationText}
+          value={verifyText}
+          onChange={(value) => setVerifyText(value)}
+        />
         <div tw="text-center ml-auto max-w-max col-span-1 space-y-2">
           <Button
             disabled={isTitleUnverified || status === 'loading'}
