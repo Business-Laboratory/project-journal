@@ -3,8 +3,7 @@ import { useRouter } from 'next/router'
 import React, { useEffect, useState, Fragment } from 'react'
 
 import { Modal, SaveButton } from '@components/modal'
-import { PlusIcon, PlusSmallIcon } from 'icons'
-import { IconLink } from '@components/icon-link'
+import { PlusSmallIcon } from 'icons'
 
 import { AdminsData } from '../pages/api/admins'
 
@@ -41,7 +40,8 @@ function EditAdminsModalContent({
   const admins = currentAdmins ?? []
 
   return (
-    <div tw="space-y-10 flex flex-col items-end">
+    //items-end
+    <div tw="space-y-10 flex flex-col">
       <div tw="space-y-2">
         <button
           css={[
@@ -60,6 +60,7 @@ function EditAdminsModalContent({
         </button>
         <div
           css={[
+            //What if we spelled out that the email input has to be longer
             css`
               grid-template-columns: repeat(2, minmax(0, max-content));
             `,
@@ -70,8 +71,8 @@ function EditAdminsModalContent({
           <span tw="col-span-1">Email</span>
           {admins.map(({ id, name, email }) => (
             <Fragment key={id}>
-              <span tw="bl-text-base col-span-1">{name}</span>
-              <span tw="bl-text-base col-span-1">{email}</span>
+              <AdminInfoInput inputText={name} />
+              <AdminInfoInput inputText={email} />
             </Fragment>
           ))}
         </div>
@@ -85,6 +86,26 @@ function EditAdminsModalContent({
         Save admins
       </SaveButton>
     </div>
+  )
+}
+
+type AdminInfoInput = {
+  inputText: string | null
+}
+function AdminInfoInput({ inputText }: AdminInfoInput) {
+  return (
+    <label tw="flex flex-col w-full">
+      <input
+        css={[
+          tw`bl-text-base placeholder-gray-yellow-400`,
+          tw`focus:outline-none border-b border-gray-yellow-600`,
+        ]}
+        value={inputText === null ? '' : inputText}
+        type="text"
+        onChange={() => {}}
+        placeholder="Name"
+      />
+    </label>
   )
 }
 
