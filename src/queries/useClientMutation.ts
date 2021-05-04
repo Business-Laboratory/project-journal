@@ -19,7 +19,6 @@ function useClientMutation() {
 }
 
 async function createOrUpdateClient(data: UpdateClientBody) {
-  console.log(data, JSON.stringify(data))
   const res = await fetch(`/api/client`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

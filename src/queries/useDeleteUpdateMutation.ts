@@ -26,7 +26,7 @@ async function deleteUpdate(id: number) {
   const res = await fetch(`/api/update`, {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id: id }),
+    body: JSON.stringify({ id }),
   })
   if (!res.ok) {
     const data = await res.json()

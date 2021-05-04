@@ -21,6 +21,7 @@ import type { Clients as ClientsData } from '@queries/useClients'
 // TODO: replace with ClientBody from useClientMutation
 import type { ClientBody } from '@queries/useClientMutation'
 import type { TextInputProps } from '@components/text-input'
+import { useDeleteClientMutation } from '@queries/useDeleteClientMutation'
 
 export default function Clients() {
   return (
@@ -136,6 +137,7 @@ function EditClientModalContent({
   )
   useRedirectNewClient(id)
   const clientMutation = useClientMutation()
+  const deleteClientMutation = useDeleteClientMutation()
 
   return (
     <>
@@ -218,12 +220,14 @@ function EditClientModalContent({
           label="Verify client name"
           verificationText={name}
           buttonText={
-            clientMutation.status === 'loading'
+            deleteClientMutation.status === 'loading'
               ? 'deleting...'
               : 'delete client'
           }
-          onDelete={() => {}}
-          status={clientMutation.status}
+          onDelete={() => {
+            deleteClientMutation.mutate(id, { onSuccess: onDismiss })
+          }}
+          status={deleteClientMutation.status}
         />
       ) : null}
     </>

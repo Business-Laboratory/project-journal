@@ -38,25 +38,34 @@ export default async function handler(
     res.status(401).json({ error: 'User not authorized.' })
     return
   }
-  if (method !== 'POST' && method !== 'DELETE') {
-    res.status(501).json({ error: `${method} not implemented.` })
-    return
-  }
 
   const data = req.body
 
-  if (!isValidData(data)) {
-    res.status(400).json({ error: `Invalid data, ${JSON.stringify(req.body)}` })
-    return
-  }
-
-  if (method === 'POST') {
-    try {
+  try {
+    if (method === 'POST') {
+      if (!isValidData(data)) {
+        res
+          .status(400)
+          .json({ error: `Invalid data, ${JSON.stringify(req.body)}` })
+        return
+      }
       const client = await updateClient(data)
       res.status(200).json(client)
-    } catch (error) {
-      res.status(500).json({ error })
     }
+    if (method === 'DELETE') {
+      const id = data?.id
+      if (!id || typeof id !== 'number') {
+        res.status(400).json({ error: `Invalid client id ${id}` })
+        return
+      }
+      await prisma.client.delete({ where: { id } })
+      res.status(200).end()
+    } else {
+      res.status(501).json({ error: `${method} not implemented.` })
+      return
+    }
+  } catch (error) {
+    res.status(500).json({ error })
   }
 }
 
