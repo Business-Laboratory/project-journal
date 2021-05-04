@@ -10,7 +10,6 @@ import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
 import { Modal } from '@components/modal'
 import { useClients } from '@queries/useClients'
-import { UpdateModal } from '@components/project'
 
 export default function Clients() {
   return (
