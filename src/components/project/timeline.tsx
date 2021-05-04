@@ -1,6 +1,6 @@
 import tw, { css, theme } from 'twin.macro'
-import React, { useEffect, useRef, forwardRef, useState, useMemo } from 'react'
 import Link from 'next/link'
+import { useEffect, useRef, forwardRef, useState, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import {
   format as dateFnsFormat,

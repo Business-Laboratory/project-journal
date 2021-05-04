@@ -1,6 +1,6 @@
-import { useWaitTimer } from '@utils/use-wait-timer'
-import { SpinnerIcon } from 'icons'
 import 'twin.macro'
+import { SpinnerIcon } from 'icons'
+import { useWaitTimer } from '@utils/use-wait-timer'
 
 export { LoadingSpinner }
 export type { LoadingSpinnerProps }

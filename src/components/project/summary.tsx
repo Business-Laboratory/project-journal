@@ -8,11 +8,14 @@ import { EditIcon, GearIcon } from 'icons'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
 import { SummaryModal } from './index'
+import {
+  createEditDescriptionHref,
+  createEditRoadmapHref,
+} from './summary-modal'
 
 import type { QueryStatus } from 'react-query'
 import type { Role } from '@prisma/client'
 import type { Project } from '@queries/useProject'
-import { createDescriptionPath, createRoadmapProject } from './summary-modal'
 
 export { Summary, LoadingSummary }
 
@@ -91,7 +94,10 @@ function Summary({
         ) : null}
         <div tw="space-y-2">
           {userRole === 'ADMIN' ? (
-            <IconLink href={createDescriptionPath(projectId)} replace={true}>
+            <IconLink
+              href={createEditDescriptionHref(projectId)}
+              replace={true}
+            >
               <EditIcon tw="h-6 w-6 fill-copper-300" />
               <h2 tw="bl-text-3xl inline">Project Description</h2>
             </IconLink>
@@ -104,7 +110,7 @@ function Summary({
         </div>
         <div tw="space-y-2">
           {userRole === 'ADMIN' ? (
-            <IconLink href={createRoadmapProject(projectId)} replace={true}>
+            <IconLink href={createEditRoadmapHref(projectId)} replace={true}>
               <EditIcon tw="h-6 w-6 fill-copper-300" />
               <h2 tw="bl-text-3xl inline">Project Roadmap</h2>
             </IconLink>

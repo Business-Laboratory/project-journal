@@ -3,7 +3,6 @@ import { checkAuthentication } from '@utils/api/check-authentication'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
 import type { PrepareAPIData } from '@types'
-
 import type { UserData } from '@utils/api/check-authentication'
 
 export type ClientsData = PrepareAPIData<ReturnType<typeof getClients>>

@@ -1,5 +1,8 @@
 import tw, { css } from 'twin.macro'
-import React, {
+import Link from 'next/link'
+import ReactMarkdown from 'react-markdown'
+import gfm from 'remark-gfm'
+import {
   useLayoutEffect,
   useRef,
   createRef,
@@ -10,23 +13,20 @@ import React, {
   useEffect,
   useState,
 } from 'react'
-import ReactMarkdown from 'react-markdown'
-import gfm from 'remark-gfm'
-import Link from 'next/link'
+import { format } from 'date-fns'
+import { useRouter } from 'next/router'
 
 import { SearchBar, UpdateModal } from './index'
 import { PlusIcon, EditIcon, UpdateLinkIcon } from 'icons'
-import { format } from 'date-fns'
 import { IconLink } from '@components/icon-link'
-import { useRouter } from 'next/router'
-import { useSetCurrentHashLink } from './hash-link-context'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
+import { useSetCurrentHashLink } from './hash-link-context'
+import { createEditUpdateHref } from './update-modal'
 
 import type { Updates } from '@queries/useUpdates'
 import type { QueryStatus } from 'react-query'
 import type { Role } from '@prisma/client'
-import { createUpdatePath } from './update-modal'
 
 export { ProjectInformation, LoadingProjectInformation }
 
@@ -153,7 +153,7 @@ function useOnScroll(onScroll: OnScrollFunction) {
 
 function AddUpdateButton({ projectId }: { projectId: number }) {
   return (
-    <IconLink href={createUpdatePath(projectId, 'new')} replace={true}>
+    <IconLink href={createEditUpdateHref(projectId, 'new')} replace={true}>
       <PlusIcon tw="w-6 h-6 fill-copper-300" />
       <span tw="bl-text-2xl">Add update</span>
     </IconLink>
@@ -343,7 +343,7 @@ function UpdatesList({ updates, userRole, projectId }: UpdatesListProps) {
               <div tw="inline-flex items-center space-x-2">
                 {userRole === 'ADMIN' ? (
                   <IconLink
-                    href={createUpdatePath(projectId, id)}
+                    href={createEditUpdateHref(projectId, id)}
                     replace={true}
                   >
                     <EditIcon tw="w-6 h-6 fill-copper-300" />

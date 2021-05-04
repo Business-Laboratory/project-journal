@@ -1,11 +1,11 @@
 import { useMemo } from 'react'
-import { useQuery } from 'react-query'
+import { useQuery, useQueryClient } from 'react-query'
 
 import type { QueryFunction } from 'react-query'
 import type { UpdatesData } from 'pages/api/updates'
 import type { QueryData } from '@types'
 
-export { useUpdates, preprocessUpdate }
+export { useUpdates, usePrefetchUpdates, preprocessUpdate }
 export type Updates = QueryData<typeof useUpdates>
 
 function useUpdates(projectId: number) {
@@ -18,6 +18,20 @@ function useUpdates(projectId: number) {
   }, [originalData])
 
   return { ...query, data }
+}
+
+/**
+ * Prefetch the users updates
+ */
+function usePrefetchUpdates(projectId: number, staleTime = 10000) {
+  const queryClient = useQueryClient()
+  // The results of this query will be cached like a normal query
+  return async () =>
+    await queryClient.prefetchQuery(
+      ['updates', { projectId }],
+      fetchProjectUpdates,
+      { staleTime } // wait this long before another prefetch is attempted
+    )
 }
 
 type UpdatesQueryKey = ['updates', { projectId: number }]
