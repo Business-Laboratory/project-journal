@@ -143,6 +143,7 @@ function initAdminState(adminsData: AdminsData) {
         id: adminObject.id,
         name: adminObject.name,
         email: adminObject.email,
+        new: false,
       }
     }) ?? []
   )
@@ -175,6 +176,7 @@ const admindsReducer = produce(
           id: action.id,
           name: '',
           email: '',
+          new: true,
         })
         break
       }
