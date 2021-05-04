@@ -4,7 +4,7 @@ import Link from 'next/link'
 import type { LinkProps } from 'next/link'
 import type { Url } from 'url'
 
-export { IconLink }
+export { IconLink, iconLinkCss }
 export type { IconLinkProps }
 
 type IconLinkProps = LinkProps & {
