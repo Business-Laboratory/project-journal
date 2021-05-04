@@ -63,7 +63,7 @@ function SummaryEditModalContent({
 
   return (
     <div tw="space-y-8 flex flex-col items-end">
-      <div tw="bl-text-3xl">
+      <div tw="bl-text-3xl self-start">
         {edit === 'description' ? 'Project Description' : 'Project Roadmap'}
       </div>
 
