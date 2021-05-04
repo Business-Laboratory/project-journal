@@ -74,7 +74,7 @@ type ContentTitleProps = {
 function ContentTitle({ currentAdmins }: ContentTitleProps) {
   return (
     <>
-      <IconLink pathName={createEditAdminsPath()}>
+      <IconLink href={createEditAdminsPath()}>
         <EditIcon tw="w-6 h-6 fill-copper-300" />
         <span tw="bl-text-3xl">Admins</span>
       </IconLink>

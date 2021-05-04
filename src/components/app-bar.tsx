@@ -36,24 +36,6 @@ function AppBar() {
   )
 }
 
-type NavHomeProps = {
-  children: React.ReactNode
-}
-function NavHome({ children }: NavHomeProps) {
-  return (
-    <Link href="/" passHref>
-      <a
-        css={[
-          tw`font-bold bl-text-3xl text-gray-yellow-100 hover:text-copper-300 focus:outline-none`,
-          appbarElementRingCss,
-        ]}
-      >
-        {children}
-      </a>
-    </Link>
-  )
-}
-
 function AdminNavLinks() {
   const { pathname } = useRouter()
 
@@ -138,6 +120,24 @@ function UserMenu({ imageUrl, role }: MenuProps) {
   )
 }
 
+type NavHomeProps = {
+  children: React.ReactNode
+}
+function NavHome({ children }: NavHomeProps) {
+  return (
+    <Link href="/" passHref>
+      <a
+        css={[
+          tw`font-bold bl-text-3xl text-gray-yellow-100 hover:text-copper-300 focus:outline-none`,
+          appbarElementRingCss,
+        ]}
+      >
+        {children}
+      </a>
+    </Link>
+  )
+}
+
 type CustomMenuLinkProps = React.ComponentPropsWithRef<'a'> & {
   href: LinkProps['href']
 }
@@ -158,13 +158,6 @@ const menuItemTw = tw`flex w-full px-3 py-1 text-xs uppercase cursor-pointer tex
 //Ring color is copper-100
 const appbarElementRingCss = css`
   &.focus-visible {
-    --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
-      var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-    --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
-      calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-    box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
-      var(--tw-shadow, 0 0 #0000);
-    --tw-ring-opacity: 1;
-    --tw-ring-color: rgba(251, 215, 183, var(--tw-ring-opacity));
+    ${tw`ring-2 ring-copper-100`}
   }
 `

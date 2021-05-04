@@ -4,6 +4,7 @@ import Header from 'next/head'
 import { signIn } from 'next-auth/client'
 
 import { Button } from '@components/button'
+import { TextInput } from '@components/text-input'
 
 const callbackUrl = `/`
 function Login() {
@@ -48,34 +49,17 @@ function EmailLogin() {
   const disabled = loginState === 'disabled' || loginState === 'loggingIn'
   return (
     <form tw="flex flex-col space-y-2">
-      {/* TODO: move this to `components/` once we have more inputs */}
-      <div tw="flex flex-col">
-        <label htmlFor="email-login" tw="bl-text-xs text-gray-yellow-300">
-          Email
-        </label>
-        <input
-          id="email-login"
-          css={[
-            tw`py-1 bl-text-base placeholder-gray-yellow-400 focus:(outline-none) appearance-none`,
-            css`
-              box-shadow: inset 0 -1px 0 0 ${theme('colors[gray-yellow].600')};
-              &:hover,
-              &:focus {
-                box-shadow: inset 0 -2px 0 0 ${theme('colors[gray-yellow].600')};
-              }
-            `,
-          ]}
-          name="email"
-          type="email"
-          placeholder="email@example.com"
-          value={email}
-          onChange={(e) => {
-            const value = e.currentTarget.value
-            setEmail(value)
-            setLoginState(validateEmail(value) ? 'enabled' : 'disabled')
-          }}
-        />
-      </div>
+      <TextInput
+        id="email-login"
+        label="Email"
+        type="email"
+        placeholder="email@example.com"
+        value={email}
+        onChange={(value) => {
+          setEmail(value)
+          setLoginState(validateEmail(value) ? 'enabled' : 'disabled')
+        }}
+      />
       <p tw="bl-text-sm max-w-max">
         You will be sent a link to a password-free sign in
       </p>
