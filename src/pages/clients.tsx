@@ -1,8 +1,10 @@
 // Alternate Admin Home view that displays clients
 import 'twin.macro'
-import React, { Fragment, useEffect } from 'react'
+import React, { Fragment, useEffect, useReducer } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
+import produce from 'immer'
+import { v4 as uuid } from 'uuid'
 
 import { PlusIcon, EditIcon } from 'icons'
 import { IconLink } from '@components/icon-link'
@@ -10,11 +12,14 @@ import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
 import { DeleteSection, Modal } from '@components/modal'
 import { useClients } from '@queries/useClients'
-
-import type { Clients as ClientsData } from '@queries/useClients'
 import { TextInput } from '@components/text-input'
 import { IconButton } from '@components/icon-button'
 import { Button } from '@components/button'
+
+import type { Clients as ClientsData } from '@queries/useClients'
+// TODO: replace with ClientBody from useClientMutation
+import type { UpdateClientBody as ClientBody } from 'pages/api/client'
+import type { TextInputProps } from '@components/text-input'
 
 export default function Clients() {
   return (
@@ -88,6 +93,7 @@ function AddClientLink() {
 type EditClientModalProps = {
   clients: ClientsData
 }
+
 function EditClientModal({ clients }: EditClientModalProps) {
   const router = useRouter()
   const { id: clientId } = router.query
@@ -103,7 +109,7 @@ function EditClientModal({ clients }: EditClientModalProps) {
   return (
     <Modal isOpen={Boolean(clientId)} onDismiss={handleOnDismiss}>
       <EditClientModalContent
-        data={
+        client={
           clientId !== 'new'
             ? clients.find(({ id }) => id === Number(clientId))
             : undefined
@@ -114,35 +120,20 @@ function EditClientModal({ clients }: EditClientModalProps) {
   )
 }
 
-// TODO: Get this from api/client
-type ClientBody = {
-  id: 'new' | number
-  name: string
-  employees: {
-    title: string | null
-    id: number
-    user: {
-      name: string | null
-      email: string | null
-    }
-  }[]
-}
-
-const newClientData: ClientBody = { id: 'new', name: '', employees: [] }
-
 type EditClientModalContentProps = {
-  data?: ClientBody
+  client?: ClientsData[0]
   onDismiss: () => void
 }
 function EditClientModalContent({
-  data = newClientData,
+  client,
   onDismiss,
 }: EditClientModalContentProps) {
-  const { id, name } = data
+  const [{ id, name, employees }, dispatch] = useReducer(
+    clientReducer,
+    client,
+    initClient
+  )
   useRedirectNewClient(id)
-
-  // TODO: convert to state
-  const employees = data.employees
 
   return (
     <>
@@ -152,10 +143,10 @@ function EditClientModalContent({
           label="Client name"
           placeholder="Client name"
           value={name}
-          onChange={() => {}}
+          onChange={(name) => dispatch({ type: 'updateName', name })}
         />
 
-        <IconButton tw="mt-9">
+        <IconButton tw="mt-9" onClick={() => dispatch({ type: 'addEmployee' })}>
           <PlusIcon tw="w-4 h-4 fill-copper-300" />
           <span tw="bl-text-xl">Add employee</span>
         </IconButton>
@@ -169,30 +160,34 @@ function EditClientModalContent({
             </TableRow>
           </thead>
           <tbody tw="block mt-2 space-y-2">
-            {employees.map(
-              ({ id, title: role, user: { email, name } }, idx) => {
-                return (
-                  <TableRow key={id}>
-                    <InputCell
-                      aria-label={`employee ${idx} name`}
-                      value={name ?? ''}
-                      onChange={() => {}}
-                    />
-                    <InputCell
-                      aria-label={`employee ${idx} email`}
-                      type="email"
-                      value={email ?? ''}
-                      onChange={() => {}}
-                    />
-                    <InputCell
-                      aria-label={`employee ${idx} role`}
-                      value={role ?? ''}
-                      onChange={() => {}}
-                    />
-                  </TableRow>
-                )
-              }
-            )}
+            {employees.map(({ id, name, email, title }, idx) => {
+              return (
+                <TableRow key={id}>
+                  <InputCell
+                    aria-label={`employee ${idx} name`}
+                    value={name}
+                    onChange={(name) =>
+                      dispatch({ type: 'editEmployee', id, name })
+                    }
+                  />
+                  <InputCell
+                    aria-label={`employee ${idx} email`}
+                    type="email"
+                    value={email}
+                    onChange={(email) =>
+                      dispatch({ type: 'editEmployee', id, email })
+                    }
+                  />
+                  <InputCell
+                    aria-label={`employee ${idx} role`}
+                    value={title ?? ''}
+                    onChange={(title) =>
+                      dispatch({ type: 'editEmployee', id, title })
+                    }
+                  />
+                </TableRow>
+              )
+            })}
           </tbody>
         </table>
         <Button tw="self-end mt-10" variant="important">
@@ -219,13 +214,15 @@ function HeaderCell(props: React.ComponentPropsWithoutRef<'th'>) {
   return <th tw="bl-text-lg text-left" {...props} />
 }
 
-function InputCell(props: React.ComponentPropsWithoutRef<'input'>) {
+function InputCell(props: TextInputProps) {
   return (
     <td tw="bl-text-lg text-left">
-      <TextInput tw="w-full" {...props} onChange={(newValue) => {}} />
+      <TextInput tw="w-full" {...props} />
     </td>
   )
 }
+
+// logic/hooks
 
 /**
  * Any client id that isn't found in our data defaults to path /clients?id=new
@@ -244,5 +241,78 @@ function useRedirectNewClient(id: ClientBody['id']) {
 function createEditClientHref(id: ClientBody['id']) {
   return {
     query: { id },
+  }
+}
+
+type ActionType =
+  | { type: 'updateName'; name: string }
+  | {
+      type: 'editEmployee'
+      id: number | string
+      name?: string
+      email?: string
+      title?: string
+    }
+  | { type: 'addEmployee' }
+  | { type: 'deleteEmployee'; id: string | number }
+type ClientState = Omit<ClientBody, 'employees'> & {
+  employees: Array<
+    Omit<ClientBody['employees'][0], 'id'> & { id: number | string }
+  >
+}
+const clientReducer = produce((state: ClientState, action: ActionType) => {
+  switch (action.type) {
+    case 'updateName': {
+      state.name = action.name
+      break
+    }
+    case 'editEmployee': {
+      const { id: employeeId, name, email, title } = action
+      const employee = state.employees.find(({ id }) => id === employeeId)
+      if (employee === undefined) {
+        throw new Error(`No employee found with id ${employeeId}`)
+      }
+      if (name) {
+        employee.name = name
+      }
+      if (email) {
+        employee.email = email
+      }
+      if (title) {
+        employee.title = title ?? null // title is the only nullable field
+      }
+      break
+    }
+    case 'addEmployee': {
+      state.employees.push({ id: uuid(), name: '', email: '', title: null })
+      break
+    }
+    case 'deleteEmployee': {
+      const { id: employeeId } = action
+      const employeeIdx = state.employees.findIndex(
+        ({ id }) => id === employeeId
+      )
+      if (employeeIdx === -1) {
+        throw new Error(`No employee found with id ${employeeId}`)
+      }
+      state.employees.splice(employeeIdx, 1)
+      break
+    }
+  }
+})
+function initClient(client?: ClientsData[0]): ClientBody {
+  if (!client) {
+    return { id: 'new', name: '', employees: [] }
+  }
+
+  return {
+    id: client.id,
+    name: client.name,
+    employees: client.employees.map(({ id, user, title }) => ({
+      id,
+      name: user.name ?? '',
+      email: user.email ?? '',
+      title: title,
+    })),
   }
 }
