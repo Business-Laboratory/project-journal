@@ -119,7 +119,7 @@ function ProjectEditModalContent({
 }
 
 /**
- * Any updateId that isn't found in our data defaults to path /project/projectId?edit=update&updateId=new
+ * Any update id that isn't found in our data defaults to path /project/projectId?edit=update&updateId=new
  */
 function useRedirectNewUpdate(projectId: number, id: UpdateBody['id']) {
   const router = useRouter()
