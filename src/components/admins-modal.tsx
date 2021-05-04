@@ -111,7 +111,7 @@ function EditAdminsModalContent({
           ))}
         </div>
       </div>
-      <SaveButton onClick={() => {}} disabled={false} error={false}>
+      <SaveButton tw="mr-4" onClick={() => {}} disabled={false} error={false}>
         Save admins
       </SaveButton>
     </div>
