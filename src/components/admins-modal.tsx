@@ -1,6 +1,7 @@
 import tw, { css } from 'twin.macro'
 import { useRouter } from 'next/router'
-import React, { useEffect, useState, Fragment } from 'react'
+import React, { Fragment, useReducer } from 'react'
+import produce from 'immer'
 
 import { Modal, SaveButton } from '@components/modal'
 import { PlusSmallIcon } from 'icons'
@@ -37,7 +38,12 @@ type EditAdminsModalContentProps = {
 function EditAdminsModalContent({
   currentAdmins,
 }: EditAdminsModalContentProps) {
-  const admins = currentAdmins ?? []
+  const [admins, adminsDispatch] = useReducer(
+    admindsReducer,
+    initAdminState(currentAdmins)
+  )
+
+  console.log(admins)
 
   return (
     <div tw="space-y-10 flex flex-col items-end">
@@ -69,8 +75,18 @@ function EditAdminsModalContent({
           <span tw="col-span-1">Email</span>
           {admins.map(({ id, name, email }) => (
             <Fragment key={id}>
-              <AdminInfoInput inputText={name} />
-              <AdminInfoInput inputText={email} />
+              <AdminInfoInput
+                value={name}
+                onChange={(name) =>
+                  adminsDispatch({ type: 'edit', id: id, name: name })
+                }
+              />
+              <AdminInfoInput
+                value={email}
+                onChange={(email) =>
+                  adminsDispatch({ type: 'edit', id: id, email: email })
+                }
+              />
             </Fragment>
           ))}
         </div>
@@ -88,9 +104,10 @@ function EditAdminsModalContent({
 }
 
 type AdminInfoInput = {
-  inputText: string | null
+  value: string | null
+  onChange: (value: string) => void
 }
-function AdminInfoInput({ inputText }: AdminInfoInput) {
+function AdminInfoInput({ value, onChange }: AdminInfoInput) {
   return (
     <label tw="flex flex-col w-full">
       <input
@@ -98,9 +115,9 @@ function AdminInfoInput({ inputText }: AdminInfoInput) {
           tw`bl-text-base placeholder-gray-yellow-400`,
           tw`focus:outline-none border-b border-gray-yellow-600`,
         ]}
-        value={inputText === null ? '' : inputText}
+        value={value === null ? '' : value}
         type="text"
-        onChange={() => {}}
+        onChange={(e) => onChange(e.target.value)}
         placeholder="Name"
       />
     </label>
@@ -113,3 +130,41 @@ function createEditAdminsPath() {
     query: { edit: 'update' },
   }
 }
+
+function initAdminState(adminsData: AdminsData) {
+  return (
+    adminsData?.map((adminObject) => {
+      return {
+        id: adminObject.id,
+        name: adminObject.name,
+        email: adminObject.email,
+      }
+    }) ?? []
+  )
+}
+
+type ActionTypes = { type: 'edit'; id: number; name?: string; email?: string }
+
+const admindsReducer = produce(
+  (state: ReturnType<typeof initAdminState>, action: ActionTypes) => {
+    switch (action.type) {
+      case 'edit': {
+        const adminToEdit = state.find(
+          (adminObject) => adminObject.id === action.id
+        )
+        if (!adminToEdit) {
+          throw new Error('You are missing the admin object.')
+        }
+        if (action.name) {
+          adminToEdit.name = action.name
+        }
+        if (action.email) {
+          adminToEdit.email = action.email
+        }
+        break
+      }
+      default:
+        throw new Error()
+    }
+  }
+)
