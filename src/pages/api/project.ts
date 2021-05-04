@@ -47,6 +47,7 @@ async function getProject(user: UserData, id: number) {
       imageStorageBlobUrl: true,
       client: {
         select: {
+          id: true,
           name: true,
           employees: {
             select: {
