@@ -11,14 +11,15 @@ import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
 import { DeleteSection, Modal } from '@components/modal'
-import { useClients } from '@queries/useClients'
 import { TextInput } from '@components/text-input'
 import { IconButton } from '@components/icon-button'
 import { Button } from '@components/button'
+import { useClients } from '@queries/useClients'
+import { useClientMutation } from '@queries/useClientMutation'
 
 import type { Clients as ClientsData } from '@queries/useClients'
 // TODO: replace with ClientBody from useClientMutation
-import type { UpdateClientBody as ClientBody } from 'pages/api/client'
+import type { ClientBody } from '@queries/useClientMutation'
 import type { TextInputProps } from '@components/text-input'
 
 export default function Clients() {
@@ -134,6 +135,7 @@ function EditClientModalContent({
     initClient
   )
   useRedirectNewClient(id)
+  const clientMutation = useClientMutation()
 
   return (
     <>
@@ -190,19 +192,40 @@ function EditClientModalContent({
             })}
           </tbody>
         </table>
-        <Button tw="self-end mt-10" variant="important">
-          save client
+        <Button
+          tw="self-end mt-10"
+          variant="important"
+          onClick={() => {
+            // all employees with strings are new, so we need to remove the id field
+            const cleanedEmployees = employees.map(({ id, ...employee }) => {
+              return typeof id === 'string' ? employee : { id, ...employee }
+            })
+            clientMutation.mutate(
+              { id, name, employees: cleanedEmployees },
+              { onSuccess: onDismiss }
+            )
+          }}
+        >
+          {clientMutation.status === 'loading'
+            ? 'saving client'
+            : 'save client'}
         </Button>
       </section>
 
-      <DeleteSection
-        tw="mt-16"
-        label="Verify client name"
-        verificationText={name}
-        buttonText={'success' === 'loading' ? 'deleting...' : 'delete client'}
-        onDelete={() => {}}
-        status={'success'}
-      />
+      {id !== 'new' ? (
+        <DeleteSection
+          tw="mt-16"
+          label="Verify client name"
+          verificationText={name}
+          buttonText={
+            clientMutation.status === 'loading'
+              ? 'deleting...'
+              : 'delete client'
+          }
+          onDelete={() => {}}
+          status={clientMutation.status}
+        />
+      ) : null}
     </>
   )
 }
@@ -300,7 +323,7 @@ const clientReducer = produce((state: ClientState, action: ActionType) => {
     }
   }
 })
-function initClient(client?: ClientsData[0]): ClientBody {
+function initClient(client?: ClientsData[0]): ClientState {
   if (!client) {
     return { id: 'new', name: '', employees: [] }
   }
