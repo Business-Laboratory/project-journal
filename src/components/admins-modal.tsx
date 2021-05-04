@@ -50,7 +50,7 @@ function EditAdminsModalContent({
       <div tw="space-y-2">
         <button
           css={[
-            tw`w-full inline-flex space-x-2 items-center hover:text-copper-300
+            tw`inline-flex space-x-2 items-center hover:text-copper-300
             focus:outline-none`,
             css`
               &.focus-visible {
@@ -68,37 +68,22 @@ function EditAdminsModalContent({
         <div
           css={[
             css`
-              grid-template-columns: 0.75rem 10rem 24rem;
+              grid-template-columns: 10rem 24rem 3rem;
             `,
-            tw`grid gap-y-2 bl-text-lg`,
+            tw`grid bl-text-lg`,
           ]}
         >
-          <span tw="col-start-2 col-end-3 pl-4">Name</span>
-          <span tw="col-start-3 col-end-4 pl-8">Email</span>
+          <span tw="col-start-1 col-end-2 self-center">Name</span>
+          <span tw="col-start-2 col-end-4 pl-8 self-center">Email</span>
           {admins.map(({ id, name, email }) => (
             <Fragment key={id}>
-              <button
-                className={`${id}`}
-                onClick={() => adminsDispatch({ type: 'delete', id: id })}
-                css={[
-                  tw`focus:outline-none`,
-                  css`
-                    &.focus-visible {
-                      ${tw`ring-2 ring-copper-400`}
-                    }
-                  `,
-                ]}
-              >
-                <DeleteIcon tw="w-3 h-3 fill-matisse-red-200 hover:fill-matisse-red-300 self-center visibility: visible" />
-              </button>
               <AdminInfoInput
                 value={name}
                 onChange={(name) =>
                   adminsDispatch({ type: 'edit', id: id, name: name })
                 }
                 placeHolder="Name"
-                className={`${id}`}
-                tw="pl-4"
+                tw="self-center"
               />
               <AdminInfoInput
                 value={email}
@@ -106,19 +91,27 @@ function EditAdminsModalContent({
                   adminsDispatch({ type: 'edit', id: id, email: email })
                 }
                 placeHolder="Email"
-                className={`${id}`}
-                tw="pl-8"
+                tw="pl-8 self-center"
               />
+              <button
+                className="group"
+                onClick={() => adminsDispatch({ type: 'delete', id: id })}
+                css={[
+                  tw`focus:outline-none h-12`,
+                  css`
+                    &.focus-visible > svg {
+                      ${tw`ring-2 ring-copper-400`}
+                    }
+                  `,
+                ]}
+              >
+                <DeleteIcon tw="w-3 h-3 fill-matisse-red-200 group-hover:fill-matisse-red-400 inline-flex" />
+              </button>
             </Fragment>
           ))}
         </div>
       </div>
-      <SaveButton
-        tw="float-right"
-        onClick={() => {}}
-        disabled={false}
-        error={false}
-      >
+      <SaveButton onClick={() => {}} disabled={false} error={false}>
         Save admins
       </SaveButton>
     </div>
