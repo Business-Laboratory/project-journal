@@ -58,7 +58,9 @@ function EditAdminsModalContent({
               }
             `,
           ]}
-          onClick={() => {}}
+          onClick={() =>
+            adminsDispatch({ type: 'add', id: new Date().valueOf() })
+          }
         >
           <PlusSmallIcon tw="w-4 h-4 fill-copper-300" />
           <span tw="bl-text-xl">Add admin</span>
@@ -80,12 +82,14 @@ function EditAdminsModalContent({
                 onChange={(name) =>
                   adminsDispatch({ type: 'edit', id: id, name: name })
                 }
+                placeHolder="Name"
               />
               <AdminInfoInput
                 value={email}
                 onChange={(email) =>
                   adminsDispatch({ type: 'edit', id: id, email: email })
                 }
+                placeHolder="Email"
               />
             </Fragment>
           ))}
@@ -106,8 +110,9 @@ function EditAdminsModalContent({
 type AdminInfoInput = {
   value: string | null
   onChange: (value: string) => void
+  placeHolder: string
 }
-function AdminInfoInput({ value, onChange }: AdminInfoInput) {
+function AdminInfoInput({ value, onChange, placeHolder }: AdminInfoInput) {
   return (
     <label tw="flex flex-col w-full">
       <input
@@ -118,7 +123,7 @@ function AdminInfoInput({ value, onChange }: AdminInfoInput) {
         value={value === null ? '' : value}
         type="text"
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Name"
+        placeholder={placeHolder}
       />
     </label>
   )
@@ -143,7 +148,9 @@ function initAdminState(adminsData: AdminsData) {
   )
 }
 
-type ActionTypes = { type: 'edit'; id: number; name?: string; email?: string }
+type ActionTypes =
+  | { type: 'edit'; id: number; name?: string; email?: string }
+  | { type: 'add'; id: number }
 
 const admindsReducer = produce(
   (state: ReturnType<typeof initAdminState>, action: ActionTypes) => {
@@ -161,6 +168,14 @@ const admindsReducer = produce(
         if (action.email) {
           adminToEdit.email = action.email
         }
+        break
+      }
+      case 'add': {
+        state.push({
+          id: action.id,
+          name: '',
+          email: '',
+        })
         break
       }
       default:
