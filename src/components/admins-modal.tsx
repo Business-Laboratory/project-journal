@@ -4,7 +4,7 @@ import React, { Fragment, useReducer } from 'react'
 import produce from 'immer'
 
 import { Modal, SaveButton } from '@components/modal'
-import { PlusSmallIcon } from 'icons'
+import { PlusSmallIcon, DeleteIcon } from 'icons'
 
 import { AdminsData } from '../pages/api/admins'
 
@@ -68,21 +68,37 @@ function EditAdminsModalContent({
         <div
           css={[
             css`
-              grid-template-columns: 10rem 21rem;
+              grid-template-columns: 0.75rem 10rem 24rem;
             `,
-            tw`grid gap-x-12 gap-y-2 bl-text-lg`,
+            tw`grid gap-y-2 bl-text-lg`,
           ]}
         >
-          <span tw="col-span-1">Name</span>
-          <span tw="col-span-1">Email</span>
+          <span tw="col-start-2 col-end-3 pl-4">Name</span>
+          <span tw="col-start-3 col-end-4 pl-8">Email</span>
           {admins.map(({ id, name, email }) => (
             <Fragment key={id}>
+              <button
+                className={`${id}`}
+                onClick={() => adminsDispatch({ type: 'delete', id: id })}
+                css={[
+                  tw`focus:outline-none`,
+                  css`
+                    &.focus-visible {
+                      ${tw`ring-2 ring-copper-400`}
+                    }
+                  `,
+                ]}
+              >
+                <DeleteIcon tw="w-3 h-3 fill-matisse-red-200 hover:fill-matisse-red-300 self-center visibility: visible" />
+              </button>
               <AdminInfoInput
                 value={name}
                 onChange={(name) =>
                   adminsDispatch({ type: 'edit', id: id, name: name })
                 }
                 placeHolder="Name"
+                className={`${id}`}
+                tw="pl-4"
               />
               <AdminInfoInput
                 value={email}
@@ -90,6 +106,8 @@ function EditAdminsModalContent({
                   adminsDispatch({ type: 'edit', id: id, email: email })
                 }
                 placeHolder="Email"
+                className={`${id}`}
+                tw="pl-8"
               />
             </Fragment>
           ))}
@@ -111,10 +129,16 @@ type AdminInfoInput = {
   value: string | null
   onChange: (value: string) => void
   placeHolder: string
+  className?: string
 }
-function AdminInfoInput({ value, onChange, placeHolder }: AdminInfoInput) {
+function AdminInfoInput({
+  value,
+  onChange,
+  placeHolder,
+  className,
+}: AdminInfoInput) {
   return (
-    <label tw="flex flex-col w-full">
+    <label className={className} tw="flex flex-col w-full">
       <input
         css={[
           tw`bl-text-base placeholder-gray-yellow-400`,
@@ -152,6 +176,7 @@ function initAdminState(adminsData: AdminsData) {
 type ActionTypes =
   | { type: 'edit'; id: number; name?: string; email?: string }
   | { type: 'add'; id: number }
+  | { type: 'delete'; id: number }
 
 const admindsReducer = produce(
   (state: ReturnType<typeof initAdminState>, action: ActionTypes) => {
@@ -178,6 +203,13 @@ const admindsReducer = produce(
           email: '',
           new: true,
         })
+        break
+      }
+      case 'delete': {
+        const adminIndex = state.findIndex(
+          (adminObject) => adminObject.id === action.id
+        )
+        state.splice(adminIndex, 1)
         break
       }
       default:
