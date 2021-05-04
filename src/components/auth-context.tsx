@@ -2,23 +2,25 @@ import 'twin.macro'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { signOut, useSession } from 'next-auth/client'
 import { useRouter } from 'next/router'
-import { QueryStatus, useQuery } from 'react-query'
+import { Button } from '@components/button'
+import { useUser } from '@queries/useUser'
 
-import { Button } from './button'
-import type { QueryFunction } from 'react-query'
-import type { UserData } from 'pages/api/user'
+import type { QueryStatus } from 'react-query'
+import type { User as UserData } from '@queries/useUser'
 
-const AuthContext = createContext<UserData | null | undefined>(undefined)
+// this is typed out because I was having trouble removing the nulls from
+// the data that comes from useSession
+type User = UserData & {
+  email: string | null
+  name: string | null
+  image: string | null
+}
+const AuthContext = createContext<User | null | undefined>(undefined)
 
 export { AuthProvider, useAuth }
 
 function AuthProvider({ children }: { children: React.ReactNode }) {
   const user = useGetUser()
-
-  // TODO: add loading screen instead of bailing
-  if (user.status === 'loading') {
-    return null
-  }
 
   if (user.status === 'error') {
     let message = 'Something went wrong'
@@ -62,16 +64,20 @@ function useGetUser() {
   const [session, loading] = useSession()
   const routeCheck = useRedirect(session, loading)
 
-  const email = session?.user?.email ?? ''
-  const user = useQuery(['user', { email }], fetchUser, {
-    enabled: Boolean(email), // only fetch the user's data if they're logged in with an email
-  })
+  const user = useUser(session?.user?.email ?? '')
 
   // next-auth loading or any redirecting means that the data is still loading
   const status: QueryStatus =
     loading || routeCheck === 'unchecked' ? 'loading' : user.status
 
-  return { ...user, status }
+  let data: User | undefined = undefined
+  if (session?.user && user?.data) {
+    const { email = '', name = '', image = '' } = session.user
+    const { id, role } = user.data
+    data = { email, name, image, id, role }
+  }
+
+  return { ...user, data, status }
 }
 
 function useRedirect(...args: ReturnType<typeof useSession>) {
@@ -100,27 +106,4 @@ function useRedirect(...args: ReturnType<typeof useSession>) {
   }, [loading, router, session])
 
   return routeCheck
-}
-
-type UserQueryKey = ['user', { email: string }]
-const fetchUser: QueryFunction<UserData, UserQueryKey> = async ({
-  queryKey,
-}) => {
-  const [, { email }] = queryKey
-
-  if (!email) {
-    throw new Error(`No email provided`)
-  }
-
-  const res = await fetch(`/api/user`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
-  })
-  if (res.status === 401) {
-    throw new Error(`User is not authorized to use this app`)
-  } else if (!res.ok) {
-    throw new Error(`Something went wrong`)
-  }
-  return res.json()
 }

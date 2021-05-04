@@ -1,14 +1,12 @@
 // Alternate Admin Home view that displays clients
 import 'twin.macro'
+import { Fragment } from 'react'
 import Head from 'next/head'
 import { PlusIcon, EditIcon } from 'icons'
-import { Fragment } from 'react'
-import { QueryFunction, useQuery } from 'react-query'
-import { ClientsData } from './api/clients'
 import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
-import { useWaitTimer } from '@utils/use-wait-timer'
+import { useClients } from '@queries/useClients'
 
 export default function Clients() {
   return (
@@ -17,10 +15,6 @@ export default function Clients() {
         <title>Clients | Project Journal</title>
       </Head>
       <main tw="pt-10 w-9/12 min-w-max mx-auto space-y-8">
-        <IconLink pathName="#">
-          <PlusIcon tw="w-6 h-6 fill-copper-300" />
-          <span tw="bl-text-2xl">Add client</span>
-        </IconLink>
         <ClientList />
       </main>
     </>
@@ -28,15 +22,13 @@ export default function Clients() {
 }
 
 function ClientList() {
-  const { data, status } = useQuery('clients', fetchClients)
-
-  const wait = useWaitTimer()
+  const { data, status } = useClients()
 
   if (status === 'error') {
     return <DataErrorMessage errorMessage="Unable to load clients" />
   }
 
-  if (wait === 'finished' && status === 'loading') {
+  if (status === 'loading') {
     return <LoadingSpinner loadingMessage="Loading clients" />
   }
 
@@ -44,6 +36,7 @@ function ClientList() {
 
   return clients.length > 0 ? (
     <>
+      <AddClientLink />
       {clients.map(({ id, name, employees }) => (
         <div key={id} tw="space-y-4">
           <IconLink pathName="#">
@@ -65,15 +58,19 @@ function ClientList() {
         </div>
       ))}
     </>
-  ) : status === 'success' ? (
-    <h1 tw="bl-text-3xl max-w-prose text-center">No clients are available</h1>
-  ) : null
+  ) : (
+    <>
+      <AddClientLink />
+      <h1 tw="bl-text-3xl max-w-prose text-center">No clients are available</h1>
+    </>
+  )
 }
 
-const fetchClients: QueryFunction<ClientsData> = async () => {
-  const res = await fetch(`/api/clients`)
-  if (!res.ok) {
-    throw new Error(`Something went wrong fetching clients`)
-  }
-  return res.json()
+function AddClientLink() {
+  return (
+    <IconLink pathName="#">
+      <PlusIcon tw="w-6 h-6 fill-copper-300" />
+      <span tw="bl-text-2xl">Add client</span>
+    </IconLink>
+  )
 }

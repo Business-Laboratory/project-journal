@@ -13,3 +13,8 @@ export type SerializeDates<T> = {
 }
 
 export type PrepareAPIData<T> = SerializeDates<UnwrapPromise<T>>
+
+export type QueryData<T extends (...args: any) => any> = Exclude<
+  ReturnType<T>['data'],
+  undefined
+>

@@ -15,7 +15,7 @@ import { matchSorter } from 'match-sorter'
 
 import { SearchIcon } from 'icons'
 
-import type { Updates } from 'pages/project/[id]'
+import type { Updates } from '@queries/useUpdates'
 
 const inputPaddingY = theme('spacing.3')
 

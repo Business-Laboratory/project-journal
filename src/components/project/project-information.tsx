@@ -14,97 +14,63 @@ import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
 import Link from 'next/link'
 
-import { SearchBar, ProjectModal } from './index'
+import { SearchBar, UpdateModal } from './index'
 import { PlusIcon, EditIcon, UpdateLinkIcon } from 'icons'
 import { format } from 'date-fns'
-import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { useRouter } from 'next/router'
 import { useSetCurrentHashLink } from './hash-link-context'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
-import { useWaitTimer } from '@utils/use-wait-timer'
 
-import type { Updates } from 'pages/project/[id]'
+import type { Updates } from '@queries/useUpdates'
+import type { QueryStatus } from 'react-query'
+import type { Role } from '@prisma/client'
+import { createUpdatePath } from './update-modal'
+
+export { ProjectInformation, LoadingProjectInformation }
 
 // Main component
 
-type ProjectInformationProps = {
-  projectId: number
-  updates: Updates
-  status: string
+type LoadingProjectInformationProps = {
+  status: QueryStatus
 }
-export function ProjectInformation({
-  projectId,
-  updates,
-  status,
-}: ProjectInformationProps) {
-  const user = useAuth()
-  const [open, setOpen] = useState(false)
-  const router = useRouter()
-  let { edit, updateId } = router.query
-  if (!updateId || Array.isArray(updateId)) {
-    updateId = undefined
-  }
-  if (!edit || Array.isArray(edit)) {
-    edit = undefined
-  }
-
-  useEffect(() => {
-    if (!updateId && open) {
-      setOpen(false)
-    }
-    if (!updateId) return
-    setOpen(true)
-  }, [updateId, updates, open])
-
-  const close = () => {
-    setOpen(false)
-    router.replace(`/project/${projectId}`, undefined, { shallow: true })
-  }
-
+function LoadingProjectInformation({ status }: LoadingProjectInformationProps) {
   return (
     <ProjectInformationContainer>
-      <div tw="w-9/12 mx-auto py-10 space-y-8">
-        <SearchBar
-          updates={updates}
-          disabled={
-            status === 'loading' || status === 'error' || updates.length === 0
-          }
-        />
-        {user?.role === 'ADMIN' && (
-          <IconLink
-            pathName={{
-              pathname: `/project/${projectId}`,
-              query: { edit: 'update', updateId: 'new' },
-            }}
-            replace={true}
-          >
-            <PlusIcon tw="w-6 h-6 fill-copper-300" />
-            <span tw="bl-text-2xl">Add update</span>
-          </IconLink>
-        )}
-        <UpdatesList
-          updates={updates}
-          role={user?.role}
-          projectId={projectId}
-          status={status}
-        />
-      </div>
-      {!!updateId && edit === 'update' && user?.role === 'ADMIN' ? (
-        <ProjectModal
-          isOpen={open}
-          close={close}
-          projectId={projectId}
-          data={
-            updates.find(({ id }) => id === Number(updateId)) ?? {
-              id: 'new',
-              title: '',
-              body: '',
-            }
-          }
-        />
+      {status === 'error' ? (
+        <DataErrorMessage errorMessage="Unable to load updates" />
+      ) : (
+        <LoadingSpinner loadingMessage="Loading updates" />
+      )}
+    </ProjectInformationContainer>
+  )
+}
+
+type ProjectInformationProps = {
+  projectId: number
+  userRole: Role
+  updates: Updates
+}
+function ProjectInformation({
+  projectId,
+  userRole,
+  updates,
+}: ProjectInformationProps) {
+  return (
+    <ProjectInformationContainer>
+      <SearchBar updates={updates} disabled={updates.length === 0} />
+      {userRole === 'ADMIN' ? (
+        <>
+          <AddUpdateButton projectId={projectId} />
+          <UpdateModal projectId={projectId} updates={updates} />
+        </>
       ) : null}
+      <UpdatesList
+        updates={updates}
+        userRole={userRole}
+        projectId={projectId}
+      />
     </ProjectInformationContainer>
   )
 }
@@ -140,9 +106,11 @@ function ProjectInformationContainer({
         `,
       ]}
     >
-      <OnScrollRefContext.Provider value={onScrollRef}>
-        {children}
-      </OnScrollRefContext.Provider>
+      <div tw="w-9/12 mx-auto py-10 space-y-8">
+        <OnScrollRefContext.Provider value={onScrollRef}>
+          {children}
+        </OnScrollRefContext.Provider>
+      </div>
     </article>
   )
 }
@@ -181,6 +149,15 @@ function useOnScroll(onScroll: OnScrollFunction) {
     )
   }
   onScrollRef.current = onScroll
+}
+
+function AddUpdateButton({ projectId }: { projectId: number }) {
+  return (
+    <IconLink pathName={createUpdatePath(projectId, 'new')} replace={true}>
+      <PlusIcon tw="w-6 h-6 fill-copper-300" />
+      <span tw="bl-text-2xl">Add update</span>
+    </IconLink>
+  )
 }
 
 // container for all of the updates which provisions refs for each of the children through context providers
@@ -349,21 +326,11 @@ const applyToFirstChild = (
 
 type UpdatesListProps = {
   updates: Updates
-  role: string | undefined | null
+  userRole: Role
   projectId: number
-  status: string
 }
-function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
-  const wait = useWaitTimer()
+function UpdatesList({ updates, userRole, projectId }: UpdatesListProps) {
   const router = useRouter()
-
-  if (status === 'error') {
-    return <DataErrorMessage errorMessage="Unable to load updates" />
-  }
-
-  if (wait === 'finished' && status === 'loading') {
-    return <LoadingSpinner loadingMessage="Loading updates" />
-  }
 
   const routerHash = window.location.hash
 
@@ -374,12 +341,9 @@ function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
           <UpdateContainer key={id} id={hashLink.replace('#', '')}>
             <div tw="inline-flex items-center justify-between w-full">
               <div tw="inline-flex items-center space-x-2">
-                {role === 'ADMIN' ? (
+                {userRole === 'ADMIN' ? (
                   <IconLink
-                    pathName={{
-                      pathname: `/project/${projectId}`,
-                      query: { edit: 'update', updateId: `${id}` },
-                    }}
+                    pathName={createUpdatePath(projectId, id)}
                     replace={true}
                   >
                     <EditIcon tw="w-6 h-6 fill-copper-300" />
@@ -444,9 +408,9 @@ function UpdatesList({ updates, role, projectId, status }: UpdatesListProps) {
         )
       })}
     </UpdatesContainer>
-  ) : status === 'success' ? (
+  ) : (
     <h1 tw="bl-text-3xl max-w-prose">No updates have been added</h1>
-  ) : null
+  )
 }
 
 // update container, which gets the hook provisioned for it and applies it to the top level element

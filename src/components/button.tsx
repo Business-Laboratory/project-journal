@@ -8,7 +8,6 @@ type ButtonProps = React.ComponentPropsWithoutRef<'button'> & {
   variant?: 'important' | 'danger'
 }
 
-// TODO: Add variant for "danger" button
 function Button({ disabled, variant, ...props }: ButtonProps) {
   //Ring color is copper-400
   return (

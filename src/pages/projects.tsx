@@ -4,44 +4,73 @@ import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
 import { PlusIcon } from 'icons'
-import { useQuery } from 'react-query'
 import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
-import { useWaitTimer } from '@utils/use-wait-timer'
-
-import type { QueryFunction } from 'react-query'
-import type { ProjectsData } from './api/projects'
+import { useProjects } from '@queries/useProjects'
 
 export default function Projects() {
-  const user = useAuth()
-
   return (
     <>
       <Head>
         <title>Projects | Project Journal</title>
       </Head>
       <main tw="pt-10 w-9/12 space-y-8 mx-auto max-w-lg lg:max-w-none">
-        {user?.role === 'ADMIN' ? (
-          <IconLink pathName="#">
-            <PlusIcon tw="w-6 h-6 fill-copper-300" />
-            <span tw="bl-text-2xl">Add project</span>
-          </IconLink>
-        ) : null}
-
-        <CardGrid userName={user?.name} />
+        <CardGrid />
       </main>
     </>
   )
 }
 
-const fetchProjects: QueryFunction<ProjectsData> = async () => {
-  const res = await fetch(`/api/projects`)
-  if (!res.ok) {
-    throw new Error(`Something went wrong`)
+function CardGrid() {
+  const user = useAuth()
+  const { data, status } = useProjects()
+
+  if (status === 'error') {
+    return <DataErrorMessage errorMessage="Unable to load projects" />
   }
-  return res.json()
+
+  // when the user or the projects data is still loading, return nothing for 1 second, and then a spinner
+  if (!user || status === 'loading') {
+    return <LoadingSpinner loadingMessage="Loading projects" />
+  }
+
+  const userNameFormatted = user.name ?? 'you'
+  const projects = data ?? []
+
+  return projects.length > 0 ? (
+    <>
+      <AddProjectLink />
+      <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
+        {projects.map((project, idx) => (
+          <Card
+            key={project.id}
+            id={project.id}
+            name={project.name ?? `Untitled Project (${idx + 1})`}
+            description={project.summary?.description ?? null}
+            imageUrl={project.imageUrl}
+          />
+        ))}
+      </div>
+    </>
+  ) : (
+    <>
+      <AddProjectLink />
+      <h1 tw="bl-text-3xl max-w-prose text-center">
+        There are currently no projects assigned to {userNameFormatted}
+      </h1>
+    </>
+  )
+}
+
+function AddProjectLink() {
+  return (
+    <IconLink pathName="#">
+      <PlusIcon tw="w-6 h-6 fill-copper-300" />
+      <span tw="bl-text-2xl">Add project</span>
+    </IconLink>
+  )
 }
 
 type CardProps = {
@@ -51,7 +80,7 @@ type CardProps = {
   imageUrl: string | null
 }
 function Card({ id, name, description, imageUrl }: CardProps) {
-  //Ring color is copper-400
+  // ring color is copper-400
   return (
     <Link href={`/project/${id}`} passHref>
       <a
@@ -103,52 +132,4 @@ function Card({ id, name, description, imageUrl }: CardProps) {
       </a>
     </Link>
   )
-}
-
-type Project = {
-  name: string | null
-  imageUrl: string | null
-  summary: {
-    description: string | null
-  } | null
-  id: number
-}
-
-type CardGridProps = {
-  userName: string | undefined | null
-}
-function CardGrid({ userName }: CardGridProps) {
-  const { data, status } = useQuery('projects', fetchProjects)
-
-  const wait = useWaitTimer()
-
-  if (status === 'error') {
-    return <DataErrorMessage errorMessage="Unable to load projects" />
-  }
-
-  if (wait === 'finished' && status === 'loading') {
-    return <LoadingSpinner loadingMessage="Loading projects" />
-  }
-
-  const userNameFormatted = userName ? userName : 'you'
-
-  const projects = data ?? []
-
-  return projects.length > 0 ? (
-    <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
-      {projects.map((project: Project, idx) => (
-        <Card
-          key={project.id}
-          id={project.id}
-          name={project.name ?? `Untitled Project (${idx + 1})`}
-          description={project.summary?.description ?? null}
-          imageUrl={project.imageUrl}
-        />
-      ))}
-    </div>
-  ) : status === 'success' ? (
-    <h1 tw="bl-text-3xl max-w-prose text-center">
-      There are currently no projects assigned to {userNameFormatted}
-    </h1>
-  ) : null
 }

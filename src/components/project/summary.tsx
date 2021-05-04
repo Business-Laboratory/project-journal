@@ -3,115 +3,64 @@ import Image from 'next/image'
 import ReactMarkdown from 'react-markdown'
 import gfm from 'remark-gfm'
 
-import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { EditIcon, GearIcon } from 'icons'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
-import { useWaitTimer } from '@utils/use-wait-timer'
-import { ProjectModal } from './index'
+import {
+  SummaryModal,
+  SettingsModal,
+  createDescriptionPath,
+  createRoadmapProject,
+  createSettingsPath,
+} from './index'
+import type { QueryStatus } from 'react-query'
+import type { Role } from '@prisma/client'
+import type { Project } from '@queries/useProject'
 
-import type { ProjectData } from 'pages/api/project'
-import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+export { Summary, LoadingSummary }
 
-type Team = ProjectData['team']
+// types
+
+type Team = Project['team']
+type ClientEmployees = Exclude<
+  Project['client'],
+  null
+>['employees'][0]['user'][]
+
+type LoadingSummaryProps = {
+  status: QueryStatus
+}
+function LoadingSummary({ status }: LoadingSummaryProps) {
+  return (
+    <SummaryWrapper>
+      {status === 'error' ? (
+        <DataErrorMessage errorMessage="Unable to load summary" />
+      ) : (
+        <LoadingSpinner loadingMessage="Loading project summary" />
+      )}
+    </SummaryWrapper>
+  )
+}
 
 type SummaryProps = {
   projectId: number
-  name: string
-  imageUrl: string
-  summary: ProjectData['summary']
-  clientName: string
-  clientEmployees: Team // TODO: update this. There's probably a better way to do this, but I'm just replacing what was here
-  team: Team
-  status: string
+  userRole: Role
+  project: Project
 }
-
-export function Summary({
-  projectId,
-  name,
-  imageUrl,
-  summary,
-  clientName,
-  clientEmployees,
-  team,
-  status,
-}: SummaryProps) {
-  const user = useAuth()
-  const router = useRouter()
-  const wait = useWaitTimer()
-  let edit = router.query.edit
-  if (!edit || Array.isArray(edit)) {
-    edit = undefined
-  }
-  const [open, setOpen] = useState(false)
-
-  useEffect(() => {
-    if (!edit && open) {
-      setOpen(false)
-    }
-    if (!edit) return
-    setOpen(true)
-  }, [edit, open])
-
-  const close = () => {
-    setOpen(false)
-    router.replace(`/project/${projectId}`, undefined, { shallow: true })
-  }
-
-  if (status === 'error') {
-    return (
-      <aside
-        css={[
-          user?.role === 'ADMIN'
-            ? css`
-                padding-top: 11.875rem;
-              `
-            : css`
-                padding-top: 7.625rem;
-              `,
-        ]}
-      >
-        <DataErrorMessage errorMessage="Unable to load summary" />
-      </aside>
-    )
-  }
-
-  if (wait === 'finished' && status === 'loading') {
-    //Need precise rem to match the y coordinate of the loading updates spinner
-    return (
-      <aside
-        css={[
-          user?.role === 'ADMIN'
-            ? css`
-                padding-top: 11.875rem;
-              `
-            : css`
-                padding-top: 7.625rem;
-              `,
-        ]}
-      >
-        <LoadingSpinner loadingMessage="Loading project summary" />
-      </aside>
-    )
-  }
-
+function Summary({ projectId, userRole, project }: SummaryProps) {
+  const { name, imageUrl, client, team, summary } = project
+  const clientEmployees = client?.employees.map(({ user }) => user) ?? []
   // Is there a situation where summary would ever be null?
   if (!summary) return null
 
   return (
-    <aside tw="relative h-full px-14 overflow-y-auto">
-      <div tw="space-y-8 py-10">
-        {user?.role === 'ADMIN' ? (
-          <IconLink
-            pathName={{
-              pathname: `/project/${projectId}/`,
-              query: { edit: 'settings' },
-            }}
-          >
+    <>
+      <SummaryWrapper>
+        {userRole === 'ADMIN' ? (
+          <IconLink pathName={createSettingsPath(projectId)} replace={true}>
             <GearIcon tw="h-6 w-6 fill-copper-300" />
-            {name === '' ? (
+            {!name || name === '' ? (
               <h1 tw="bl-text-4xl text-gray-yellow-300 inline capitalize">
                 Untitled project
               </h1>
@@ -120,25 +69,24 @@ export function Summary({
             )}
           </IconLink>
         ) : (
-          <h1 tw="bl-text-4xl">{name === '' ? 'Untitled Project' : name}</h1>
+          <h1 tw="bl-text-4xl">
+            {name === '' || !name ? 'Untitled Project' : name}
+          </h1>
         )}
         {imageUrl ? (
           <div tw="relative h-60 w-full">
             <Image
               tw="object-contain"
               layout="fill"
-              src={imageUrl}
-              alt={name}
+              src={imageUrl ?? ''}
+              alt={name ?? ''}
             />
           </div>
         ) : null}
         <div tw="space-y-2">
-          {user?.role === 'ADMIN' ? (
+          {userRole === 'ADMIN' ? (
             <IconLink
-              pathName={{
-                pathname: `/project/${projectId}`,
-                query: { edit: 'description' },
-              }}
+              pathName={createDescriptionPath(projectId)}
               replace={true}
             >
               <EditIcon tw="h-6 w-6 fill-copper-300" />
@@ -152,14 +100,8 @@ export function Summary({
           ) : null}
         </div>
         <div tw="space-y-2">
-          {user?.role === 'ADMIN' ? (
-            <IconLink
-              pathName={{
-                pathname: `/project/${projectId}`,
-                query: { edit: 'roadmap' },
-              }}
-              replace={true}
-            >
+          {userRole === 'ADMIN' ? (
+            <IconLink pathName={createRoadmapProject(projectId)} replace={true}>
               <EditIcon tw="h-6 w-6 fill-copper-300" />
               <h2 tw="bl-text-3xl inline">Project Roadmap</h2>
             </IconLink>
@@ -175,34 +117,28 @@ export function Summary({
           <div tw="space-y-6">
             <div>
               <div tw="bl-text-2xl">Client</div>
-              <div tw="bl-text-base">{clientName}</div>
+              <div tw="bl-text-base">{client?.name ?? ''}</div>
             </div>
             <TeamSection title="Client Team" team={clientEmployees} />
             <TeamSection title="Project Team" team={team} />
           </div>
         </div>
-      </div>
-      {(edit === 'description' || edit === 'roadmap') &&
-      user?.role === 'ADMIN' ? (
-        <ProjectModal
-          isOpen={open}
-          close={close}
-          projectId={projectId}
-          data={{
-            id: summary.id,
-            title:
-              edit === 'description'
-                ? 'Project Description'
-                : 'Project Roadmap',
-            // Also don't see any way description/roadmap will be null as
-            // they will be initialized as string
-            body:
-              edit === 'description'
-                ? summary.description ?? ''
-                : summary.roadmap ?? '',
-          }}
-        />
+      </SummaryWrapper>
+
+      {userRole === 'ADMIN' ? (
+        <>
+          <SummaryModal projectId={projectId} summary={summary} />
+          <SettingsModal projectId={projectId} project={project} />
+        </>
       ) : null}
+    </>
+  )
+}
+
+function SummaryWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <aside tw="relative h-full px-14 overflow-y-auto space-y-8 py-10">
+      {children}
     </aside>
   )
 }

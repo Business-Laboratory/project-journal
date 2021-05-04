@@ -1,11 +1,11 @@
 import { prisma } from '@lib/prisma'
 import { checkAuthentication } from '@utils/api/check-authentication'
+import { updateProjectImageUrl } from '@utils/api/update-project-image-url'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
 import type { PrepareAPIData } from '@types'
-import type { User } from '@prisma/client'
+import type { UserData } from '@utils/api/check-authentication'
 
-// TODO: apply PrepareAPIData to all APIs
 export type ProjectData = PrepareAPIData<ReturnType<typeof getProject>>
 
 /**
@@ -32,18 +32,22 @@ export default async function handler(
   }
 }
 
-async function getProject(user: User, id: number) {
+async function getProject(user: UserData, id: number) {
   const userId = user.id
   const userRole = user.role
+
   const project = await prisma.project.findUnique({
     where: {
       id,
     },
     select: {
+      id: true,
       name: true,
       imageUrl: true,
+      imageStorageBlobUrl: true,
       client: {
         select: {
+          id: true,
           name: true,
           employees: {
             select: {
@@ -54,13 +58,6 @@ async function getProject(user: User, id: number) {
       },
       team: true,
       summary: true,
-      updates: {
-        orderBy: [
-          {
-            createdAt: 'desc',
-          },
-        ],
-      },
     },
   })
 
@@ -77,5 +74,9 @@ async function getProject(user: User, id: number) {
     }
   }
 
-  return project
+  const { imageStorageBlobUrl, ...returnProject } = project
+
+  const newImageUrl = await updateProjectImageUrl(project)
+
+  return { ...returnProject, imageUrl: newImageUrl }
 }
