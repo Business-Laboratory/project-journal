@@ -5,16 +5,21 @@ export { TextInput }
 export type { TextInputProps }
 
 type TextInputProps = Omit<React.ComponentPropsWithRef<'input'>, 'onChange'> & {
-  label: string
+  label?: string
   onChange: (value: string) => void
 }
 const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
   function TextInput({ label, value, onChange, id, className, ...props }, ref) {
     return (
-      <div tw="flex flex-col bl-text-base" className={className}>
-        <label htmlFor={id} tw="bl-text-xs text-gray-yellow-300">
-          {label}
-        </label>
+      <div
+        css={[tw`bl-text-base`, label ? tw`flex flex-col` : null]}
+        className={className}
+      >
+        {label ? (
+          <label htmlFor={id} tw="bl-text-xs text-gray-yellow-300">
+            {label}
+          </label>
+        ) : null}
         <input
           ref={ref}
           id={id}

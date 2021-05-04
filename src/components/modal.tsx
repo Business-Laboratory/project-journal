@@ -82,6 +82,7 @@ type DeleteSectionProps = {
   className?: string
   label: string
   verificationText: string
+  buttonText: string
   onDelete: () => void
   status: QueryStatus
 }
@@ -89,6 +90,7 @@ export function DeleteSection({
   className,
   label,
   verificationText,
+  buttonText,
   status,
   onDelete,
 }: DeleteSectionProps) {
@@ -115,7 +117,7 @@ export function DeleteSection({
             }}
             variant="danger"
           >
-            {status === 'loading' ? 'Deleting...' : 'Delete update'}
+            {buttonText}
           </Button>
           {status === 'error' ? (
             <div role="alert" tw="bl-text-lg text-matisse-red-200 uppercase">

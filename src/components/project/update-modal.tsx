@@ -106,6 +106,11 @@ function ProjectEditModalContent({
           tw="mt-16"
           label="Verify update title"
           verificationText={title}
+          buttonText={
+            deleteMutation.status === 'loading'
+              ? 'Deleting...'
+              : 'Delete update'
+          }
           onDelete={() => {
             deleteMutation.mutate(id, {
               onSuccess: onDismiss,

@@ -1,6 +1,6 @@
 // Alternate Admin Home view that displays clients
 import 'twin.macro'
-import { Fragment, useEffect } from 'react'
+import React, { Fragment, useEffect } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 
@@ -8,8 +8,13 @@ import { PlusIcon, EditIcon } from 'icons'
 import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
-import { Modal } from '@components/modal'
+import { DeleteSection, Modal } from '@components/modal'
 import { useClients } from '@queries/useClients'
+
+import type { Clients as ClientsData } from '@queries/useClients'
+import { TextInput } from '@components/text-input'
+import { IconButton } from '@components/icon-button'
+import { Button } from '@components/button'
 
 export default function Clients() {
   return (
@@ -43,7 +48,7 @@ function ClientList() {
       {clients.length > 0 ? (
         clients.map(({ id, name, employees }) => (
           <div key={id} tw="space-y-4">
-            <IconLink href={{ query: { id: String(id) } }}>
+            <IconLink href={createEditClientHref(id)}>
               <EditIcon tw="w-6 h-6 fill-copper-300" />
               <span tw="bl-text-3xl">{name}</span>
             </IconLink>
@@ -66,21 +71,24 @@ function ClientList() {
           No clients are available
         </h1>
       )}
-      <EditClientModal />
+      <EditClientModal clients={clients} />
     </>
   )
 }
 
 function AddClientLink() {
   return (
-    <IconLink href="#">
+    <IconLink href={createEditClientHref('new')}>
       <PlusIcon tw="w-6 h-6 fill-copper-300" />
       <span tw="bl-text-2xl">Add client</span>
     </IconLink>
   )
 }
 
-function EditClientModal() {
+type EditClientModalProps = {
+  clients: ClientsData
+}
+function EditClientModal({ clients }: EditClientModalProps) {
   const router = useRouter()
   const { id: clientId } = router.query
 
@@ -95,7 +103,11 @@ function EditClientModal() {
   return (
     <Modal isOpen={Boolean(clientId)} onDismiss={handleOnDismiss}>
       <EditClientModalContent
-        data={{ id: 'new' }}
+        data={
+          clientId !== 'new'
+            ? clients.find(({ id }) => id === Number(clientId))
+            : undefined
+        }
         onDismiss={handleOnDismiss}
       />
     </Modal>
@@ -105,20 +117,114 @@ function EditClientModal() {
 // TODO: Get this from api/client
 type ClientBody = {
   id: 'new' | number
+  name: string
+  employees: {
+    title: string | null
+    id: number
+    user: {
+      name: string | null
+      email: string | null
+    }
+  }[]
 }
+
+const newClientData: ClientBody = { id: 'new', name: '', employees: [] }
 
 type EditClientModalContentProps = {
   data?: ClientBody
   onDismiss: () => void
 }
 function EditClientModalContent({
-  data = { id: 'new' },
+  data = newClientData,
   onDismiss,
 }: EditClientModalContentProps) {
-  const { id } = data
+  const { id, name } = data
   useRedirectNewClient(id)
 
-  return null
+  // TODO: convert to state
+  const employees = data.employees
+
+  return (
+    <>
+      <section tw="flex flex-col">
+        <TextInput
+          tw="bl-text-3xl w-full"
+          label="Client name"
+          placeholder="Client name"
+          value={name}
+          onChange={() => {}}
+        />
+
+        <IconButton tw="mt-9">
+          <PlusIcon tw="w-4 h-4 fill-copper-300" />
+          <span tw="bl-text-xl">Add employee</span>
+        </IconButton>
+
+        <table tw="w-full mt-2">
+          <thead>
+            <TableRow>
+              <HeaderCell>Name</HeaderCell>
+              <HeaderCell>Email</HeaderCell>
+              <HeaderCell>Role</HeaderCell>
+            </TableRow>
+          </thead>
+          <tbody tw="block mt-2 space-y-2">
+            {employees.map(
+              ({ id, title: role, user: { email, name } }, idx) => {
+                return (
+                  <TableRow key={id}>
+                    <InputCell
+                      aria-label={`employee ${idx} name`}
+                      value={name ?? ''}
+                      onChange={() => {}}
+                    />
+                    <InputCell
+                      aria-label={`employee ${idx} email`}
+                      type="email"
+                      value={email ?? ''}
+                      onChange={() => {}}
+                    />
+                    <InputCell
+                      aria-label={`employee ${idx} role`}
+                      value={role ?? ''}
+                      onChange={() => {}}
+                    />
+                  </TableRow>
+                )
+              }
+            )}
+          </tbody>
+        </table>
+        <Button tw="self-end mt-10" variant="important">
+          save client
+        </Button>
+      </section>
+
+      <DeleteSection
+        tw="mt-16"
+        label="Verify client name"
+        verificationText={name}
+        buttonText={'success' === 'loading' ? 'deleting...' : 'delete client'}
+        onDelete={() => {}}
+        status={'success'}
+      />
+    </>
+  )
+}
+
+function TableRow(props: React.ComponentPropsWithoutRef<'tr'>) {
+  return <tr tw="grid grid-cols-3 gap-x-3 justify-start" {...props} />
+}
+function HeaderCell(props: React.ComponentPropsWithoutRef<'th'>) {
+  return <th tw="bl-text-lg text-left" {...props} />
+}
+
+function InputCell(props: React.ComponentPropsWithoutRef<'input'>) {
+  return (
+    <td tw="bl-text-lg text-left">
+      <TextInput tw="w-full" {...props} onChange={(newValue) => {}} />
+    </td>
+  )
 }
 
 /**
@@ -130,7 +236,13 @@ function useRedirectNewClient(id: ClientBody['id']) {
 
   useEffect(() => {
     if (id === 'new' && clientId !== 'new') {
-      router.replace({ query: { id: 'new' } }, undefined, { shallow: true })
+      router.replace(createEditClientHref('new'), undefined, { shallow: true })
     }
   }, [clientId, id, router])
+}
+
+function createEditClientHref(id: ClientBody['id']) {
+  return {
+    query: { id },
+  }
 }
