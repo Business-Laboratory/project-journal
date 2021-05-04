@@ -40,8 +40,7 @@ function EditAdminsModalContent({
   const admins = currentAdmins ?? []
 
   return (
-    //items-end
-    <div tw="space-y-10 flex flex-col">
+    <div tw="space-y-10 flex flex-col items-end">
       <div tw="space-y-2">
         <button
           css={[
@@ -60,9 +59,8 @@ function EditAdminsModalContent({
         </button>
         <div
           css={[
-            //What if we spelled out that the email input has to be longer
             css`
-              grid-template-columns: repeat(2, minmax(0, max-content));
+              grid-template-columns: 10rem 21rem;
             `,
             tw`grid gap-x-12 gap-y-2 bl-text-lg`,
           ]}
