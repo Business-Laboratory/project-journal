@@ -15,7 +15,7 @@ import { useDeleteUpdateMutation } from '@queries/useDeleteUpdateMutation'
 import type { UpdateBody } from '@queries/useUpdateMutation'
 import type { Updates } from '@queries/useUpdates'
 
-export { UpdateModal, createUpdatePath }
+export { UpdateModal, createEditUpdateHref }
 
 type UpdateModalProps = {
   projectId: number
@@ -127,14 +127,14 @@ function useRedirectNewUpdate(projectId: number, id: UpdateBody['id']) {
 
   useEffect(() => {
     if (id === 'new' && updateId !== 'new') {
-      router.replace(createUpdatePath(projectId, 'new'), undefined, {
+      router.replace(createEditUpdateHref(projectId, 'new'), undefined, {
         shallow: true,
       })
     }
   }, [id, projectId, router, updateId])
 }
 
-function createUpdatePath(projectId: number, updateId: UpdateBody['id']) {
+function createEditUpdateHref(projectId: number, updateId: UpdateBody['id']) {
   return {
     pathname: `/project/${projectId}`,
     query: { edit: 'update', updateId: String(updateId) },
