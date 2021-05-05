@@ -9,6 +9,7 @@ import { TextInput } from '@components/text-input'
 import { PlusSmallIcon, DeleteIcon } from 'icons'
 
 import { AdminsData } from '../pages/api/admins'
+import { useAdminsMutation } from '@queries/useAdminsMutation'
 
 export { AdminsModal, createEditAdminsPath }
 
@@ -29,21 +30,28 @@ function AdminsModal({ currentAdmins }: AdminsModalProps) {
 
   return (
     <Modal isOpen={edit === 'update'} onDismiss={handleOnDismiss}>
-      <EditAdminsModalContent currentAdmins={currentAdmins} />
+      <EditAdminsModalContent
+        currentAdmins={currentAdmins}
+        onDismiss={handleOnDismiss}
+      />
     </Modal>
   )
 }
 
 type EditAdminsModalContentProps = {
   currentAdmins: AdminsData
+  onDismiss: () => void
 }
 function EditAdminsModalContent({
   currentAdmins,
+  onDismiss,
 }: EditAdminsModalContentProps) {
   const [admins, adminsDispatch] = useReducer(
     admindsReducer,
     initAdminState(currentAdmins)
   )
+
+  const adminsMutation = useAdminsMutation()
 
   console.log(admins)
 
@@ -104,8 +112,17 @@ function EditAdminsModalContent({
           ))}
         </div>
       </div>
-      <SaveButton tw="mr-4" onClick={() => {}} disabled={false} error={false}>
-        Save admins
+      <SaveButton
+        tw="mr-4"
+        onClick={() => {
+          adminsMutation.mutate(admins, {
+            onSuccess: onDismiss,
+          })
+        }}
+        disabled={adminsMutation.isLoading}
+        error={adminsMutation.isError}
+      >
+        {adminsMutation.isLoading ? 'Saving admins...' : 'Save admins'}
       </SaveButton>
     </div>
   )
@@ -123,9 +140,8 @@ function initAdminState(adminsData: AdminsData) {
     adminsData?.map((adminObject) => {
       return {
         id: adminObject.id,
-        name: adminObject.name,
-        email: adminObject.email,
-        new: false,
+        name: adminObject.name ?? '',
+        email: adminObject.email ?? '',
       }
     }) ?? []
   )

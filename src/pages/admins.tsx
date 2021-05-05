@@ -25,7 +25,7 @@ export default function DefaultComponent() {
 }
 
 function AdminsContent() {
-  const { data, status } = useQuery('users', fetchAdmins)
+  const { data, status } = useQuery('admins', fetchAdmins)
 
   const wait = useWaitTimer()
 

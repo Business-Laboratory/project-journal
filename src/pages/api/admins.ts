@@ -7,6 +7,7 @@ import type { UserData } from '@utils/api/check-authentication'
 
 export type AdminsData = PrepareAPIData<ReturnType<typeof getAdmins>>
 
+export type UpdateAdminsBody = { name: string; email: string }[]
 /**
  * Gets projects based on their role:
  * ADMIN — Gets all projects
@@ -24,8 +25,14 @@ export default async function handler(
   if (!user) return
 
   try {
-    const admins = await getAdmins(user)
-    res.status(200).json(admins)
+    if (req.method === 'GET') {
+      const admins = await getAdmins(user)
+      res.status(200).json(admins)
+    }
+    if (req.method === 'POST') {
+      await updateAdmins(req.body)
+      res.status(200).json({})
+    }
   } catch (error) {
     console.log(error)
     res.status(500).json({ error })
@@ -39,4 +46,10 @@ async function getAdmins(user: UserData) {
     where: { role: 'ADMIN' },
   })
   return admins
+}
+
+async function updateAdmins(admins: UpdateAdminsBody) {
+  return new Promise((res) => {
+    setTimeout(res, 3000)
+  })
 }
