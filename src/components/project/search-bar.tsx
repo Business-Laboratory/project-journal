@@ -1,5 +1,4 @@
 import tw, { css, theme } from 'twin.macro'
-import React, { useRef, useState, useMemo, useEffect } from 'react'
 import {
   Combobox,
   ComboboxInput,
@@ -9,6 +8,7 @@ import {
   ComboboxOptionText,
   useComboboxContext,
 } from '@reach/combobox'
+import { useRef, useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { useRect } from '@reach/rect'
 import { matchSorter } from 'match-sorter'

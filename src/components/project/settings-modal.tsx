@@ -1,9 +1,8 @@
 import tw from 'twin.macro'
 import { useRouter } from 'next/router'
-import React, { useReducer, useState } from 'react'
+import React, { useReducer } from 'react'
 
 import { DeleteSection, Modal, SaveButton } from '@components/modal'
-import { useUpdateSummary } from '@queries/useUpdateSummary'
 import { Project } from '@queries/useProject'
 import { User } from '@queries/useUser'
 import { useClients } from '@queries/useClients'
@@ -11,7 +10,7 @@ import { useAdmins } from '@queries/useAdmins'
 import { Button } from '@components/button'
 import { CameraIcon } from 'icons'
 
-export { SettingsModal, createSettingsPath }
+export { SettingsModal, createSettingsHref }
 
 type SettingsModalProps = {
   projectId: number
@@ -64,7 +63,7 @@ function SettingsEditModalContent({
   const clients = clientData ?? []
   const admins = adminData ?? []
 
-  // const disabled = !body || summaryMutation.status === 'loading'
+  const disabled = !clientId || !!team || clientStatus || adminStatus
 
   return (
     <div tw="space-y-8 flex flex-col items-end">
@@ -104,7 +103,9 @@ function SettingsEditModalContent({
       </label>
       <Button tw="space-x-4 align-middle max-w-max self-start">
         <CameraIcon tw="inline fill-gray-yellow-600" />
-        <span tw="bl-text-lg">Upload project image</span>
+        <span tw="bl-text-lg">
+          {imageUrl === '' ? 'Upload project image' : 'Change project image'}
+        </span>
       </Button>
       <label tw="flex flex-col w-full" htmlFor="client">
         <span tw="bl-text-xs text-gray-yellow-300">Project Team</span>
@@ -135,7 +136,7 @@ function SettingsEditModalContent({
         //     { onSuccess: onDismiss }
         //   )
         // }}
-        // disabled={disabled}
+        disabled={disabled}
         error={false}
       >
         {/* {summaryMutation.status === 'loading'
@@ -145,6 +146,7 @@ function SettingsEditModalContent({
       </SaveButton>
       <DeleteSection
         tw="mt-16 w-full"
+        label="Project name"
         verificationText={name}
         onDelete={() => ({})}
         status={'idle'}
@@ -194,7 +196,7 @@ function settingsReducer(
   }
 }
 
-function createSettingsPath(projectId: number) {
+function createSettingsHref(projectId: number) {
   return {
     pathname: `/project/${projectId}`,
     query: { edit: 'settings' },

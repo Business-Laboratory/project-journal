@@ -10,9 +10,9 @@ import { DataErrorMessage } from '@components/data-error-message'
 import {
   SummaryModal,
   SettingsModal,
-  createDescriptionPath,
-  createRoadmapProject,
-  createSettingsPath,
+  createEditDescriptionHref,
+  createEditRoadmapHref,
+  createSettingsHref,
 } from './index'
 import type { QueryStatus } from 'react-query'
 import type { Role } from '@prisma/client'
@@ -21,12 +21,7 @@ import type { Project } from '@queries/useProject'
 export { Summary, LoadingSummary }
 
 // types
-
 type Team = Project['team']
-type ClientEmployees = Exclude<
-  Project['client'],
-  null
->['employees'][0]['user'][]
 
 type LoadingSummaryProps = {
   status: QueryStatus
@@ -58,7 +53,7 @@ function Summary({ projectId, userRole, project }: SummaryProps) {
     <>
       <SummaryWrapper>
         {userRole === 'ADMIN' ? (
-          <IconLink pathName={createSettingsPath(projectId)} replace={true}>
+          <IconLink href={createSettingsHref(projectId)} replace={true}>
             <GearIcon tw="h-6 w-6 fill-copper-300" />
             {!name || name === '' ? (
               <h1 tw="bl-text-4xl text-gray-yellow-300 inline capitalize">
@@ -86,7 +81,7 @@ function Summary({ projectId, userRole, project }: SummaryProps) {
         <div tw="space-y-2">
           {userRole === 'ADMIN' ? (
             <IconLink
-              pathName={createDescriptionPath(projectId)}
+              href={createEditDescriptionHref(projectId)}
               replace={true}
             >
               <EditIcon tw="h-6 w-6 fill-copper-300" />
@@ -101,7 +96,7 @@ function Summary({ projectId, userRole, project }: SummaryProps) {
         </div>
         <div tw="space-y-2">
           {userRole === 'ADMIN' ? (
-            <IconLink pathName={createRoadmapProject(projectId)} replace={true}>
+            <IconLink href={createEditRoadmapHref(projectId)} replace={true}>
               <EditIcon tw="h-6 w-6 fill-copper-300" />
               <h2 tw="bl-text-3xl inline">Project Roadmap</h2>
             </IconLink>

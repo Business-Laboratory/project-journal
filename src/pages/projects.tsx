@@ -3,12 +3,15 @@ import tw, { css, theme } from 'twin.macro'
 import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
+
 import { PlusIcon } from 'icons'
-import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
+import { useAuth } from '@components/auth-context'
 import { useProjects } from '@queries/useProjects'
+import { usePrefetchProject } from '@queries/useProject'
+import { usePrefetchUpdates } from '@queries/useUpdates'
 
 export default function Projects() {
   return (
@@ -66,7 +69,7 @@ function CardGrid() {
 
 function AddProjectLink() {
   return (
-    <IconLink pathName="#">
+    <IconLink href="#">
       <PlusIcon tw="w-6 h-6 fill-copper-300" />
       <span tw="bl-text-2xl">Add project</span>
     </IconLink>
@@ -80,7 +83,9 @@ type CardProps = {
   imageUrl: string | null
 }
 function Card({ id, name, description, imageUrl }: CardProps) {
-  // ring color is copper-400
+  const prefetchProject = usePrefetchProject(id)
+  const prefetchUpdates = usePrefetchUpdates(id)
+
   return (
     <Link href={`/project/${id}`} passHref>
       <a
@@ -96,17 +101,18 @@ function Card({ id, name, description, imageUrl }: CardProps) {
               );
             }
             &.focus-visible {
-              --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
-                var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-              --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
-                calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-              box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
-                var(--tw-shadow, 0 0 #0000);
-              --tw-ring-opacity: 1;
-              --tw-ring-color: rgba(171, 133, 94, var(--tw-ring-opacity));
+              ${tw`ring-2 ring-copper-400 `}
             }
           `,
         ]}
+        onFocus={() => {
+          prefetchProject()
+          prefetchUpdates()
+        }}
+        onMouseOver={() => {
+          prefetchProject()
+          prefetchUpdates()
+        }}
       >
         {imageUrl ? (
           <>

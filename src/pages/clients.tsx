@@ -2,6 +2,7 @@
 import 'twin.macro'
 import { Fragment } from 'react'
 import Head from 'next/head'
+
 import { PlusIcon, EditIcon } from 'icons'
 import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
@@ -39,7 +40,7 @@ function ClientList() {
       <AddClientLink />
       {clients.map(({ id, name, employees }) => (
         <div key={id} tw="space-y-4">
-          <IconLink pathName="#">
+          <IconLink href="#">
             <EditIcon tw="w-6 h-6 fill-copper-300" />
             <span tw="bl-text-3xl">{name}</span>
           </IconLink>
@@ -68,7 +69,7 @@ function ClientList() {
 
 function AddClientLink() {
   return (
-    <IconLink pathName="#">
+    <IconLink href="#">
       <PlusIcon tw="w-6 h-6 fill-copper-300" />
       <span tw="bl-text-2xl">Add client</span>
     </IconLink>

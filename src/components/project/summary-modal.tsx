@@ -1,12 +1,12 @@
 import 'twin.macro'
 import { useRouter } from 'next/router'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { MarkdownTextArea, Modal, SaveButton } from '@components/modal'
-import { useUpdateSummary } from '@queries/useUpdateSummary'
 import { Project } from '@queries/useProject'
+import { useUpdateSummary } from '@queries/useUpdateSummary'
 
-export { SummaryModal, createDescriptionPath, createRoadmapProject }
+export { SummaryModal, createEditDescriptionHref, createEditRoadmapHref }
 
 type SummaryModalProps = {
   projectId: number
@@ -63,7 +63,7 @@ function SummaryEditModalContent({
 
   return (
     <div tw="space-y-8 flex flex-col items-end">
-      <div tw="bl-text-3xl">
+      <div tw="bl-text-3xl self-start">
         {edit === 'description' ? 'Project Description' : 'Project Roadmap'}
       </div>
 
@@ -93,14 +93,14 @@ function SummaryEditModalContent({
   )
 }
 
-function createDescriptionPath(projectId: number) {
+function createEditDescriptionHref(projectId: number) {
   return {
     pathname: `/project/${projectId}`,
     query: { edit: 'description' },
   }
 }
 
-function createRoadmapProject(projectId: number) {
+function createEditRoadmapHref(projectId: number) {
   return {
     pathname: `/project/${projectId}`,
     query: { edit: 'roadmap' },
