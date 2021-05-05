@@ -130,11 +130,12 @@ function EditClientModalContent({
   client,
   onDismiss,
 }: EditClientModalContentProps) {
-  const [{ id, name, employees }, dispatch] = useReducer(
+  const [{ data, status }, dispatch] = useReducer(
     clientReducer,
     client,
     initClient
   )
+  const { id, name, employees } = data
   useRedirectNewClient(id)
   const clientMutation = useClientMutation()
   const deleteClientMutation = useDeleteClientMutation()
@@ -197,7 +198,9 @@ function EditClientModalContent({
         <Button
           tw="self-end mt-10"
           variant="important"
+          disabled={status === 'invalid' || clientMutation.status === 'loading'}
           onClick={() => {
+            if (status === 'invalid') return
             // all employees with strings are new, so we need to remove the id field
             const cleanedEmployees = employees.map(({ id, ...employee }) => {
               return typeof id === 'string' ? employee : { id, ...employee }
@@ -218,7 +221,7 @@ function EditClientModalContent({
         <DeleteSection
           tw="mt-16"
           label="Verify client name"
-          verificationText={name}
+          verificationText={name || 'Client name'}
           buttonText={
             deleteClientMutation.status === 'loading'
               ? 'deleting...'
@@ -282,64 +285,92 @@ type ActionType =
     }
   | { type: 'addEmployee' }
   | { type: 'deleteEmployee'; id: string | number }
-type ClientState = Omit<ClientBody, 'employees'> & {
+type ClientData = Omit<ClientBody, 'employees'> & {
   employees: Array<
     Omit<ClientBody['employees'][0], 'id'> & { id: number | string }
   >
 }
-const clientReducer = produce((state: ClientState, action: ActionType) => {
-  switch (action.type) {
-    case 'updateName': {
-      state.name = action.name
-      break
+type ClientStatus = 'invalid' | 'valid'
+const clientReducer = produce(
+  (client: ReturnType<typeof initClient>, action: ActionType) => {
+    const { data } = client
+    switch (action.type) {
+      case 'updateName': {
+        data.name = action.name
+        break
+      }
+      case 'editEmployee': {
+        const { id: employeeId, name, email, title } = action
+        const employee = data.employees.find(({ id }) => id === employeeId)
+        if (employee === undefined) {
+          throw new Error(`No employee found with id ${employeeId}`)
+        }
+        if (name !== undefined) {
+          employee.name = name
+        }
+        if (email !== undefined) {
+          employee.email = email
+        }
+        if (title !== undefined) {
+          employee.title = title ?? null // title is the only nullable field
+        }
+        break
+      }
+      case 'addEmployee': {
+        data.employees.push({ id: uuid(), name: '', email: '', title: null })
+        break
+      }
+      case 'deleteEmployee': {
+        const { id: employeeId } = action
+        const employeeIdx = data.employees.findIndex(
+          ({ id }) => id === employeeId
+        )
+        if (employeeIdx === -1) {
+          throw new Error(`No employee found with id ${employeeId}`)
+        }
+        data.employees.splice(employeeIdx, 1)
+        break
+      }
     }
-    case 'editEmployee': {
-      const { id: employeeId, name, email, title } = action
-      const employee = state.employees.find(({ id }) => id === employeeId)
-      if (employee === undefined) {
-        throw new Error(`No employee found with id ${employeeId}`)
-      }
-      if (name) {
-        employee.name = name
-      }
-      if (email) {
-        employee.email = email
-      }
-      if (title) {
-        employee.title = title ?? null // title is the only nullable field
-      }
-      break
-    }
-    case 'addEmployee': {
-      state.employees.push({ id: uuid(), name: '', email: '', title: null })
-      break
-    }
-    case 'deleteEmployee': {
-      const { id: employeeId } = action
-      const employeeIdx = state.employees.findIndex(
-        ({ id }) => id === employeeId
-      )
-      if (employeeIdx === -1) {
-        throw new Error(`No employee found with id ${employeeId}`)
-      }
-      state.employees.splice(employeeIdx, 1)
-      break
-    }
+
+    // always check the status after making changes
+    client.status = getClientStatus(data)
   }
-})
-function initClient(client?: ClientsData[0]): ClientState {
-  if (!client) {
-    return { id: 'new', name: '', employees: [] }
+)
+
+function initClient(client?: ClientsData[0]) {
+  const clientData: ClientData = !client
+    ? { id: 'new', name: '', employees: [] }
+    : {
+        id: client.id,
+        name: client.name,
+        employees: client.employees.map(({ id, user, title }) => ({
+          id,
+          name: user.name ?? '',
+          email: user.email ?? '',
+          title: title,
+        })),
+      }
+
+  return { status: getClientStatus(clientData), data: clientData }
+}
+
+/**
+ * Checks that the client has a name and all the employees have names and emails and that all emails are unique
+ * @param clientData
+ * @returns
+ */
+function getClientStatus(clientData: ClientData): ClientStatus {
+  if (!clientData.name) {
+    return 'invalid'
+  }
+  if (clientData.employees.some(({ name, email }) => !name || !email)) {
+    return 'invalid'
+  }
+  const emails = new Set(clientData.employees.map(({ email }) => email))
+  if (emails.size !== clientData.employees.length) {
+    return 'invalid'
   }
 
-  return {
-    id: client.id,
-    name: client.name,
-    employees: client.employees.map(({ id, user, title }) => ({
-      id,
-      name: user.name ?? '',
-      email: user.email ?? '',
-      title: title,
-    })),
-  }
+  return 'valid'
 }
