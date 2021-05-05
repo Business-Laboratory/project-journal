@@ -37,7 +37,6 @@ module.exports = {
         '"Segoe UI Symbol"',
         '"Noto Color Emoji"',
       ],
-      icon: ['"Anicons Regular"', 'sans-serif'],
     },
     screens: {
       sm: '640px',

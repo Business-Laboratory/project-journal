@@ -3,12 +3,15 @@ import tw, { css, theme } from 'twin.macro'
 import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
+
 import { PlusIcon } from 'icons'
-import { useAuth } from '@components/auth-context'
 import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
+import { useAuth } from '@components/auth-context'
 import { useProjects } from '@queries/useProjects'
+import { usePrefetchProject } from '@queries/useProject'
+import { usePrefetchUpdates } from '@queries/useUpdates'
 
 export default function Projects() {
   return (
@@ -80,6 +83,9 @@ type CardProps = {
   imageUrl: string | null
 }
 function Card({ id, name, description, imageUrl }: CardProps) {
+  const prefetchProject = usePrefetchProject(id)
+  const prefetchUpdates = usePrefetchUpdates(id)
+
   return (
     <Link href={`/project/${id}`} passHref>
       <a
@@ -99,6 +105,14 @@ function Card({ id, name, description, imageUrl }: CardProps) {
             }
           `,
         ]}
+        onFocus={() => {
+          prefetchProject()
+          prefetchUpdates()
+        }}
+        onMouseOver={() => {
+          prefetchProject()
+          prefetchUpdates()
+        }}
       >
         {imageUrl ? (
           <>

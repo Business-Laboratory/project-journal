@@ -1,6 +1,7 @@
 import { css } from 'twin.macro'
-import { memo } from 'react'
 import Header from 'next/head'
+import { QueryStatus } from 'react-query'
+import { memo } from 'react'
 import { useRouter } from 'next/router'
 
 import {
@@ -14,11 +15,10 @@ import {
 } from '@components/project'
 import { appBarHeight } from '@components/app-bar'
 import { useProject } from '@queries/useProject'
-
-import { QueryStatus } from 'react-query'
 import { useAuth } from '@components/auth-context'
 import { useUpdates } from '@queries/useUpdates'
-import { Role } from '.prisma/client'
+
+import type { Role } from '@prisma/client'
 
 export default function Project() {
   const { query } = useRouter()

@@ -1,9 +1,9 @@
-import tw, { css, theme } from 'twin.macro'
-import { useState } from 'react'
+import tw, { css } from 'twin.macro'
 import { DialogOverlay, DialogContent } from '@reach/dialog'
 import { Button } from '@components/button'
 import { TextInput } from '@components/text-input'
 import { CloseIcon } from 'icons'
+import { useState } from 'react'
 
 import type { DialogOverlayProps } from '@reach/dialog'
 import type { QueryStatus } from 'react-query'
@@ -21,7 +21,7 @@ function Modal({ children, onDismiss, ...props }: DialogOverlayProps) {
           onClick={onDismiss}
           aria-label="close modal"
         >
-          <CloseIcon tw="w-4 h-4 m-auto stroke-gray-yellow-400 group-hover:stroke-copper-300" />
+          <CloseIcon tw="w-4 h-4 m-auto fill-gray-yellow-400 group-hover:fill-copper-300" />
         </button>
         {children}
       </DialogContent>
