@@ -9,6 +9,9 @@ import { TextInput } from '@components/text-input'
 import { PlusSmallIcon, DeleteIcon } from 'icons'
 
 import { AdminsData } from '../pages/api/admins'
+
+import { isValidEmail } from '@utils/is-valid-email'
+
 import { useAdminsMutation } from '@queries/useAdminsMutation'
 
 export { AdminsModal, createEditAdminsPath }
@@ -52,8 +55,6 @@ function EditAdminsModalContent({
   )
 
   const adminsMutation = useAdminsMutation()
-
-  console.log(admins)
 
   return (
     <div tw="space-y-10 flex flex-col items-end">
@@ -119,7 +120,7 @@ function EditAdminsModalContent({
             onSuccess: onDismiss,
           })
         }}
-        disabled={adminsMutation.isLoading}
+        disabled={adminsMutation.isLoading || !isValidData(admins)}
         error={adminsMutation.isError}
       >
         {adminsMutation.isLoading ? 'Saving admins...' : 'Save admins'}
@@ -175,7 +176,6 @@ const admindsReducer = produce(
           id: action.id,
           name: '',
           email: '',
-          new: true,
         })
         break
       }
@@ -191,3 +191,24 @@ const admindsReducer = produce(
     }
   }
 )
+
+function isValidData(data: any): data is AdminsData {
+  if (!Array.isArray(data) || data.some((e: any) => !isValidAdmin(e))) {
+    return false
+  }
+  return true
+}
+function isValidAdmin(data: any): data is AdminsData[0] {
+  if (!('name' in data && typeof data.name === 'string' && data.name !== ''))
+    return false
+  if (
+    !(
+      'email' in data &&
+      typeof data.email === 'string' &&
+      data.email !== '' &&
+      isValidEmail(data.email)
+    )
+  )
+    return false
+  return true
+}
