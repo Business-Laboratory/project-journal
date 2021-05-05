@@ -4,6 +4,8 @@ import React, { Fragment, useReducer } from 'react'
 import produce from 'immer'
 
 import { Modal, SaveButton } from '@components/modal'
+import { IconButton } from '@components/icon-button'
+import { TextInput } from '@components/text-input'
 import { PlusSmallIcon, DeleteIcon } from 'icons'
 
 import { AdminsData } from '../pages/api/admins'
@@ -48,23 +50,14 @@ function EditAdminsModalContent({
   return (
     <div tw="space-y-10 flex flex-col items-end">
       <div tw="space-y-2">
-        <button
-          css={[
-            tw`inline-flex space-x-2 items-center hover:text-copper-300
-            focus:outline-none`,
-            css`
-              &.focus-visible {
-                ${tw`ring-2 ring-copper-400`}
-              }
-            `,
-          ]}
+        <IconButton
           onClick={() =>
             adminsDispatch({ type: 'add', id: new Date().valueOf() })
           }
         >
           <PlusSmallIcon tw="w-4 h-4 fill-copper-300" />
           <span tw="bl-text-xl">Add admin</span>
-        </button>
+        </IconButton>
         <div
           css={[
             css`
@@ -77,21 +70,21 @@ function EditAdminsModalContent({
           <span tw="col-start-2 col-end-4 pl-8 self-center">Email</span>
           {admins.map(({ id, name, email }) => (
             <Fragment key={id}>
-              <AdminInfoInput
-                value={name}
+              <TextInput
+                tw="flex flex-col w-full self-center"
+                placeholder="Name"
+                value={name === null ? '' : name}
                 onChange={(name) =>
                   adminsDispatch({ type: 'edit', id: id, name: name })
                 }
-                placeHolder="Name"
-                tw="self-center"
               />
-              <AdminInfoInput
-                value={email}
+              <TextInput
+                tw="flex flex-col w-full pl-8 self-center"
+                placeholder="Email"
+                value={email === null ? '' : email}
                 onChange={(email) =>
                   adminsDispatch({ type: 'edit', id: id, email: email })
                 }
-                placeHolder="Email"
-                tw="pl-8 self-center"
               />
               <button
                 className="group"
@@ -115,34 +108,6 @@ function EditAdminsModalContent({
         Save admins
       </SaveButton>
     </div>
-  )
-}
-
-type AdminInfoInput = {
-  value: string | null
-  onChange: (value: string) => void
-  placeHolder: string
-  className?: string
-}
-function AdminInfoInput({
-  value,
-  onChange,
-  placeHolder,
-  className,
-}: AdminInfoInput) {
-  return (
-    <label className={className} tw="flex flex-col w-full">
-      <input
-        css={[
-          tw`bl-text-base placeholder-gray-yellow-400`,
-          tw`focus:outline-none border-b border-gray-yellow-600`,
-        ]}
-        value={value === null ? '' : value}
-        type="text"
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeHolder}
-      />
-    </label>
   )
 }
 
