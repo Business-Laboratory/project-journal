@@ -2,10 +2,14 @@ import tw from 'twin.macro'
 import { useRouter } from 'next/router'
 import React, { useReducer, useState } from 'react'
 
-import { Modal, SaveButton } from '@components/modal'
+import { DeleteSection, Modal, SaveButton } from '@components/modal'
 import { useUpdateSummary } from '@queries/useUpdateSummary'
 import { Project } from '@queries/useProject'
 import { User } from '@queries/useUser'
+import { useClients } from '@queries/useClients'
+import { useAdmins } from '@queries/useAdmins'
+import { Button } from '@components/button'
+import { CameraIcon } from 'icons'
 
 export { SettingsModal, createSettingsPath }
 
@@ -53,14 +57,19 @@ function SettingsEditModalContent({
     settingsReducer,
     initialState(project)
   )
+  const { data: clientData, status: clientStatus } = useClients()
+  const { data: adminData, status: adminStatus } = useAdmins()
   // const summaryMutation = useUpdateSummary(projectId)
+
+  const clients = clientData ?? []
+  const admins = adminData ?? []
 
   // const disabled = !body || summaryMutation.status === 'loading'
 
   return (
     <div tw="space-y-8 flex flex-col items-end">
       <label tw="flex flex-col w-full">
-        <span tw="bl-text-xs text-gray-yellow-300">Update title</span>
+        <span tw="bl-text-xs text-gray-yellow-300">Project name</span>
         <input
           css={[
             tw`w-full bl-text-3xl placeholder-gray-yellow-400`,
@@ -71,9 +80,75 @@ function SettingsEditModalContent({
           onChange={(e) =>
             dispatch({ type: 'SET_NAME', payload: e.target.value })
           }
-          placeholder="Update #"
+          placeholder="Untitled project"
         />
       </label>
+      <label tw="flex flex-col w-full" htmlFor="client">
+        <span tw="bl-text-xs text-gray-yellow-300">Client</span>
+        <select
+          id="client"
+          name="client"
+          css={[
+            tw`w-full bl-text-3xl placeholder-gray-yellow-400`,
+            tw`focus:outline-none border-b border-gray-yellow-600`,
+          ]}
+          placeholder="Client"
+        >
+          <option value="default"></option>
+          {clients.map(({ id, name }) => (
+            <option value={id} key={id}>
+              {name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <Button tw="space-x-4 align-middle max-w-max self-start">
+        <CameraIcon tw="inline fill-gray-yellow-600" />
+        <span tw="bl-text-lg">Upload project image</span>
+      </Button>
+      <label tw="flex flex-col w-full" htmlFor="client">
+        <span tw="bl-text-xs text-gray-yellow-300">Project Team</span>
+        <select
+          id="client"
+          name="client"
+          css={[
+            tw`w-full bl-text-3xl placeholder-gray-yellow-400`,
+            tw`focus:outline-none border-b border-gray-yellow-600`,
+          ]}
+          placeholder="Project team"
+        >
+          <option value="default"></option>
+          {admins.map(({ id, name }) => (
+            <option value={id} key={id}>
+              {name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <SaveButton
+        // onClick={() => {
+        //   if (disabled) return
+        //   summaryMutation.mutate(
+        //     edit === 'description'
+        //       ? { id, description: body }
+        //       : { id, roadmap: body },
+        //     { onSuccess: onDismiss }
+        //   )
+        // }}
+        // disabled={disabled}
+        error={false}
+      >
+        {/* {summaryMutation.status === 'loading'
+          ? `Saving ${edit}...`
+          : `Save ${edit}`} */}
+        Save Settings
+      </SaveButton>
+      <DeleteSection
+        tw="mt-16 w-full"
+        verificationText={name}
+        onDelete={() => ({})}
+        status={'idle'}
+      />
     </div>
   )
 }

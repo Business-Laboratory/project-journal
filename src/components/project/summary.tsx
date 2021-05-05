@@ -124,7 +124,6 @@ function Summary({ projectId, userRole, project }: SummaryProps) {
           </div>
         </div>
       </SummaryWrapper>
-
       {userRole === 'ADMIN' ? (
         <>
           <SummaryModal projectId={projectId} summary={summary} />
