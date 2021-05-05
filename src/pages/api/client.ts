@@ -58,6 +58,7 @@ export default async function handler(
         res.status(400).json({ error: `Invalid client id ${id}` })
         return
       }
+      // TODO: delete all of the employees. We won't delete the users though, as they may be used elsewhere
       await prisma.client.delete({ where: { id } })
       res.status(200).end()
     } else {
@@ -65,45 +66,93 @@ export default async function handler(
       return
     }
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error })
   }
 }
 
-async function updateClient({ id, name }: UpdateClientBody) {
+async function updateClient({ id, name, employees }: UpdateClientBody) {
+  // update/create users in the database based on the employees that are coming in
+  const users = await updateAndCreateUsers(employees)
+  const emailToUserId = new Map(users.map(({ email, id }) => [email, id]))
   if (id === 'new') {
-    const update = await prisma.client.create({
+    const createEmployees = employees.map(({ title, email }) => {
+      const userId = emailToUserId.get(email)
+      if (userId === undefined) {
+        throw new Error(`No user id found for email ${email}`)
+      }
+      return { title, userId }
+    })
+    const client = await prisma.client.create({
       data: {
         name,
-        // projects           Project[]
-        // employees          Employee[]
+        employees: {
+          create: createEmployees,
+        },
       },
     })
-    return update
+    return client
   }
-  // const update = await prisma.update.update({
-  //   where: {
-  //     id,
-  //   },
-  //   data,
-  // })
 
-  // return update
+  // TODO remove employees that no longer exist
+  // TODO change users role to null if they are no longer a part of a project
+  const client = await prisma.client.update({
+    where: {
+      id,
+    },
+    data: {
+      name,
+      employees: {
+        connectOrCreate: employees.map(({ id, title, email }) => {
+          const userId = emailToUserId.get(email)
+          if (userId === undefined) {
+            throw new Error(`No user id found for email ${email}`)
+          }
+          return {
+            where: { id },
+            create: { title, userId },
+          }
+        }),
+      },
+    },
+  })
+
+  return client
 }
+
+async function updateAndCreateUsers(employees: UpdateClientBody['employees']) {
+  const users = employees.map(({ email, name }) => {
+    return prisma.user.upsert({
+      where: { email },
+      update: { name, updatedAt: new Date() },
+      create: { name, email, role: 'USER' },
+    })
+  })
+  return await Promise.all(users)
+}
+
+// Employees flow
+// 1. Check for emails that don't associate with users
+//  1.1 Create new users with name and email
+//  1.2 Update existing users names
+// 2. Split employees into create, update, and delete
+//  2.1 Create new employees, associating them with the project and correct user
+//  2.2 Update existing employees titles, and associating them with the correct user
+//  2.2 Delete users
+
 function isValidData(data: any): data is UpdateClientBody {
-  if (data.id !== 'new' && typeof data.id !== 'number') {
+  if (!(data.id === 'new' || typeof data.id === 'number')) {
+    return false
+  }
+  if (!('name' in data && typeof data.name === 'string' && data.name !== '')) {
     return false
   }
   if (
-    !('name' in data) &&
-    typeof data.name !== 'string' &&
-    Boolean(data.name)
-  ) {
-    return false
-  }
-  if (
-    !('employees' in data) &&
-    !Array.isArray(data.employees) &&
-    data.employees.some((e: any) => !isValidEmployee(e))
+    !(
+      'employees' in data &&
+      Array.isArray(data.employees) &&
+      data.employees.every((e: any) => isValidEmployee(e))
+    )
   ) {
     return false
   }
@@ -112,12 +161,22 @@ function isValidData(data: any): data is UpdateClientBody {
 }
 
 function isValidEmployee(data: any): data is UpdateClientBody['employees'] {
-  if (!('id' in data) && typeof data.id !== 'number') return false
-  if (!('name' in data) && typeof data.name !== 'number') return false
-  if (!('email' in data) && typeof data.email !== 'string') return false
+  if (!('id' in data && typeof data.id === 'number')) {
+    return false
+  }
+  if (!('name' in data && typeof data.name === 'string' && data.name !== '')) {
+    return false
+  }
   if (
-    !('title' in data) &&
-    (typeof data.title !== 'string' || data.title !== null)
+    !('email' in data && typeof data.email === 'string' && data.email !== '')
+  ) {
+    return false
+  }
+  if (
+    !(
+      'title' in data &&
+      (typeof data.title === 'string' || data.title === null)
+    )
   ) {
     return false
   }

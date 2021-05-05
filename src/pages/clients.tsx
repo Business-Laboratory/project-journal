@@ -340,7 +340,12 @@ const clientReducer = produce(
 
 function initClient(client?: ClientsData[0]) {
   const clientData: ClientData = !client
-    ? { id: 'new', name: '', employees: [] }
+    ? {
+        id: 'new',
+        name: '',
+        // add one employee by default
+        employees: [{ id: uuid(), name: '', email: '', title: null }],
+      }
     : {
         id: client.id,
         name: client.name,
