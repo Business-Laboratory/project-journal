@@ -1,4 +1,4 @@
-import tw from 'twin.macro'
+import tw, { css, theme } from 'twin.macro'
 import { useRouter } from 'next/router'
 import React, { useReducer } from 'react'
 
@@ -8,7 +8,16 @@ import { User } from '@queries/useUser'
 import { useClients } from '@queries/useClients'
 import { useAdmins } from '@queries/useAdmins'
 import { Button } from '@components/button'
-import { CameraIcon } from 'icons'
+import { CameraIcon, ExpandIcon } from 'icons'
+import { ClientsData } from 'pages/api/clients'
+import {
+  ListboxButton,
+  ListboxInput,
+  ListboxList,
+  ListboxOption,
+  ListboxPopover,
+} from '@reach/listbox'
+import '@reach/listbox/styles.css'
 
 export { SettingsModal, createSettingsHref }
 
@@ -60,7 +69,6 @@ function SettingsEditModalContent({
   const { data: adminData, status: adminStatus } = useAdmins()
   // const summaryMutation = useUpdateSummary(projectId)
 
-  const clients = clientData ?? []
   const admins = adminData ?? []
 
   const disabled = !clientId || !!team || clientStatus || adminStatus
@@ -82,24 +90,18 @@ function SettingsEditModalContent({
           placeholder="Untitled project"
         />
       </label>
-      <label tw="flex flex-col w-full" htmlFor="client">
-        <span tw="bl-text-xs text-gray-yellow-300">Client</span>
-        <select
-          id="client"
-          name="client"
-          css={[
-            tw`w-full bl-text-3xl placeholder-gray-yellow-400`,
-            tw`focus:outline-none border-b border-gray-yellow-600`,
-          ]}
-          placeholder="Client"
-        >
-          <option value="default"></option>
-          {clients.map(({ id, name }) => (
-            <option value={id} key={id}>
-              {name}
-            </option>
-          ))}
-        </select>
+      <label tw="flex flex-col w-full" htmlFor="client-select">
+        <span id="client-select" tw="bl-text-xs text-gray-yellow-300">
+          Client
+        </span>
+        <ClientSelect
+          label={'client-select'}
+          clients={clientData}
+          client={clientId}
+          onChange={(value) =>
+            dispatch({ type: 'SET_CLIENT', payload: Number(value) })
+          }
+        />
       </label>
       <Button tw="space-x-4 align-middle max-w-max self-start">
         <CameraIcon tw="inline fill-gray-yellow-600" />
@@ -184,6 +186,10 @@ function settingsReducer(
       >
     }
     case 'SET_CLIENT': {
+      console.log('hello')
+      if (!action.payload || action.payload < 0) {
+        return { ...state, clientId: null } as ReturnType<typeof initialState>
+      }
       return { ...state, clientId: action.payload } as ReturnType<
         typeof initialState
       >
@@ -194,6 +200,62 @@ function settingsReducer(
       >
     }
   }
+}
+
+type ClientSelectProps = {
+  label: string
+  clients: ClientsData
+  client: number | null
+  onChange: (newValue: string) => void
+}
+function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
+  return (
+    <ListboxInput
+      css={[
+        tw`w-full`,
+        tw`border-b border-gray-yellow-600`,
+        tw`hover:border-copper-300 focus:border-copper-400 focus:outline-none`,
+        css`
+          [data-reach-listbox-input] {
+            border-color: ${theme('colors[copper].400')} !important;
+          }
+        `,
+      ]}
+      aria-labelledby={label}
+      value={client?.toString() ?? '-1'}
+      onChange={(value) => onChange(value)}
+    >
+      <ListboxButton
+        css={[tw`p-0 bl-text-3xl flex justify-between items-center`]}
+        tw="flex justify-between items-center bl-text-3xl border-none"
+        arrow={<ExpandIcon tw="fill-gray-yellow-400 w-6 h-6" />}
+      />
+      <ListboxPopover
+        css={[
+          tw`z-50 bg-gray-yellow-100 mt-6`,
+          tw`border rounded border-copper-400`,
+        ]}
+      >
+        <ListboxList tw="bl-text-xs my-2">
+          <ListboxOption
+            css={[tw`text-gray-yellow-400 py-2 px-4`, tw`hover:bg-copper-100`]}
+            value={'-1'}
+          >
+            Select client
+          </ListboxOption>
+          {clients?.map(({ id, name }) => (
+            <ListboxOption
+              css={[tw`py-2 px-4`, tw`hover:bg-copper-100`]}
+              key={id}
+              value={id.toString()}
+            >
+              {name}
+            </ListboxOption>
+          ))}
+        </ListboxList>
+      </ListboxPopover>
+    </ListboxInput>
+  )
 }
 
 function createSettingsHref(projectId: number) {
