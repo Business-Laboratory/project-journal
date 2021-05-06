@@ -6,6 +6,8 @@ import { signIn } from 'next-auth/client'
 import { Button } from '@components/button'
 import { TextInput } from '@components/text-input'
 
+import { isValidEmail } from '@utils/is-valid-email'
+
 const callbackUrl = `/`
 function Login() {
   return (
@@ -57,7 +59,7 @@ function EmailLogin() {
         value={email}
         onChange={(value) => {
           setEmail(value)
-          setLoginState(validateEmail(value) ? 'enabled' : 'disabled')
+          setLoginState(isValidEmail(value) ? 'enabled' : 'disabled')
         }}
       />
       <p tw="bl-text-sm max-w-max">
@@ -91,10 +93,4 @@ function EmailLogin() {
       ) : null}
     </form>
   )
-}
-
-// taken from https://stackoverflow.com/questions/46155/how-to-validate-an-email-address-in-javascript
-function validateEmail(email: string) {
-  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-  return re.test(String(email).toLowerCase())
 }
