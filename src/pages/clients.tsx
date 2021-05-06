@@ -1,7 +1,7 @@
 // Alternate Admin Home view that displays clients
 import tw, { css } from 'twin.macro'
-import { Fragment, useEffect, useReducer } from 'react'
 import Head from 'next/head'
+import { Fragment, useEffect, useReducer } from 'react'
 import { useRouter } from 'next/router'
 import produce from 'immer'
 
@@ -9,13 +9,13 @@ import { PlusIcon, EditIcon, DeleteIcon } from 'icons'
 import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
-import { DeleteSection, Modal } from '@components/modal'
+import { DeleteSection, Modal, SaveButton } from '@components/modal'
 import { TextInput } from '@components/text-input'
 import { IconButton } from '@components/icon-button'
-import { Button } from '@components/button'
 import { useClients } from '@queries/useClients'
 import { useClientMutation } from '@queries/useClientMutation'
 import { useDeleteClientMutation } from '@queries/useDeleteClientMutation'
+import { isValidEmail } from '@utils/is-valid-email'
 
 import type { Clients as ClientsData } from '@queries/useClients'
 import type { ClientBody } from '@queries/useClientMutation'
@@ -210,7 +210,7 @@ function EditClientModalContent({
             )
           })}
         </div>
-        <Button
+        <SaveButton
           tw="self-end mt-10"
           variant="important"
           disabled={status === 'invalid' || clientMutation.status === 'loading'}
@@ -222,11 +222,12 @@ function EditClientModalContent({
               { onSuccess: onDismiss }
             )
           }}
+          error={clientMutation.status === 'error'}
         >
           {clientMutation.status === 'loading'
             ? 'saving client'
             : 'save client'}
-        </Button>
+        </SaveButton>
       </section>
 
       {id !== 'new' ? (
@@ -368,7 +369,11 @@ function getClientStatus(clientData: ClientBody): ClientStatus {
   if (!clientData.name) {
     return 'invalid'
   }
-  if (clientData.employees.some(({ name, email }) => !name || !email)) {
+  if (
+    clientData.employees.some(
+      ({ name, email }) => !name || !email || !isValidEmail(email)
+    )
+  ) {
     return 'invalid'
   }
   const emails = new Set(clientData.employees.map(({ email }) => email))

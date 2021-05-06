@@ -3,6 +3,7 @@ import { checkAuthentication } from '@utils/api/check-authentication'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
 import type { PrepareAPIData } from '@types'
+import { isValidEmail } from '@utils/is-valid-email'
 
 export type UpdateClientBody = {
   id: 'new' | number
@@ -256,7 +257,12 @@ function isValidEmployee(data: any): data is UpdateClientBody['employees'] {
     return false
   }
   if (
-    !('email' in data && typeof data.email === 'string' && data.email !== '')
+    !(
+      'email' in data &&
+      typeof data.email === 'string' &&
+      data.email !== '' &&
+      isValidEmail(data.email)
+    )
   ) {
     return false
   }
