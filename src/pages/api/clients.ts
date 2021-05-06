@@ -35,6 +35,7 @@ async function getClients(user: UserData) {
   if (user.role !== 'ADMIN') return
 
   const clients = await prisma.client.findMany({
+    orderBy: { createdAt: 'desc' },
     select: {
       id: true,
       name: true,

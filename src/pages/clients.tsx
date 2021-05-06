@@ -1,5 +1,5 @@
 // Alternate Admin Home view that displays clients
-import 'twin.macro'
+import tw, { css } from 'twin.macro'
 import React, { Fragment, useEffect, useReducer } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
@@ -189,6 +189,12 @@ function EditClientModalContent({
                       dispatch({ type: 'editEmployee', userId, title })
                     }
                   />
+                  <button
+                    tw="w-12 h-12"
+                    onClick={() => dispatch({ type: 'deleteEmployee', userId })}
+                  >
+                    Delete
+                  </button>
                 </TableRow>
               )
             })}
@@ -234,7 +240,17 @@ function EditClientModalContent({
 }
 
 function TableRow(props: React.ComponentPropsWithoutRef<'tr'>) {
-  return <tr tw="grid grid-cols-3 gap-x-3 justify-start" {...props} />
+  return (
+    <tr
+      css={[
+        tw`grid gap-x-3 justify-start`,
+        css`
+          grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+        `,
+      ]}
+      {...props}
+    />
+  )
 }
 function HeaderCell(props: React.ComponentPropsWithoutRef<'th'>) {
   return <th tw="bl-text-lg text-left" {...props} />
