@@ -39,9 +39,7 @@ async function getClients(user: UserData) {
       id: true,
       name: true,
       employees: {
-        select: {
-          id: true,
-          title: true,
+        include: {
           user: {
             select: {
               name: true,

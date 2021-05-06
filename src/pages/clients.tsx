@@ -48,8 +48,8 @@ function ClientList() {
             <span tw="col-span-1">Name</span>
             <span tw="col-span-1">Email</span>
             <span tw="col-span-1">Role</span>
-            {employees.map(({ id: eId, title, user }) => (
-              <Fragment key={eId}>
+            {employees.map(({ userId, clientId, title, user }) => (
+              <Fragment key={`${userId}-${clientId}`}>
                 <span tw="bl-text-base col-span-1">{user.name}</span>
                 <span tw="bl-text-base col-span-1">{user.email}</span>
                 <span tw="bl-text-base col-span-1">{title}</span>

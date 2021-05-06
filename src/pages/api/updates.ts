@@ -52,9 +52,6 @@ async function getUpdates(user: UserData, projectId: number) {
               where: {
                 userId,
               },
-              select: {
-                id: true,
-              },
             },
           },
         },
