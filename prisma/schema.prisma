@@ -103,13 +103,16 @@ model Project {
 }
 
 model Employee {
-  id       Int     @id @default(autoincrement())
   client   Client  @relation(fields: [clientId], references: [id])
   clientId Int     @map(name: "client_id")
   user     User    @relation(fields: [userId], references: [id])
-  userId   Int     @unique @map(name: "user_id")
+  userId   Int     @map(name: "user_id")
   title    String?
 
+  // the same user cannot be an employee of a client more than once
+  // however, multiple employees may belong to the same client, and the
+  // same user may (unlikely) be employeed by multiple clients
+  @@id([clientId, userId])
   @@map(name: "employees")
 }
 
