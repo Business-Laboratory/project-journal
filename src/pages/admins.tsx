@@ -5,11 +5,10 @@ import { Fragment } from 'react'
 import { IconLink } from '@components/icon-link'
 import { EditIcon } from 'icons'
 import { AdminsData } from './api/admins'
-import { QueryFunction, useQuery } from 'react-query'
-import { useWaitTimer } from '@utils/use-wait-timer'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
 import { AdminsModal, createEditAdminsPath } from '@components/admins-modal'
+import { useAdmins } from '@queries/useAdmins'
 
 export default function DefaultComponent() {
   return (
@@ -17,7 +16,7 @@ export default function DefaultComponent() {
       <Head>
         <title>Admins | Project Journal</title>
       </Head>
-      <main tw="pt-10 max-w-max mx-auto space-y-8">
+      <main tw="pt-10 px-16 max-w-max mx-auto space-y-8">
         <AdminsContent />
       </main>
     </>
@@ -25,15 +24,13 @@ export default function DefaultComponent() {
 }
 
 function AdminsContent() {
-  const { data, status } = useQuery('admins', fetchAdmins)
-
-  const wait = useWaitTimer()
+  const { data, status } = useAdmins()
 
   if (status === 'error') {
     return <DataErrorMessage errorMessage="Unable to load admins" />
   }
 
-  if (wait === 'finished' && status === 'loading') {
+  if (status === 'loading') {
     return <LoadingSpinner loadingMessage="Loading admins" />
   }
 
@@ -81,12 +78,4 @@ function ContentTitle({ currentAdmins }: ContentTitleProps) {
       <AdminsModal currentAdmins={currentAdmins} />
     </>
   )
-}
-
-const fetchAdmins: QueryFunction<AdminsData> = async () => {
-  const res = await fetch(`/api/admins`)
-  if (!res.ok) {
-    throw new Error(`Something went wrong fetching admins`)
-  }
-  return res.json()
 }

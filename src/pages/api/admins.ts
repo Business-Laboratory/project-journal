@@ -50,6 +50,7 @@ export default async function handler(
 async function getAdmins(user: UserData) {
   const admins = await prisma.user.findMany({
     where: { role: 'ADMIN' },
+    orderBy: { createdAt: 'asc' },
   })
   return admins
 }

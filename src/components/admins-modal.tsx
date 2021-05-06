@@ -1,4 +1,4 @@
-import tw, { css } from 'twin.macro'
+import tw, { css, theme } from 'twin.macro'
 import { useRouter } from 'next/router'
 import React, { Fragment, useReducer } from 'react'
 import produce from 'immer'
@@ -70,7 +70,10 @@ function EditAdminsModalContent({
         <div
           css={[
             css`
-              grid-template-columns: 10rem 24rem 3rem;
+              grid-template-columns:
+                minmax(${theme('width.40')}, auto)
+                minmax(${theme('width.64')}, auto)
+                ${theme('width.12')};
             `,
             tw`grid bl-text-lg`,
           ]}
@@ -80,7 +83,7 @@ function EditAdminsModalContent({
           {admins.map(({ id, name, email }) => (
             <Fragment key={id}>
               <TextInput
-                tw="flex flex-col w-full self-center"
+                tw="flex flex-col self-center"
                 placeholder="Name"
                 value={name === null ? '' : name}
                 onChange={(name) =>
@@ -88,7 +91,7 @@ function EditAdminsModalContent({
                 }
               />
               <TextInput
-                tw="flex flex-col w-full pl-8 self-center"
+                tw="flex flex-col pl-8 self-center"
                 placeholder="Email"
                 value={email === null ? '' : email}
                 onChange={(email) =>

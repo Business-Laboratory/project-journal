@@ -155,7 +155,6 @@ const CustomMenuLink = forwardRef<HTMLAnchorElement, CustomMenuLinkProps>(
 
 const menuItemTw = tw`flex w-full px-3 py-1 text-xs uppercase cursor-pointer text-gray-yellow-200 hover:bg-gray-yellow-200 hover:text-gray-yellow-600 focus:bg-gray-yellow-200 focus:text-gray-yellow-600`
 
-//Ring color is copper-100
 const appbarElementRingCss = css`
   &.focus-visible {
     ${tw`ring-2 ring-copper-100`}

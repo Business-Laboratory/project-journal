@@ -1,6 +1,6 @@
 import { useQueryClient, useMutation } from 'react-query'
 
-import { UpdateAdminsBody } from 'pages/api/admins'
+import { UpdateAdminsBody, AdminsData } from 'pages/api/admins'
 
 export { useAdminsMutation }
 
@@ -8,7 +8,10 @@ function useAdminsMutation() {
   const queryClient = useQueryClient()
   const adminsKey = 'admins'
   return useMutation(updateAdmins, {
-    onSuccess: async () => {},
+    onSuccess: async (admins) => {
+      queryClient.cancelQueries(adminsKey)
+      queryClient.setQueryData<AdminsData>(adminsKey, admins)
+    },
     onSettled: () => {
       queryClient.invalidateQueries(adminsKey)
     },
@@ -25,5 +28,5 @@ async function updateAdmins(data: UpdateAdminsBody) {
   if (!res.ok) {
     throw new Error(response.error)
   }
-  //return response as Update
+  return response as AdminsData
 }
