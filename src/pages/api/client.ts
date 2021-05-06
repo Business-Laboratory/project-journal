@@ -8,7 +8,7 @@ export type UpdateClientBody = {
   id: 'new' | number
   name: string
   employees: {
-    id?: number // if there is no id, it's a new employee, and thus needs to be created
+    userId: number
     name: string
     email: string
     title: string | null
@@ -103,13 +103,13 @@ async function updateClient({ id, name, employees }: UpdateClientBody) {
     data: {
       name,
       employees: {
-        connectOrCreate: employees.map(({ id, title, email }) => {
+        connectOrCreate: employees.map(({ title, email }) => {
           const userId = emailToUserId.get(email)
           if (userId === undefined) {
             throw new Error(`No user id found for email ${email}`)
           }
           return {
-            where: { id },
+            where: { clientId_userId: { clientId: id, userId } },
             create: { title, userId },
           }
         }),
@@ -161,9 +161,6 @@ function isValidData(data: any): data is UpdateClientBody {
 }
 
 function isValidEmployee(data: any): data is UpdateClientBody['employees'] {
-  if (!('id' in data && typeof data.id === 'number')) {
-    return false
-  }
   if (!('name' in data && typeof data.name === 'string' && data.name !== '')) {
     return false
   }

@@ -4,7 +4,6 @@ import React, { Fragment, useEffect, useReducer } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import produce from 'immer'
-import { v4 as uuid } from 'uuid'
 
 import { PlusIcon, EditIcon } from 'icons'
 import { IconLink } from '@components/icon-link'
@@ -165,14 +164,14 @@ function EditClientModalContent({
             </TableRow>
           </thead>
           <tbody tw="block mt-2 space-y-2">
-            {employees.map(({ id, name, email, title }, idx) => {
+            {employees.map(({ userId, name, email, title }, idx) => {
               return (
-                <TableRow key={id}>
+                <TableRow key={userId}>
                   <InputCell
                     aria-label={`employee ${idx} name`}
                     value={name}
                     onChange={(name) =>
-                      dispatch({ type: 'editEmployee', id, name })
+                      dispatch({ type: 'editEmployee', userId, name })
                     }
                   />
                   <InputCell
@@ -180,14 +179,14 @@ function EditClientModalContent({
                     type="email"
                     value={email}
                     onChange={(email) =>
-                      dispatch({ type: 'editEmployee', id, email })
+                      dispatch({ type: 'editEmployee', userId, email })
                     }
                   />
                   <InputCell
                     aria-label={`employee ${idx} role`}
                     value={title ?? ''}
                     onChange={(title) =>
-                      dispatch({ type: 'editEmployee', id, title })
+                      dispatch({ type: 'editEmployee', userId, title })
                     }
                   />
                 </TableRow>
@@ -202,11 +201,8 @@ function EditClientModalContent({
           onClick={() => {
             if (status === 'invalid') return
             // all employees with strings are new, so we need to remove the id field
-            const cleanedEmployees = employees.map(({ id, ...employee }) => {
-              return typeof id === 'string' ? employee : { id, ...employee }
-            })
             clientMutation.mutate(
-              { id, name, employees: cleanedEmployees },
+              { id, name, employees },
               { onSuccess: onDismiss }
             )
           }}
@@ -278,18 +274,13 @@ type ActionType =
   | { type: 'updateName'; name: string }
   | {
       type: 'editEmployee'
-      id: number | string
+      userId: number
       name?: string
       email?: string
       title?: string
     }
   | { type: 'addEmployee' }
-  | { type: 'deleteEmployee'; id: string | number }
-type ClientData = Omit<ClientBody, 'employees'> & {
-  employees: Array<
-    Omit<ClientBody['employees'][0], 'id'> & { id: number | string }
-  >
-}
+  | { type: 'deleteEmployee'; userId: number }
 type ClientStatus = 'invalid' | 'valid'
 const clientReducer = produce(
   (client: ReturnType<typeof initClient>, action: ActionType) => {
@@ -300,10 +291,10 @@ const clientReducer = produce(
         break
       }
       case 'editEmployee': {
-        const { id: employeeId, name, email, title } = action
-        const employee = data.employees.find(({ id }) => id === employeeId)
+        const { userId, name, email, title } = action
+        const employee = data.employees.find((e) => e.userId === userId)
         if (employee === undefined) {
-          throw new Error(`No employee found with id ${employeeId}`)
+          throw new Error(`No employee found with userId ${userId}`)
         }
         if (name !== undefined) {
           employee.name = name
@@ -317,16 +308,19 @@ const clientReducer = produce(
         break
       }
       case 'addEmployee': {
-        data.employees.push({ id: uuid(), name: '', email: '', title: null })
+        data.employees.push({
+          userId: Date.now(),
+          name: '',
+          email: '',
+          title: null,
+        })
         break
       }
       case 'deleteEmployee': {
-        const { id: employeeId } = action
-        const employeeIdx = data.employees.findIndex(
-          ({ id }) => id === employeeId
-        )
+        const { userId } = action
+        const employeeIdx = data.employees.findIndex((e) => e.userId === userId)
         if (employeeIdx === -1) {
-          throw new Error(`No employee found with id ${employeeId}`)
+          throw new Error(`No employee found with userId ${userId}`)
         }
         data.employees.splice(employeeIdx, 1)
         break
@@ -339,18 +333,18 @@ const clientReducer = produce(
 )
 
 function initClient(client?: ClientsData[0]) {
-  const clientData: ClientData = !client
+  const clientData: ClientBody = !client
     ? {
         id: 'new',
         name: '',
         // add one employee by default
-        employees: [{ id: uuid(), name: '', email: '', title: null }],
+        employees: [{ userId: Date.now(), name: '', email: '', title: null }],
       }
     : {
         id: client.id,
         name: client.name,
-        employees: client.employees.map(({ id, user, title }) => ({
-          id,
+        employees: client.employees.map(({ userId, user, title }) => ({
+          userId,
           name: user.name ?? '',
           email: user.email ?? '',
           title: title,
@@ -365,7 +359,7 @@ function initClient(client?: ClientsData[0]) {
  * @param clientData
  * @returns
  */
-function getClientStatus(clientData: ClientData): ClientStatus {
+function getClientStatus(clientData: ClientBody): ClientStatus {
   if (!clientData.name) {
     return 'invalid'
   }
