@@ -5,7 +5,7 @@ import { Fragment, useEffect, useReducer } from 'react'
 import { useRouter } from 'next/router'
 import produce from 'immer'
 
-import { PlusIcon, EditIcon, DeleteIcon } from 'icons'
+import { PlusSmallIcon, EditIcon, DeleteIcon } from 'icons'
 import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
@@ -83,7 +83,7 @@ function ClientList() {
 function AddClientLink() {
   return (
     <IconLink href={createEditClientHref('new')}>
-      <PlusIcon tw="w-6 h-6 fill-copper-300" />
+      <PlusSmallIcon tw="w-6 h-6 fill-copper-300" />
       <span tw="bl-text-2xl">Add client</span>
     </IconLink>
   )
@@ -149,13 +149,13 @@ function EditClientModalContent({
         />
 
         <IconButton tw="mt-9" onClick={() => dispatch({ type: 'addEmployee' })}>
-          <PlusIcon tw="w-4 h-4 fill-copper-300" />
+          <PlusSmallIcon tw="w-4 h-4 fill-copper-300" />
           <span tw="bl-text-xl">Add employee</span>
         </IconButton>
 
         <div
           css={[
-            tw`grid gap-x-3 items-center`,
+            tw`grid gap-x-3 items-center mt-2`,
             css`
               min-width: 600px; /* this is just an estimate so it doesn't collapse too much */
               grid-template-columns: repeat(3, minmax(0, 1fr)) auto;

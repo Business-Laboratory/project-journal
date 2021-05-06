@@ -73,7 +73,7 @@ function EditAdminsModalContent({
                 minmax(${theme('width.64')}, auto)
                 ${theme('width.12')};
             `,
-            tw`grid bl-text-lg w-full`,
+            tw`grid bl-text-lg`,
           ]}
         >
           <span tw="col-start-1 col-end-2 self-center">Name</span>
