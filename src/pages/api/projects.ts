@@ -36,22 +36,23 @@ async function getProjects(user: UserData) {
   // if the role is a user, get the client id to apply to the where clause
   if (user.role === 'USER') {
     const userId = user.id
-    const client = await prisma.employee.findUnique({
+    const clients = await prisma.employee.findMany({
       where: {
         userId: userId,
       },
       select: {
-        id: true,
         clientId: true,
       },
     })
     // USERs with no clients have no projects
-    if (client === null) {
+    if (clients.length === 0) {
       return []
     }
     where = {
       client: {
-        id: client.clientId,
+        id: {
+          in: clients.map(({ clientId }) => clientId),
+        },
       },
     }
   }
