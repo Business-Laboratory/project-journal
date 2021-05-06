@@ -18,6 +18,7 @@ import {
   ListboxPopover,
 } from '@reach/listbox'
 import '@reach/listbox/styles.css'
+import Image from 'next/image'
 
 export { SettingsModal, createSettingsHref }
 
@@ -69,9 +70,8 @@ function SettingsEditModalContent({
   const { data: adminData, status: adminStatus } = useAdmins()
   // const summaryMutation = useUpdateSummary(projectId)
 
-  const admins = adminData ?? []
-
-  const disabled = !clientId || !!team || clientStatus || adminStatus
+  const disabled =
+    !clientId || !!team || clientStatus || adminStatus || !adminData
 
   return (
     <div tw="space-y-8 flex flex-col items-end">
@@ -103,31 +103,17 @@ function SettingsEditModalContent({
           }
         />
       </label>
-      <Button tw="space-x-4 align-middle max-w-max self-start">
-        <CameraIcon tw="inline fill-gray-yellow-600" />
-        <span tw="bl-text-lg">
-          {imageUrl === '' ? 'Upload project image' : 'Change project image'}
-        </span>
-      </Button>
-      <label tw="flex flex-col w-full" htmlFor="client">
-        <span tw="bl-text-xs text-gray-yellow-300">Project Team</span>
-        <select
-          id="client"
-          name="client"
-          css={[
-            tw`w-full bl-text-3xl placeholder-gray-yellow-400`,
-            tw`focus:outline-none border-b border-gray-yellow-600`,
-          ]}
-          placeholder="Project team"
-        >
-          <option value="default"></option>
-          {admins.map(({ id, name }) => (
-            <option value={id} key={id}>
-              {name}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div tw="grid grid-cols-2">
+        <Button tw="space-x-4 col-span-1 align-middle max-w-max self-start inline-block">
+          <CameraIcon tw="inline fill-gray-yellow-600" />
+          <span tw="bl-text-lg">
+            {imageUrl === '' ? 'Upload project image' : 'Change project image'}
+          </span>
+        </Button>
+        <div tw="relative col-span-1">
+          <Image tw="object-cover" layout="fill" src={imageUrl} alt={name} />
+        </div>
+      </div>
       <SaveButton
         // onClick={() => {
         //   if (disabled) return
@@ -148,7 +134,7 @@ function SettingsEditModalContent({
       </SaveButton>
       <DeleteSection
         tw="mt-16 w-full"
-        label="Project name"
+        label="Verify project name"
         verificationText={name}
         onDelete={() => ({})}
         status={'idle'}
@@ -216,8 +202,8 @@ function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
         tw`border-b border-gray-yellow-600`,
         tw`hover:border-copper-300 focus:border-copper-400 focus:outline-none`,
         css`
-          [data-reach-listbox-input] {
-            border-color: ${theme('colors[copper].400')} !important;
+          &[data-reach-listbox-input][data-state='expanded'] {
+            border-color: ${theme('colors[copper].400')};
           }
         `,
       ]}
@@ -232,8 +218,19 @@ function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
       />
       <ListboxPopover
         css={[
-          tw`z-50 bg-gray-yellow-100 mt-6`,
+          tw`z-50 bg-gray-yellow-100 mt-6 shadow-bl focus-within:shadow-bl`,
           tw`border rounded border-copper-400`,
+          // Don't know if we can not hardcode the font weight
+          css`
+            [data-reach-listbox-option][data-current-selected] {
+              font-weight: 500;
+              color: ${theme('colors[copper].400')};
+            }
+            [data-reach-listbox-option][data-current-nav] {
+              color: ${theme('colors[gray-yellow].600')};
+              background-color: ${theme('colors[copper].100')};
+            }
+          `,
         ]}
       >
         <ListboxList tw="bl-text-xs my-2">
