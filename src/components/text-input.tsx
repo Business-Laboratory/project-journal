@@ -1,9 +1,7 @@
 import tw, { css, theme } from 'twin.macro'
 import { forwardRef } from 'react'
-
 export { TextInput }
 export type { TextInputProps }
-
 type TextInputProps = Omit<React.ComponentPropsWithRef<'input'>, 'onChange'> & {
   label?: string
   onChange: (value: string) => void
@@ -34,7 +32,6 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
     )
   }
 )
-
 const inputCss = [
   tw`py-1 placeholder-gray-yellow-400 focus:(outline-none) appearance-none`,
   css`
