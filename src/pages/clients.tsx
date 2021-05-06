@@ -1,11 +1,11 @@
 // Alternate Admin Home view that displays clients
 import tw, { css } from 'twin.macro'
-import React, { Fragment, useEffect, useReducer } from 'react'
+import { Fragment, useEffect, useReducer } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import produce from 'immer'
 
-import { PlusIcon, EditIcon } from 'icons'
+import { PlusIcon, EditIcon, DeleteIcon } from 'icons'
 import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
@@ -15,12 +15,10 @@ import { IconButton } from '@components/icon-button'
 import { Button } from '@components/button'
 import { useClients } from '@queries/useClients'
 import { useClientMutation } from '@queries/useClientMutation'
+import { useDeleteClientMutation } from '@queries/useDeleteClientMutation'
 
 import type { Clients as ClientsData } from '@queries/useClients'
-// TODO: replace with ClientBody from useClientMutation
 import type { ClientBody } from '@queries/useClientMutation'
-import type { TextInputProps } from '@components/text-input'
-import { useDeleteClientMutation } from '@queries/useDeleteClientMutation'
 
 export default function Clients() {
   return (
@@ -155,51 +153,63 @@ function EditClientModalContent({
           <span tw="bl-text-xl">Add employee</span>
         </IconButton>
 
-        <table tw="w-full mt-2">
-          <thead>
-            <TableRow>
-              <HeaderCell>Name</HeaderCell>
-              <HeaderCell>Email</HeaderCell>
-              <HeaderCell>Role</HeaderCell>
-            </TableRow>
-          </thead>
-          <tbody tw="block mt-2 space-y-2">
-            {employees.map(({ userId, name, email, title }, idx) => {
-              return (
-                <TableRow key={userId}>
-                  <InputCell
-                    aria-label={`employee ${idx} name`}
-                    value={name}
-                    onChange={(name) =>
-                      dispatch({ type: 'editEmployee', userId, name })
-                    }
-                  />
-                  <InputCell
-                    aria-label={`employee ${idx} email`}
-                    type="email"
-                    value={email}
-                    onChange={(email) =>
-                      dispatch({ type: 'editEmployee', userId, email })
-                    }
-                  />
-                  <InputCell
-                    aria-label={`employee ${idx} role`}
-                    value={title ?? ''}
-                    onChange={(title) =>
-                      dispatch({ type: 'editEmployee', userId, title })
-                    }
-                  />
-                  <button
-                    tw="w-12 h-12"
-                    onClick={() => dispatch({ type: 'deleteEmployee', userId })}
-                  >
-                    Delete
-                  </button>
-                </TableRow>
-              )
-            })}
-          </tbody>
-        </table>
+        <div
+          css={[
+            tw`grid gap-x-3 items-center`,
+            css`
+              min-width: 600px; /* this is just an estimate so it doesn't collapse too much */
+              grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+            `,
+          ]}
+        >
+          <ColumnHeader>Name</ColumnHeader>
+          <ColumnHeader>Email</ColumnHeader>
+          <ColumnHeader>Role</ColumnHeader>
+
+          {employees.map(({ userId, name, email, title }, idx) => {
+            return (
+              <Fragment key={userId}>
+                <TextInput
+                  tw="col-start-1"
+                  aria-label={`employee ${idx} name`}
+                  value={name}
+                  onChange={(name) =>
+                    dispatch({ type: 'editEmployee', userId, name })
+                  }
+                />
+                <TextInput
+                  aria-label={`employee ${idx} email`}
+                  type="email"
+                  value={email}
+                  onChange={(email) =>
+                    dispatch({ type: 'editEmployee', userId, email })
+                  }
+                />
+                <TextInput
+                  aria-label={`employee ${idx} role`}
+                  value={title ?? ''}
+                  onChange={(title) =>
+                    dispatch({ type: 'editEmployee', userId, title })
+                  }
+                />
+                <button
+                  className="group"
+                  onClick={() => dispatch({ type: 'deleteEmployee', userId })}
+                  css={[
+                    tw`focus:outline-none w-12 h-12`,
+                    css`
+                      &.focus-visible > svg {
+                        ${tw`ring-2 ring-copper-400`}
+                      }
+                    `,
+                  ]}
+                >
+                  <DeleteIcon tw="w-3 h-3 fill-matisse-red-200 group-hover:fill-matisse-red-400 inline-flex" />
+                </button>
+              </Fragment>
+            )
+          })}
+        </div>
         <Button
           tw="self-end mt-10"
           variant="important"
@@ -239,29 +249,8 @@ function EditClientModalContent({
   )
 }
 
-function TableRow(props: React.ComponentPropsWithoutRef<'tr'>) {
-  return (
-    <tr
-      css={[
-        tw`grid gap-x-3 justify-start`,
-        css`
-          grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
-        `,
-      ]}
-      {...props}
-    />
-  )
-}
-function HeaderCell(props: React.ComponentPropsWithoutRef<'th'>) {
-  return <th tw="bl-text-lg text-left" {...props} />
-}
-
-function InputCell(props: TextInputProps) {
-  return (
-    <td tw="bl-text-lg text-left">
-      <TextInput tw="w-full" {...props} />
-    </td>
-  )
+function ColumnHeader(props: React.ComponentPropsWithoutRef<'th'>) {
+  return <div tw="bl-text-lg text-left" {...props} />
 }
 
 // logic/hooks
