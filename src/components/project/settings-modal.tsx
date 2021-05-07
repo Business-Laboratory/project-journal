@@ -1,15 +1,14 @@
 import tw, { css, theme } from 'twin.macro'
 import { useRouter } from 'next/router'
-import React, { useReducer } from 'react'
+import React, { useReducer, useState } from 'react'
 
 import { DeleteSection, Modal, SaveButton } from '@components/modal'
-import { Project } from '@queries/useProject'
-import { User } from '@queries/useUser'
 import { useClients } from '@queries/useClients'
 import { useAdmins } from '@queries/useAdmins'
 import { Button } from '@components/button'
 import { CameraIcon, ExpandIcon } from 'icons'
 import { ClientsData } from 'pages/api/clients'
+import { ProjectData, ProjectMutationBody } from 'pages/api/project'
 import {
   ListboxButton,
   ListboxInput,
@@ -19,12 +18,13 @@ import {
 } from '@reach/listbox'
 import '@reach/listbox/styles.css'
 import Image from 'next/image'
+import { useProjectMutation } from '@queries/useProjectMutation'
 
 export { SettingsModal, createSettingsHref }
 
 type SettingsModalProps = {
   projectId: number
-  project: Project
+  project: ProjectData
 }
 
 function SettingsModal({ projectId, project }: SettingsModalProps) {
@@ -54,7 +54,7 @@ function SettingsModal({ projectId, project }: SettingsModalProps) {
 type SettingsEditModalContentProps = SettingsModalProps & {
   onDismiss: () => void
   edit: 'settings'
-  project: Project
+  project: ProjectData
 }
 function SettingsEditModalContent({
   projectId,
@@ -62,16 +62,53 @@ function SettingsEditModalContent({
   edit,
   project,
 }: SettingsEditModalContentProps) {
-  const [{ name, imageUrl, clientId, team }, dispatch] = useReducer(
+  const [{ name, clientId, team }, dispatch] = useReducer(
     settingsReducer,
     initialState(project)
   )
-  const { data: clientData, status: clientStatus } = useClients()
+  const { data: clientsData, status: clientsStatus } = useClients()
   const { data: adminData, status: adminStatus } = useAdmins()
-  // const summaryMutation = useUpdateSummary(projectId)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [tempImageUrl, setTempImageUrl] = useState(project.imageUrl ?? '')
+  const projectMutation = useProjectMutation(projectId)
 
   const disabled =
-    !clientId || !!team || clientStatus || adminStatus || !adminData
+    checkDisabled(
+      project,
+      name,
+      imageFile,
+      clientId,
+      team,
+      clientsStatus,
+      adminStatus
+    ) ||
+    projectMutation.status === 'loading' ||
+    !adminData
+
+  const handleProjectSave = async () => {
+    if (imageFile !== null) {
+      const result = await fetch('/api/generate-upload-blob-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: projectId,
+          fileName: imageFile?.name,
+        }),
+      })
+      const { sasUrl } = await result.json()
+
+      // lazy load the image uploader since it's pretty large
+      const { uploadImage } = await import('@utils/upload-image')
+
+      const imageStorageBlobUrl = await uploadImage(sasUrl, imageFile)
+      projectMutation.mutate(
+        { id: projectId, name, imageStorageBlobUrl, clientId, team },
+        { onSuccess: onDismiss }
+      )
+    } else {
+      projectMutation.mutate({ id: projectId, name, clientId, team })
+    }
+  }
 
   return (
     <div tw="space-y-8 flex flex-col items-end">
@@ -96,41 +133,64 @@ function SettingsEditModalContent({
         </span>
         <ClientSelect
           label={'client-select'}
-          clients={clientData}
+          clients={clientsData ?? []}
           client={clientId}
           onChange={(value) =>
             dispatch({ type: 'SET_CLIENT', payload: Number(value) })
           }
         />
       </label>
-      <div tw="grid grid-cols-2">
-        <Button tw="space-x-4 col-span-1 align-middle max-w-max self-start inline-block">
-          <CameraIcon tw="inline fill-gray-yellow-600" />
-          <span tw="bl-text-lg">
-            {imageUrl === '' ? 'Upload project image' : 'Change project image'}
-          </span>
+      <div tw="flex flex-row w-full justify-between">
+        <Button tw="max-w-max self-start inline-flex">
+          <label htmlFor="image" tw="space-x-4 items-center inline-flex">
+            <CameraIcon tw="inline fill-gray-yellow-600" />
+            <span tw="bl-text-lg">
+              {tempImageUrl === ''
+                ? 'Upload project image'
+                : 'Change project image'}
+            </span>
+            <input
+              tw="w-full h-full"
+              hidden
+              type="file"
+              id="image"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) {
+                  const reader = new FileReader()
+                  reader.readAsDataURL(file)
+                  reader.onload = () => {
+                    setTempImageUrl(reader.result?.toString() ?? '')
+                    setImageFile(file)
+                  }
+                }
+              }}
+              name="img"
+              accept="image/*"
+            />
+          </label>
         </Button>
-        <div tw="relative col-span-1">
-          <Image tw="object-cover" layout="fill" src={imageUrl} alt={name} />
+        {/*Hardcoded width and height*/}
+        <div tw="relative self-end w-64 h-36">
+          <Image
+            tw="object-cover"
+            layout="fill"
+            src={tempImageUrl}
+            alt={name}
+          />
         </div>
       </div>
       <SaveButton
-        // onClick={() => {
-        //   if (disabled) return
-        //   summaryMutation.mutate(
-        //     edit === 'description'
-        //       ? { id, description: body }
-        //       : { id, roadmap: body },
-        //     { onSuccess: onDismiss }
-        //   )
-        // }}
+        onClick={() => {
+          if (disabled) return
+          handleProjectSave()
+        }}
         disabled={disabled}
-        error={false}
+        error={projectMutation.status === 'error'}
       >
-        {/* {summaryMutation.status === 'loading'
+        {projectMutation.status === 'loading'
           ? `Saving ${edit}...`
-          : `Save ${edit}`} */}
-        Save Settings
+          : `Save ${edit}`}
       </SaveButton>
       <DeleteSection
         tw="mt-16 w-full"
@@ -143,18 +203,21 @@ function SettingsEditModalContent({
   )
 }
 
-const initialState = ({ name, imageUrl, client, team }: Project) => ({
+const initialState = ({
+  name,
+  imageUrl,
+  client,
+  team,
+}: ProjectData): Omit<ProjectMutationBody, 'imageStorageBlobUrl' | 'id'> => ({
   name: name ?? '',
-  imageUrl: imageUrl ?? '',
   clientId: client?.id ?? null,
-  team: team ?? [],
+  team: team.map(({ id }) => id) ?? [],
 })
 
 type ActionType =
-  | { type: 'SET_NAME'; payload: String }
-  | { type: 'SET_IMAGE'; payload: String }
+  | { type: 'SET_NAME'; payload: string }
   | { type: 'SET_CLIENT'; payload: number | null }
-  | { type: 'SET_TEAM'; payload: User[] }
+  | { type: 'SET_TEAM'; payload: number[] }
 
 function settingsReducer(
   state: ReturnType<typeof initialState>,
@@ -162,28 +225,16 @@ function settingsReducer(
 ) {
   switch (action.type) {
     case 'SET_NAME': {
-      return { ...state, name: action.payload } as ReturnType<
-        typeof initialState
-      >
-    }
-    case 'SET_IMAGE': {
-      return { ...state, imageUrl: action.payload } as ReturnType<
-        typeof initialState
-      >
+      return { ...state, name: action.payload }
     }
     case 'SET_CLIENT': {
-      console.log('hello')
       if (!action.payload || action.payload < 0) {
-        return { ...state, clientId: null } as ReturnType<typeof initialState>
+        return { ...state, clientId: null }
       }
-      return { ...state, clientId: action.payload } as ReturnType<
-        typeof initialState
-      >
+      return { ...state, clientId: action.payload }
     }
     case 'SET_TEAM': {
-      return { ...state, team: action.payload } as ReturnType<
-        typeof initialState
-      >
+      return { ...state, team: action.payload }
     }
   }
 }
@@ -260,4 +311,25 @@ function createSettingsHref(projectId: number) {
     pathname: `/project/${projectId}`,
     query: { edit: 'settings' },
   }
+}
+
+const checkDisabled = (
+  project: ProjectData,
+  name: string,
+  file: File | null,
+  clientId: number | null,
+  team: number[],
+  clientsStatus: 'error' | 'idle' | 'loading' | 'success',
+  adminStatus: 'error' | 'idle' | 'loading' | 'success'
+) => {
+  if (
+    (project.name === name && !file && project.client?.id === clientId) ||
+    clientsStatus === 'loading' ||
+    clientsStatus === 'error' ||
+    adminStatus === 'loading' ||
+    adminStatus === 'error'
+  ) {
+    return true
+  }
+  return false
 }

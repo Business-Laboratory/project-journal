@@ -20,7 +20,10 @@ export default async function handler(
 ) {
   const user = await checkAuthentication(req, res)
   // bail if there's no user
-  if (!user) return
+  if (!user || user.role !== 'ADMIN') {
+    res.status(401).json({ error: 'User not authorized.' })
+    return
+  }
 
   try {
     const projects = await getClients(user)
@@ -32,9 +35,7 @@ export default async function handler(
 }
 
 async function getClients(user: UserData) {
-  if (user.role !== 'ADMIN') return
-
-  const clients = await prisma.client.findMany({
+  return await prisma.client.findMany({
     select: {
       id: true,
       name: true,
@@ -50,5 +51,4 @@ async function getClients(user: UserData) {
       },
     },
   })
-  return clients
 }

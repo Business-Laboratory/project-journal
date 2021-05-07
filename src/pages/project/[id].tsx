@@ -38,6 +38,7 @@ export default function Project() {
 }
 
 function ProjectById({ projectId }: { projectId: number }) {
+  // Why isn't data's type ProjectData? How can it be undefined? in case of error?
   const { data, status } = useProject(projectId)
   // we need to be loading all of the loading indicators if the user hasn't loaded, since it effects the layout
   const user = useAuth()

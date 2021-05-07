@@ -16,12 +16,12 @@ import {
 } from './index'
 import type { QueryStatus } from 'react-query'
 import type { Role } from '@prisma/client'
-import type { Project } from '@queries/useProject'
+import type { ProjectData } from 'pages/api/project'
 
 export { Summary, LoadingSummary }
 
 // types
-type Team = Project['team']
+type Team = ProjectData['team']
 
 type LoadingSummaryProps = {
   status: QueryStatus
@@ -41,7 +41,7 @@ function LoadingSummary({ status }: LoadingSummaryProps) {
 type SummaryProps = {
   projectId: number
   userRole: Role
-  project: Project
+  project: ProjectData
 }
 function Summary({ projectId, userRole, project }: SummaryProps) {
   const { name, imageUrl, client, team, summary } = project
