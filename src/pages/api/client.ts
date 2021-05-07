@@ -2,7 +2,8 @@ import { prisma } from '@lib/prisma'
 import { checkAuthentication } from '@utils/api/check-authentication'
 
 import type { NextApiRequest, NextApiResponse } from 'next'
-import type { PrepareAPIData } from '@types'
+import type { UnwrapPromise, PrepareAPIData } from '@types'
+import type { getClients } from './clients'
 import { isValidEmail } from '@utils/is-valid-email'
 
 export type UpdateClientBody = {
@@ -15,7 +16,7 @@ export type UpdateClientBody = {
     title: string | null
   }[]
 }
-export type Client = PrepareAPIData<ReturnType<typeof updateClient>>
+export type Client = PrepareAPIData<typeof updateClient>
 
 /**
  * Gets projects based on their role:
@@ -71,7 +72,26 @@ export default async function handler(
   }
 }
 
-async function updateClient({ id, name, employees }: UpdateClientBody) {
+// make sure the client we return is the same type as returned from `api/clients`
+const clientSelectClause = {
+  id: true,
+  name: true,
+  employees: {
+    include: {
+      user: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
+  },
+}
+async function updateClient({
+  id,
+  name,
+  employees,
+}: UpdateClientBody): Promise<UnwrapPromise<ReturnType<typeof getClients>>[0]> {
   // update/create users in the database based on the employees that are coming in
   const users = await updateAndCreateUsers(employees)
   const emailToUserId = new Map(users.map(({ email, id }) => [email, id]))
@@ -90,12 +110,15 @@ async function updateClient({ id, name, employees }: UpdateClientBody) {
           create: createEmployees,
         },
       },
+      select: clientSelectClause,
     })
+
     return client
   }
 
-  const removeEmployeesPromise = removeEmployees(id, employees)
-  const clientUpdatePromise = prisma.client.update({
+  // need to run this first, otherwise it'll return the old employees
+  await removeEmployees(id, employees)
+  const client = await prisma.client.update({
     where: {
       id,
     },
@@ -115,12 +138,8 @@ async function updateClient({ id, name, employees }: UpdateClientBody) {
         }),
       },
     },
+    select: clientSelectClause,
   })
-
-  const [client] = await Promise.all([
-    clientUpdatePromise,
-    removeEmployeesPromise,
-  ] as const)
 
   return client
 }
