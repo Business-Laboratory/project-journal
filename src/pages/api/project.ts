@@ -42,6 +42,7 @@ export default async function handler(
       }
       const project = await getProject(user, Number(id))
       res.status(200).json(project)
+      return
     }
     if (method === 'POST') {
       if (user.role !== 'ADMIN') {
@@ -63,6 +64,7 @@ export default async function handler(
         team
       )
       res.status(200).json(project)
+      return
     }
     res.status(501).json({ error: `${method} not implemented.` })
   } catch (error) {
