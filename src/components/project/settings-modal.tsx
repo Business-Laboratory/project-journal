@@ -70,6 +70,7 @@ function SettingsEditModalContent({
   const { data: adminData, status: adminStatus } = useAdmins()
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [tempImageUrl, setTempImageUrl] = useState(project.imageUrl ?? '')
+  const [imageUpload, setImageUpload] = useState<'idle' | 'loading'>('idle')
   const projectMutation = useProjectMutation(projectId)
 
   const disabled =
@@ -83,10 +84,12 @@ function SettingsEditModalContent({
       adminStatus
     ) ||
     projectMutation.status === 'loading' ||
+    imageUpload === 'loading' ||
     !adminData
 
   const handleProjectSave = async () => {
     if (imageFile !== null) {
+      setImageUpload('loading')
       const result = await fetch('/api/generate-upload-blob-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -103,10 +106,18 @@ function SettingsEditModalContent({
       const imageStorageBlobUrl = await uploadImage(sasUrl, imageFile)
       projectMutation.mutate(
         { id: projectId, name, imageStorageBlobUrl, clientId, team },
-        { onSuccess: onDismiss }
+        {
+          onSuccess: () => {
+            setImageUpload('idle')
+            onDismiss()
+          },
+        }
       )
     } else {
-      projectMutation.mutate({ id: projectId, name, clientId, team })
+      projectMutation.mutate(
+        { id: projectId, name, clientId, team },
+        { onSuccess: onDismiss }
+      )
     }
   }
 
@@ -188,7 +199,7 @@ function SettingsEditModalContent({
         disabled={disabled}
         error={projectMutation.status === 'error'}
       >
-        {projectMutation.status === 'loading'
+        {projectMutation.status === 'loading' || imageUpload === 'loading'
           ? `Saving ${edit}...`
           : `Save ${edit}`}
       </SaveButton>

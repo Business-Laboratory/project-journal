@@ -9,6 +9,7 @@ import type { UserData } from '@utils/api/check-authentication'
 
 export type ProjectData = PrepareAPIData<ReturnType<typeof getProject>>
 export type ProjectUpdateData = PrepareAPIData<ReturnType<typeof updateProject>>
+export type NewProjectData = PrepareAPIData<ReturnType<typeof newProject>>
 export type ProjectMutationBody = {
   id: number
   name: string
@@ -49,6 +50,13 @@ export default async function handler(
         res.status(401).json({ error: 'User not authorized.' })
         return
       }
+
+      if (req.body.id === 'new') {
+        const project = await newProject()
+        res.status(200).json(project)
+        return
+      }
+
       const {
         id,
         name,
@@ -172,6 +180,39 @@ async function updateProject(
       // team: {
       //   set: team.map(id=> ({ id }))
       // }
+    },
+  })
+}
+
+async function newProject() {
+  return await prisma.project.create({
+    data: {
+      name: 'Untitled Project',
+      summary: {
+        create: {
+          description: '',
+          roadmap: '',
+        },
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      imageUrl: true,
+      imageStorageBlobUrl: true,
+      client: {
+        select: {
+          id: true,
+          name: true,
+          employees: {
+            select: {
+              user: true,
+            },
+          },
+        },
+      },
+      team: true,
+      summary: true,
     },
   })
 }
