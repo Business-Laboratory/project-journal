@@ -1,6 +1,7 @@
 import tw, { css } from 'twin.macro'
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown, { uriTransformer } from 'react-markdown'
 import gfm from 'remark-gfm'
+import breaks from 'remark-breaks'
 
 import type { ReactMarkdownOptions } from 'react-markdown'
 
@@ -8,24 +9,50 @@ export { RenderMarkdown }
 
 function RenderMarkdown(props: ReactMarkdownOptions) {
   return (
-    <div css={markdownCss}>
-      <ReactMarkdown plugins={[gfm]} {...props} />
-    </div>
+    <ReactMarkdown
+      css={markdownCss}
+      components={{
+        h1: 'h3',
+        h2: 'h4',
+        h3: 'h5',
+        // attempting to implement something similar to this: https://css-tricks.com/the-checkbox-hack/
+        input: ({ index }) => {
+          const id = `checkbox-${index}`
+          return (
+            <>
+              <label htmlFor={id}>Do Something</label>
+              <input className="checkbox" type="checkbox" id={id} />
+              <div className="control-me">Control me</div>
+            </>
+          )
+        },
+      }}
+      plugins={[breaks, gfm]}
+      transformLinkUri={uriTransformer}
+      {...props}
+    />
   )
 }
 
 const markdownCss = [
-  tw`bl-text-base`,
+  tw`bl-text-base space-y-4`,
   css`
-    h1 {
-      ${tw`bl-text-2xl`}
+    .control-me {
+      /* Default state */
     }
-
-    h2 {
-      ${tw`bl-text-xl`}
+    .checkbox:checked ~ .control-me {
+      /* A toggled state! No JavaScript! */
     }
 
     h3 {
+      ${tw`bl-text-2xl`}
+    }
+
+    h4 {
+      ${tw`bl-text-xl`}
+    }
+
+    h5 {
       ${tw`bl-text-lg`}
     }
 
@@ -56,6 +83,12 @@ const markdownCss = [
       p {
         display: inline;
       }
+    }
+
+    .task-list-item {
+      list-style-type: none;
+    }
+    input[type='checkbox'] {
     }
 
     /* ul {
