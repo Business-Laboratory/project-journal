@@ -1,12 +1,11 @@
-import tw, { css } from 'twin.macro'
+import 'twin.macro'
 import Image from 'next/image'
-import ReactMarkdown from 'react-markdown'
-import gfm from 'remark-gfm'
 
 import { IconLink } from '@components/icon-link'
 import { EditIcon, GearIcon } from 'icons'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
+import { RenderMarkdown } from '@components/render-markdown'
 import { SummaryModal } from './index'
 import {
   createEditDescriptionHref,
@@ -105,7 +104,7 @@ function Summary({
             <h2 tw="bl-text-3xl">Project Description</h2>
           )}
           {summary.description ? (
-            <MarkdownWrapper>{summary.description}</MarkdownWrapper>
+            <RenderMarkdown>{summary.description}</RenderMarkdown>
           ) : null}
         </div>
         <div tw="space-y-2">
@@ -118,7 +117,7 @@ function Summary({
             <h2 tw="bl-text-3xl">Project Roadmap</h2>
           )}
           {summary.roadmap ? (
-            <MarkdownWrapper>{summary.roadmap}</MarkdownWrapper>
+            <RenderMarkdown>{summary.roadmap}</RenderMarkdown>
           ) : null}
         </div>
         <div tw="space-y-2">
@@ -146,41 +145,6 @@ function SummaryWrapper({ children }: { children: React.ReactNode }) {
     <aside tw="relative h-full px-14 overflow-y-auto space-y-8 py-10">
       {children}
     </aside>
-  )
-}
-
-function MarkdownWrapper({ children }: { children: string }) {
-  return (
-    // took list styling from here https://stackoverflow.com/questions/11737266/what-is-default-list-styling-css
-    <div
-      css={[
-        tw`bl-text-base`,
-        css`
-          ul {
-            list-style-type: disc;
-            list-style-position: inside;
-          }
-          ol {
-            list-style-type: decimal;
-            list-style-position: inside;
-          }
-          ul ul,
-          ol ul {
-            list-style-type: circle;
-            list-style-position: inside;
-            margin-left: 1rem;
-          }
-          ol ol,
-          ul ol {
-            list-style-type: lower-latin;
-            list-style-position: inside;
-            margin-left: 1rem;
-          }
-        `,
-      ]}
-    >
-      <ReactMarkdown plugins={[gfm]}>{children}</ReactMarkdown>
-    </div>
   )
 }
 

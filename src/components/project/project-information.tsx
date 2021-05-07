@@ -1,7 +1,5 @@
 import tw, { css } from 'twin.macro'
 import Link from 'next/link'
-import ReactMarkdown from 'react-markdown'
-import gfm from 'remark-gfm'
 import {
   useLayoutEffect,
   useRef,
@@ -21,6 +19,7 @@ import { PlusIcon, EditIcon, UpdateLinkIcon } from 'icons'
 import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
+import { RenderMarkdown } from '@components/render-markdown'
 import { useSetCurrentHashLink } from './hash-link-context'
 import { createEditUpdateHref } from './update-modal'
 
@@ -388,7 +387,7 @@ function UpdatesList({ updates, userRole, projectId }: UpdatesListProps) {
                 </a>
               </Link>
             </div>
-            <ReactMarkdown plugins={[gfm]}>{body}</ReactMarkdown>
+            <RenderMarkdown>{body}</RenderMarkdown>
           </UpdateContainer>
         )
       })}
