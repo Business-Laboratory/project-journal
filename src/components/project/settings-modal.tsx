@@ -19,6 +19,7 @@ import {
 import '@reach/listbox/styles.css'
 import Image from 'next/image'
 import { useProjectMutation } from '@queries/useProjectMutation'
+import { useDeleteProject } from '@queries/useDeleteProject'
 
 export { SettingsModal, createSettingsHref }
 
@@ -62,6 +63,7 @@ function SettingsEditModalContent({
   edit,
   project,
 }: SettingsEditModalContentProps) {
+  const router = useRouter()
   const [{ name, clientId, team }, dispatch] = useReducer(
     settingsReducer,
     initialState(project)
@@ -71,7 +73,9 @@ function SettingsEditModalContent({
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [tempImageUrl, setTempImageUrl] = useState(project.imageUrl)
   const [imageUpload, setImageUpload] = useState<'idle' | 'loading'>('idle')
+
   const projectMutation = useProjectMutation(projectId)
+  const projectDeleteMutation = useDeleteProject()
 
   const disabled =
     checkDisabled(
@@ -207,8 +211,14 @@ function SettingsEditModalContent({
         tw="mt-16 w-full"
         label="Verify project name"
         verificationText={name}
-        onDelete={() => ({})}
-        status={'idle'}
+        onDelete={() => {
+          projectDeleteMutation.mutate(projectId, {
+            onSuccess: () => {
+              router.push('/projects')
+            },
+          })
+        }}
+        status={projectDeleteMutation.status}
       />
     </div>
   )

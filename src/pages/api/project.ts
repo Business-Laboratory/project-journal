@@ -74,6 +74,22 @@ export default async function handler(
       res.status(200).json(project)
       return
     }
+
+    if (method === 'DELETE') {
+      if (user.role !== 'ADMIN') {
+        res.status(401).json({ error: 'User not authorized.' })
+        return
+      }
+      const id: number = req.body.id
+      if (!id || typeof id !== 'number') {
+        res.status(400).json({ error: `Invalid client id ${id}` })
+        return
+      }
+      await deleteProject(id)
+      res.status(200).end()
+      return
+    }
+
     res.status(501).json({ error: `${method} not implemented.` })
   } catch (error) {
     res.status(501).json({ error })
@@ -213,6 +229,14 @@ async function newProject() {
       },
       team: true,
       summary: true,
+    },
+  })
+}
+
+async function deleteProject(id: number) {
+  await prisma.project.delete({
+    where: {
+      id,
     },
   })
 }
