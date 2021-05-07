@@ -15,11 +15,7 @@ export type UpdateClientBody = {
     title: string | null
   }[]
 }
-// TODO: Remove the exclude
-export type Client = Exclude<
-  PrepareAPIData<ReturnType<typeof updateClient>>,
-  undefined
->
+export type Client = PrepareAPIData<ReturnType<typeof updateClient>>
 
 /**
  * Gets projects based on their role:
@@ -146,6 +142,12 @@ async function updateAndCreateUsers(employees: UpdateClientBody['employees']) {
   return await Promise.all(users)
 }
 
+/**
+ * Removes the employees associated with the client that aren't in the incoming array
+ * @param id
+ * @param newEmployees
+ * @returns
+ */
 async function removeEmployees(
   id: number,
   newEmployees: UpdateClientBody['employees']
@@ -176,59 +178,46 @@ async function removeEmployees(
 
   const newEmployeeEmails = new Set(newEmployees.map(({ email }) => email))
 
-  let employeesToDelete = []
-  for (const employee of previousEmployees) {
-    const { email } = employee.user
-    // bail if the previous employee somehow didn't have an email, or if they're in the new employees
-    if (email === null || newEmployeeEmails.has(email)) {
-      continue
-    }
-
-    employeesToDelete.push(employee)
-  }
+  // filter all previous employee who somehow didn't have an email, or who are in the new employees
+  const employeesToDelete = previousEmployees.filter((employees) => {
+    const { email } = employees.user
+    return email !== null && !newEmployeeEmails.has(email)
+  })
 
   // delete employees
   const deleteEmployeesPromise = prisma.employee.deleteMany({
     where: {
       AND: {
-        userId: {
-          in: employeesToDelete.map(({ userId }) => userId),
-        },
-        clientId: {
-          in: employeesToDelete.map(({ clientId }) => clientId),
-        },
+        userId: { in: employeesToDelete.map(({ userId }) => userId) },
+        clientId: { in: employeesToDelete.map(({ clientId }) => clientId) },
       },
     },
   })
 
   // if the user is not an ADMIN and they are not an employee anywhere else
   // then change their role so they no longer have access to the app
-  const updateUsersPromise = Promise.all(
-    employeesToDelete.map(async (employee) => {
-      const { role } = employee.user
-      if (role !== 'ADMIN') {
-        const numberOfEmployeesUserIs = await prisma.employee.count({
-          where: {
-            AND: {
-              clientId: {
-                not: id,
-              },
-              userId: employee.userId,
-            },
-          },
-        })
-        if (numberOfEmployeesUserIs === 0) {
-          await prisma.user.update({
-            where: { id: employee.userId },
-            data: { role: null },
-          })
-          return
-        }
-      }
-    })
-  )
+  const updateUsersPromises = employeesToDelete.map(async (employee) => {
+    const { role } = employee.user
+    if (role === 'ADMIN') return
 
-  await Promise.all([deleteEmployeesPromise, updateUsersPromise])
+    const countOfOtherEmployments = await prisma.employee.count({
+      where: {
+        AND: {
+          clientId: { not: id },
+          userId: employee.userId,
+        },
+      },
+    })
+    if (countOfOtherEmployments > 0) return
+
+    await prisma.user.update({
+      where: { id: employee.userId },
+      data: { role: null },
+    })
+    return
+  })
+
+  await Promise.all([deleteEmployeesPromise, Promise.all(updateUsersPromises)])
   return
 }
 
