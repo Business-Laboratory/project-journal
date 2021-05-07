@@ -12,6 +12,8 @@ import { useAuth } from '@components/auth-context'
 import { useProjects } from '@queries/useProjects'
 import { usePrefetchProject } from '@queries/useProject'
 import { usePrefetchUpdates } from '@queries/useUpdates'
+import { useNewProject } from '@queries/useNewProject'
+import { useRouter } from 'next/router'
 
 export default function Projects() {
   return (
@@ -68,11 +70,27 @@ function CardGrid() {
 }
 
 function AddProjectLink() {
-  return (
-    <IconLink href="#">
+  const router = useRouter()
+  const newProjectMutation = useNewProject()
+  return newProjectMutation.status !== 'loading' ? (
+    <IconLink
+      href=""
+      onClick={() => {
+        newProjectMutation.mutate(
+          { id: 'new' },
+          {
+            onSuccess: (project) => {
+              router.push(`/project/${project.id}?edit=settings`)
+            },
+          }
+        )
+      }}
+    >
       <PlusIcon tw="w-6 h-6 fill-copper-300" />
       <span tw="bl-text-2xl">Add project</span>
     </IconLink>
+  ) : (
+    <span tw="bl-text-2xl">Creating project...</span>
   )
 }
 

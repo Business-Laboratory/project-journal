@@ -69,7 +69,7 @@ function SettingsEditModalContent({
   const { data: clientsData, status: clientsStatus } = useClients()
   const { data: adminData, status: adminStatus } = useAdmins()
   const [imageFile, setImageFile] = useState<File | null>(null)
-  const [tempImageUrl, setTempImageUrl] = useState(project.imageUrl ?? '')
+  const [tempImageUrl, setTempImageUrl] = useState(project.imageUrl)
   const [imageUpload, setImageUpload] = useState<'idle' | 'loading'>('idle')
   const projectMutation = useProjectMutation(projectId)
 
@@ -156,9 +156,7 @@ function SettingsEditModalContent({
           <label htmlFor="image" tw="space-x-4 items-center inline-flex">
             <CameraIcon tw="inline fill-gray-yellow-600" />
             <span tw="bl-text-lg">
-              {tempImageUrl === ''
-                ? 'Upload project image'
-                : 'Change project image'}
+              {!tempImageUrl ? 'Upload project image' : 'Change project image'}
             </span>
             <input
               tw="w-full h-full"
@@ -182,14 +180,16 @@ function SettingsEditModalContent({
           </label>
         </Button>
         {/*Hardcoded width and height*/}
-        <div tw="relative self-end w-64 h-36">
-          <Image
-            tw="object-cover"
-            layout="fill"
-            src={tempImageUrl}
-            alt={name}
-          />
-        </div>
+        {tempImageUrl !== null ? (
+          <div tw="relative self-end w-64 h-36">
+            <Image
+              tw="object-cover"
+              layout="fill"
+              src={tempImageUrl}
+              alt={name}
+            />
+          </div>
+        ) : null}
       </div>
       <SaveButton
         onClick={() => {

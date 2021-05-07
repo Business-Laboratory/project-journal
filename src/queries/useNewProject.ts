@@ -1,7 +1,7 @@
 import { useQueryClient, useMutation } from 'react-query'
 
 import type { Project } from './useProject'
-import type { ProjectMutationBody, NewProjectData } from 'pages/api/project'
+import type { NewProjectData } from 'pages/api/project'
 
 export { useNewProject }
 export type UpdateBody = Parameters<
@@ -10,16 +10,15 @@ export type UpdateBody = Parameters<
 
 function useNewProject() {
   const queryClient = useQueryClient()
-  return useMutation(projectMutation, {
+  return useMutation(newProjectMutation, {
     onSuccess: async (project) => {
       const projectKey = ['project', { id: project.id }]
       queryClient.setQueryData<Project>(projectKey, project)
-      return projectKey
     },
   })
 }
 
-async function projectMutation(data: ProjectMutationBody) {
+async function newProjectMutation(data: { id: 'new' }) {
   const res = await fetch(`/api/project`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
