@@ -1,18 +1,16 @@
 import tw, { css, theme } from 'twin.macro'
+import { Fragment, useReducer } from 'react'
 import { useRouter } from 'next/router'
-import React, { Fragment, useReducer } from 'react'
 import produce from 'immer'
 
 import { Modal, SaveButton } from '@components/modal'
 import { IconButton } from '@components/icon-button'
 import { TextInput } from '@components/text-input'
 import { PlusSmallIcon, DeleteIcon } from 'icons'
-
-import { AdminsData } from '../pages/api/admins'
-
 import { isValidEmail } from '@utils/is-valid-email'
-
 import { useAdminsMutation } from '@queries/useAdminsMutation'
+
+import type { AdminsData } from 'pages/api/admins'
 
 export { AdminsModal, createEditAdminsPath }
 
@@ -58,7 +56,7 @@ function EditAdminsModalContent({
 
   return (
     <div tw="space-y-10 flex flex-col items-end">
-      <div tw="space-y-2">
+      <div tw="space-y-2 w-full">
         <IconButton
           onClick={() =>
             adminsDispatch({ type: 'add', id: new Date().valueOf() })

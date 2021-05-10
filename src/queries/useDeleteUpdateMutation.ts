@@ -1,4 +1,5 @@
 import { useQueryClient, useMutation } from 'react-query'
+import produce from 'immer'
 
 import type { Updates } from './useUpdates'
 
@@ -13,8 +14,9 @@ export function useDeleteUpdateMutation(projectId: number) {
       if (deleteIdIdx === -1) {
         throw new Error(`Update with id ${id} not found in query cache`)
       }
-      let newUpdates = [...previousUpdates]
-      newUpdates.splice(deleteIdIdx, 1)
+      const newUpdates = produce(previousUpdates, (draft) => {
+        draft.splice(deleteIdIdx, 1)
+      })
       queryClient.setQueryData(updateKey, newUpdates)
     },
     onSettled: () => {
@@ -26,7 +28,7 @@ async function deleteUpdate(id: number) {
   const res = await fetch(`/api/update`, {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id: id }),
+    body: JSON.stringify({ id }),
   })
   if (!res.ok) {
     const data = await res.json()
