@@ -149,7 +149,7 @@ function EditClientModalContent({
         />
 
         <IconButton
-          tw="mt-9 w-auto"
+          tw="mt-9 max-w-max"
           onClick={() => dispatch({ type: 'addEmployee' })}
         >
           <PlusSmallIcon tw="w-4 h-4 fill-copper-300" />
