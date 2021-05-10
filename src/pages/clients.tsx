@@ -160,8 +160,10 @@ function EditClientModalContent({
           css={[
             tw`grid gap-x-3 items-center mt-2`,
             css`
-              min-width: 600px; /* this is just an estimate so it doesn't collapse too much */
-              grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+              width: 650px;
+              grid-template-columns: repeat(3, minmax(0, 1fr)) ${theme(
+                  'width.12'
+                )};
               margin-right: calc(
                 calc(${theme('width.12')} - ${theme('width.3')}) / -2
               );
@@ -210,7 +212,7 @@ function EditClientModalContent({
                     `,
                   ]}
                 >
-                  <DeleteIcon tw="w-3 h-3 fill-matisse-red-200 group-hover:fill-matisse-red-400 inline-flex" />
+                  <DeleteIcon tw="h-3 fill-matisse-red-200 group-hover:fill-matisse-red-400 inline-flex" />
                 </button>
               </Fragment>
             )
