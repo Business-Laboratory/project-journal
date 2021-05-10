@@ -19,6 +19,7 @@
     "@azure/storage-blob": "^12.5.0",
     "@emotion/react": "^11.1.5",
     "@prisma/client": "^2.20.1",
+    "@reach/checkbox": "^0.15.1",
     "@reach/combobox": "^0.15.1",
     "@reach/dialog": "^0.15.0",
     "@reach/menu-button": "^0.15.1",

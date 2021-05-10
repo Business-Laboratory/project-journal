@@ -1,9 +1,13 @@
 import tw, { css } from 'twin.macro'
 import ReactMarkdown, { uriTransformer } from 'react-markdown'
+import { CustomCheckboxContainer, CustomCheckboxInput } from '@reach/checkbox'
+import type { ReactMarkdownOptions } from 'react-markdown'
 import gfm from 'remark-gfm'
 import breaks from 'remark-breaks'
 
-import type { ReactMarkdownOptions } from 'react-markdown'
+import { CheckIcon } from 'icons'
+
+import '@reach/checkbox/styles.css'
 
 export { RenderMarkdown }
 
@@ -15,15 +19,64 @@ function RenderMarkdown(props: ReactMarkdownOptions) {
         h1: 'h3',
         h2: 'h4',
         h3: 'h5',
-        // attempting to implement something similar to this: https://css-tricks.com/the-checkbox-hack/
-        input: ({ index }) => {
-          const id = `checkbox-${index}`
+        li: ({ className, children, checked }) => {
+          if (className === 'task-list-item') {
+            if (typeof checked !== 'boolean') {
+              throw new Error(`checked must be a boolean, received ${checked}`)
+            }
+
+            return (
+              <li className={className}>
+                <label tw="flex items-center">
+                  <CustomCheckboxContainer
+                    disabled
+                    checked={checked}
+                    css={[
+                      tw`w-4 h-4`,
+                      !checked ? tw`border-2 border-gray-yellow-600` : null,
+                    ]}
+                  >
+                    <CustomCheckboxInput value="whatever" checked={checked} />
+                    {checked ? (
+                      <CheckIcon aria-hidden tw="fill-copper-300" />
+                    ) : null}
+                  </CustomCheckboxContainer>
+                  {
+                    // the last child should always been the label
+                    children[children.length - 1]
+                  }
+                </label>
+              </li>
+            )
+          }
+
+          // these seem to be all that needs to be passed along
+          return <li className={className}>{children}</li>
+        },
+        input: (props) => {
+          console.log(props)
+          const checked = props.checked
+          if (typeof checked !== 'boolean') {
+            throw new Error(`checked must be a boolean, received ${checked}`)
+          }
           return (
-            <>
-              <label htmlFor={id}>Do Something</label>
-              <input className="checkbox" type="checkbox" id={id} />
-              <div className="control-me">Control me</div>
-            </>
+            // eslint-disable-next-line jsx-a11y/label-has-associated-control
+            <label tw="flex items-center">
+              <CustomCheckboxContainer
+                disabled
+                checked={checked}
+                css={[
+                  tw`w-4 h-4`,
+                  !checked ? tw`border-2 border-gray-yellow-600` : null,
+                ]}
+              >
+                <CustomCheckboxInput value="whatever" checked={checked} />
+                {checked ? (
+                  <CheckIcon aria-hidden tw="fill-copper-300" />
+                ) : null}
+              </CustomCheckboxContainer>
+              This is a pretty cool checkbox; do you agree?
+            </label>
           )
         },
       }}
@@ -105,24 +158,5 @@ const markdownCss = [
     }
     input[type='checkbox'] {
     }
-
-    /* ul {
-      list-style-type: disc;
-      list-style-position: inside;
-    }
-    ol {
-      list-style-type: decimal;
-      list-style-position: inside;
-    }
-    ul ul,
-    ol ul {
-      list-style-type: circle;
-      list-style-position: inside;
-    }
-    ol ol,
-    ul ol {
-      list-style-type: lower-latin;
-      list-style-position: inside;
-    } */
   `,
 ]
