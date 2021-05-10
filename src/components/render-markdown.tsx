@@ -56,12 +56,27 @@ const markdownCss = [
       ${tw`bl-text-lg`}
     }
 
+    a {
+      ${tw`text-copper-300`}
+      &:hover {
+        ${tw`text-copper-400`}
+      }
+      &.focus-visible {
+        ${tw`outline-none ring-2 ring-copper-400`}
+      }
+    }
+
     em {
       ${tw`italic`}
     }
 
-    strong {
+    /* only normal text can have bold applied */
+    p strong {
       ${tw`font-semibold`}
+    }
+
+    del {
+      ${tw`line-through`}
     }
 
     ul {
