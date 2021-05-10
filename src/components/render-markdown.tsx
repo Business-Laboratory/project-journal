@@ -44,23 +44,16 @@ function RenderMarkdown(props: ReactMarkdownOptions) {
 const markdownCss = [
   tw`bl-text-base space-y-4`,
   css`
-    .control-me {
-      /* Default state */
-    }
-    .checkbox:checked ~ .control-me {
-      /* A toggled state! No JavaScript! */
-    }
-
     h3 {
-      ${tw`bl-text-2xl`}
+      ${tw`bl-text-2xl py-2`}
     }
 
     h4 {
-      ${tw`bl-text-xl`}
+      ${tw`bl-text-xl py-1`}
     }
 
     h5 {
-      ${tw`bl-text-lg`}
+      ${tw`bl-text-lg py-0.5`}
     }
 
     a {
@@ -136,7 +129,7 @@ function Checkbox({ className, checked, children }: CheckboxProps) {
           {checked ? <CheckIcon aria-hidden tw="fill-copper-300" /> : null}
         </CustomCheckboxContainer>
         {
-          // the last child should always been the label
+          // the last child should always be the label
           children[children.length - 1]
         }
       </label>
