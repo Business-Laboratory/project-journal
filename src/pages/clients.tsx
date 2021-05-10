@@ -1,11 +1,11 @@
 // Alternate Admin Home view that displays clients
-import tw, { css } from 'twin.macro'
+import tw, { css, theme } from 'twin.macro'
 import Head from 'next/head'
 import { Fragment, useEffect, useReducer } from 'react'
 import { useRouter } from 'next/router'
 import produce from 'immer'
 
-import { PlusSmallIcon, EditIcon, DeleteIcon } from 'icons'
+import { PlusIcon, PlusSmallIcon, EditIcon, DeleteIcon } from 'icons'
 import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
@@ -26,7 +26,7 @@ export default function Clients() {
       <Head>
         <title>Clients | Project Journal</title>
       </Head>
-      <main tw="pt-10 w-9/12 min-w-max mx-auto space-y-8">
+      <main tw="py-10 w-9/12 min-w-max mx-auto space-y-8">
         <ClientList />
       </main>
     </>
@@ -83,7 +83,7 @@ function ClientList() {
 function AddClientLink() {
   return (
     <IconLink href={createEditClientHref('new')}>
-      <PlusSmallIcon tw="w-6 h-6 fill-copper-300" />
+      <PlusIcon tw="w-6 h-6 fill-copper-300" />
       <span tw="bl-text-2xl">Add client</span>
     </IconLink>
   )
@@ -139,7 +139,7 @@ function EditClientModalContent({
 
   return (
     <>
-      <section tw="flex flex-col">
+      <section tw="flex flex-col justify-start">
         <TextInput
           tw="bl-text-3xl w-full"
           label="Client name"
@@ -148,7 +148,10 @@ function EditClientModalContent({
           onChange={(name) => dispatch({ type: 'updateName', name })}
         />
 
-        <IconButton tw="mt-9" onClick={() => dispatch({ type: 'addEmployee' })}>
+        <IconButton
+          tw="mt-9 w-auto"
+          onClick={() => dispatch({ type: 'addEmployee' })}
+        >
           <PlusSmallIcon tw="w-4 h-4 fill-copper-300" />
           <span tw="bl-text-xl">Add employee</span>
         </IconButton>
@@ -159,6 +162,9 @@ function EditClientModalContent({
             css`
               min-width: 600px; /* this is just an estimate so it doesn't collapse too much */
               grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+              margin-right: calc(
+                calc(${theme('width.12')} - ${theme('width.3')}) / -2
+              );
             `,
           ]}
         >
@@ -225,7 +231,7 @@ function EditClientModalContent({
           error={clientMutation.status === 'error'}
         >
           {clientMutation.status === 'loading'
-            ? 'saving client'
+            ? 'saving client...'
             : 'save client'}
         </SaveButton>
       </section>
