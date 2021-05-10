@@ -92,6 +92,7 @@ export default async function handler(
 
     res.status(501).json({ error: `${method} not implemented.` })
   } catch (error) {
+    console.log(error)
     res.status(501).json({ error })
   }
 }
@@ -234,6 +235,17 @@ async function newProject() {
 }
 
 async function deleteProject(id: number) {
+  // Change to delete once the projectId is marked as unique in schema
+  await prisma.summary.deleteMany({
+    where: {
+      projectId: id,
+    },
+  })
+  await prisma.update.deleteMany({
+    where: {
+      projectId: id,
+    },
+  })
   await prisma.project.delete({
     where: {
       id,

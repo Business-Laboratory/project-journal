@@ -1,24 +1,11 @@
 import { useQueryClient, useMutation } from 'react-query'
 
-import { Projects } from './useProjects'
-
 export function useDeleteProject() {
   const queryClient = useQueryClient()
-  const updateKey = ['projects']
   return useMutation(deleteProject, {
     onSuccess: async (_, id) => {
+      const updateKey = ['projects', { id }]
       await queryClient.cancelQueries(updateKey)
-      const projects = queryClient.getQueryData<Projects>(updateKey) ?? []
-      const deleteIdIdx = projects.findIndex((u) => u.id === id)
-      if (deleteIdIdx === -1) {
-        throw new Error(`Project with id ${id} not found in query cache`)
-      }
-      let newProjects = [...projects]
-      newProjects.splice(deleteIdIdx, 1)
-      queryClient.setQueryData(updateKey, newProjects)
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries(updateKey)
     },
   })
 }
