@@ -1,14 +1,10 @@
 import tw, { css, theme } from 'twin.macro'
 import Link from 'next/link'
+import type { LinkProps } from 'next/link'
 import { signOut } from 'next-auth/client'
 import { useRouter } from 'next/router'
-import {
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  MenuLink,
-} from '@reach/menu-button'
+import { Menu, MenuButton, MenuList, MenuItem } from '@reach/menu-button'
+import { forwardRef } from 'react'
 
 import { useAuth } from '@components/auth-context'
 import { LogoIcon } from 'icons'
@@ -82,7 +78,9 @@ type MenuProps = {
   imageUrl: string | null
   role: Role | null
 }
+
 function UserMenu({ imageUrl, role }: MenuProps) {
+  const router = useRouter()
   return (
     <Menu>
       <MenuButton tw="focus:outline-none focus:ring-2 focus:ring-copper-100 ">
@@ -102,12 +100,11 @@ function UserMenu({ imageUrl, role }: MenuProps) {
         ]}
       >
         {role === 'ADMIN' && (
-          <Link href="/edit-admins" passHref>
-            <MenuLink css={menuItemTw} as="a">
-              EDIT ADMINS
-            </MenuLink>
-          </Link>
+          <MenuItem css={menuItemTw} onSelect={() => router.push('/admins')}>
+            <CustomMenuLink href="/admins">EDIT ADMINS</CustomMenuLink>
+          </MenuItem>
         )}
+
         <MenuItem
           css={menuItemTw}
           onSelect={() => {
@@ -140,6 +137,21 @@ function NavHome({ children }: NavHomeProps) {
     </Link>
   )
 }
+
+type CustomMenuLinkProps = React.ComponentPropsWithRef<'a'> & {
+  href: LinkProps['href']
+}
+const CustomMenuLink = forwardRef<HTMLAnchorElement, CustomMenuLinkProps>(
+  function CustomMenuLink({ href, children, ...props }, ref) {
+    return (
+      <Link href={href} passHref>
+        <a ref={ref} {...props}>
+          {children}
+        </a>
+      </Link>
+    )
+  }
+)
 
 const menuItemTw = tw`flex w-full px-3 py-1 text-xs uppercase cursor-pointer text-gray-yellow-200 hover:bg-gray-yellow-200 hover:text-gray-yellow-600 focus:bg-gray-yellow-200 focus:text-gray-yellow-600`
 

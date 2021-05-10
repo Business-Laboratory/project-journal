@@ -65,9 +65,10 @@ function SaveButton({
   variant = 'important',
   children,
   error,
+  className,
 }: ButtonProps & { error: boolean }) {
   return (
-    <div tw="space-y-3">
+    <div tw="space-y-3" className={className}>
       <Button variant={variant} onClick={onClick} disabled={disabled}>
         {children}
       </Button>
