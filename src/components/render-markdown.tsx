@@ -24,60 +24,14 @@ function RenderMarkdown(props: ReactMarkdownOptions) {
             if (typeof checked !== 'boolean') {
               throw new Error(`checked must be a boolean, received ${checked}`)
             }
-
             return (
-              <li className={className}>
-                <label tw="flex items-center">
-                  <CustomCheckboxContainer
-                    disabled
-                    checked={checked}
-                    css={[
-                      tw`w-4 h-4`,
-                      !checked ? tw`border-2 border-gray-yellow-600` : null,
-                    ]}
-                  >
-                    <CustomCheckboxInput value="whatever" checked={checked} />
-                    {checked ? (
-                      <CheckIcon aria-hidden tw="fill-copper-300" />
-                    ) : null}
-                  </CustomCheckboxContainer>
-                  {
-                    // the last child should always been the label
-                    children[children.length - 1]
-                  }
-                </label>
-              </li>
+              <Checkbox className={className} checked={checked}>
+                {children}
+              </Checkbox>
             )
           }
-
           // these seem to be all that needs to be passed along
           return <li className={className}>{children}</li>
-        },
-        input: (props) => {
-          console.log(props)
-          const checked = props.checked
-          if (typeof checked !== 'boolean') {
-            throw new Error(`checked must be a boolean, received ${checked}`)
-          }
-          return (
-            // eslint-disable-next-line jsx-a11y/label-has-associated-control
-            <label tw="flex items-center">
-              <CustomCheckboxContainer
-                disabled
-                checked={checked}
-                css={[
-                  tw`w-4 h-4`,
-                  !checked ? tw`border-2 border-gray-yellow-600` : null,
-                ]}
-              >
-                <CustomCheckboxInput value="whatever" checked={checked} />
-                {checked ? (
-                  <CheckIcon aria-hidden tw="fill-copper-300" />
-                ) : null}
-              </CustomCheckboxContainer>
-              This is a pretty cool checkbox; do you agree?
-            </label>
-          )
         },
       }}
       plugins={[breaks, gfm]}
@@ -160,3 +114,32 @@ const markdownCss = [
     }
   `,
 ]
+
+type CheckboxProps = {
+  className?: string
+  checked: boolean
+  children: React.ReactNode[]
+}
+function Checkbox({ className, checked, children }: CheckboxProps) {
+  return (
+    <li className={className}>
+      <label tw="flex items-center">
+        <CustomCheckboxContainer
+          disabled
+          checked={checked}
+          css={[
+            tw`w-4 h-4`,
+            !checked ? tw`border-2 border-gray-yellow-600` : null,
+          ]}
+        >
+          <CustomCheckboxInput value="whatever" checked={checked} />
+          {checked ? <CheckIcon aria-hidden tw="fill-copper-300" /> : null}
+        </CustomCheckboxContainer>
+        {
+          // the last child should always been the label
+          children[children.length - 1]
+        }
+      </label>
+    </li>
+  )
+}
