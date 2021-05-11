@@ -68,7 +68,6 @@ const fetchProject: QueryFunction<ProjectData, ProjectQueryKey> = async ({
 
   const res = await fetch(`/api/project?id=${id}`, {
     method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
   })
   if (!res.ok) {
     throw new Error(`Something went wrong`)
