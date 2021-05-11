@@ -310,6 +310,9 @@ function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
               color: ${theme('colors[gray-yellow].600')};
               background-color: ${theme('colors[copper].100')};
             }
+            &[data-reach-listbox-popover]:focus-within {
+              ${tw`outline-none`}
+            }
           `,
         ]}
       >
