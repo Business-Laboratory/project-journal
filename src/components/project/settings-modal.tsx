@@ -155,8 +155,8 @@ function SettingsEditModalContent({
           }
         />
       </label>
-      <div tw="flex flex-row w-full justify-between">
-        <Button tw="max-w-max self-start inline-flex">
+      <div tw="flex flex-row w-full justify-between space-x-8">
+        <Button tw="min-w-min self-start inline-flex">
           <label htmlFor="image" tw="space-x-4 items-center inline-flex">
             <CameraIcon tw="inline fill-gray-yellow-600" />
             <span tw="bl-text-lg">
