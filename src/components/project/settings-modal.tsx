@@ -283,12 +283,15 @@ function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
         css={[
           tw`flex justify-between items-center bl-text-3xl`,
           tw`border-0 border-b border-gray-yellow-600`,
-          tw`hover:border-copper-300 focus:border focus:border-copper-400 focus:outline-none`,
+          tw`hover:border-copper-300 focus:border-copper-400 focus:outline-none`,
           tw`p-0 bl-text-3xl flex justify-between items-center focus:outline-none`,
           !client ? tw`text-gray-yellow-400` : tw`text-gray-yellow-600`,
           css`
             &[data-reach-listbox-button]:focus-visible {
-              ${tw`outline-none border border-copper-400`}
+              ${tw`outline-none`}
+            }
+            &[data-reach-listbox-button][aria-expanded='true'] {
+              ${tw`border-copper-400`}
             }
           `,
         ]}
