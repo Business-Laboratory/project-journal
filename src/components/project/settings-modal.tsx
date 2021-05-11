@@ -272,7 +272,7 @@ function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
       css={[
         tw`w-full`,
         tw`border-b border-gray-yellow-600`,
-        tw`hover:border-copper-300 focus:border-copper-400 focus:outline-none`,
+        tw`hover:border-copper-300 focus:border focus:border-copper-400 focus:outline-none`,
         css`
           &[data-reach-listbox-input][data-state='expanded'] {
             border-color: ${theme('colors[copper].400')};
@@ -285,10 +285,10 @@ function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
     >
       <ListboxButton
         css={[
+          tw`flex justify-between items-center bl-text-3xl border-none`,
           tw`p-0 bl-text-3xl flex justify-between items-center focus:outline-none`,
           !client ? tw`text-gray-yellow-400` : tw`text-gray-yellow-600`,
         ]}
-        tw="flex justify-between items-center bl-text-3xl border-none"
         arrow={<ExpandIcon tw="fill-gray-yellow-400 w-6 h-6" />}
       />
       <ListboxPopover
