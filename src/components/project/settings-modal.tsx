@@ -210,7 +210,7 @@ function SettingsEditModalContent({
       <DeleteSection
         tw="mt-16 w-full"
         label="Verify project name"
-        verificationText={name}
+        verificationText={name || 'Project Name'}
         onDelete={() => {
           projectDeleteMutation.mutate(projectId, {
             onSuccess: () => {
@@ -284,7 +284,10 @@ function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
       onChange={(value) => onChange(value)}
     >
       <ListboxButton
-        css={[tw`p-0 bl-text-3xl flex justify-between items-center`]}
+        css={[
+          tw`p-0 bl-text-3xl flex justify-between items-center focus:outline-none`,
+          !client ? tw`text-gray-yellow-400` : tw`text-gray-yellow-600`,
+        ]}
         tw="flex justify-between items-center bl-text-3xl border-none"
         arrow={<ExpandIcon tw="fill-gray-yellow-400 w-6 h-6" />}
       />

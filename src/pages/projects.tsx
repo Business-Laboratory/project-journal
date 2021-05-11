@@ -5,7 +5,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 
 import { PlusIcon } from 'icons'
-import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
 import { useAuth } from '@components/auth-context'
@@ -14,6 +13,7 @@ import { usePrefetchProject } from '@queries/useProject'
 import { usePrefetchUpdates } from '@queries/useUpdates'
 import { useNewProject } from '@queries/useNewProject'
 import { useRouter } from 'next/router'
+import { IconButton } from '@components/icon-button'
 
 export default function Projects() {
   return (
@@ -73,8 +73,7 @@ function AddProjectLink() {
   const router = useRouter()
   const newProjectMutation = useNewProject()
   return newProjectMutation.status !== 'loading' ? (
-    <IconLink
-      href=""
+    <IconButton
       onClick={() => {
         newProjectMutation.mutate(
           { id: 'new' },
@@ -88,7 +87,7 @@ function AddProjectLink() {
     >
       <PlusIcon tw="w-6 h-6 fill-copper-300" />
       <span tw="bl-text-2xl">Add project</span>
-    </IconLink>
+    </IconButton>
   ) : (
     <span tw="bl-text-2xl">Creating project...</span>
   )
