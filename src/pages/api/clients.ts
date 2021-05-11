@@ -6,6 +6,7 @@ import type { PrepareAPIData } from '@types'
 import type { UserData } from '@utils/api/check-authentication'
 
 export type ClientsData = PrepareAPIData<ReturnType<typeof getClients>>
+export { getClients }
 
 /**
  * Gets projects based on their role:
@@ -19,9 +20,9 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const user = await checkAuthentication(req, res)
-  // bail if there's no user
+  // bail if there's no user or the user is not an admin
   if (!user || user.role !== 'ADMIN') {
-    res.status(401).json({ error: 'User not authorized.' })
+    res.status(401).json({ error: 'You are not an admin.' })
     return
   }
 
@@ -35,7 +36,8 @@ export default async function handler(
 }
 
 async function getClients(user: UserData) {
-  return await prisma.client.findMany({
+  const clients = await prisma.client.findMany({
+    orderBy: { createdAt: 'desc' },
     select: {
       id: true,
       name: true,
@@ -51,4 +53,5 @@ async function getClients(user: UserData) {
       },
     },
   })
+  return clients
 }

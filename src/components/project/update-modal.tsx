@@ -106,6 +106,11 @@ function ProjectEditModalContent({
           tw="mt-16"
           label="Verify update title"
           verificationText={title}
+          buttonText={
+            deleteMutation.status === 'loading'
+              ? 'Deleting...'
+              : 'Delete update'
+          }
           onDelete={() => {
             deleteMutation.mutate(id, {
               onSuccess: onDismiss,
@@ -119,7 +124,7 @@ function ProjectEditModalContent({
 }
 
 /**
- * Any updateId that isn't found in our data defaults to path /project/projectId?edit=update&updateId=new
+ * Any update id that isn't found in our data defaults to path /project/projectId?edit=update&updateId=new
  */
 function useRedirectNewUpdate(projectId: number, id: UpdateBody['id']) {
   const router = useRouter()

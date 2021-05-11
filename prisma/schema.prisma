@@ -113,6 +113,7 @@ model Employee {
   // however, multiple employees may belong to the same client, and the
   // same user may (unlikely) be employeed by multiple clients
   @@id([clientId, userId])
+  @@unique([clientId, userId])
   @@map(name: "employees")
 }
 

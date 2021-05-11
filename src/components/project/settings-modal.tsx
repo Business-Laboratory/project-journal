@@ -211,6 +211,11 @@ function SettingsEditModalContent({
         tw="mt-16 w-full"
         label="Verify project name"
         verificationText={name || 'Project Name'}
+        buttonText={
+          projectDeleteMutation.status === 'loading'
+            ? 'Deleting...'
+            : 'Delete project'
+        }
         onDelete={() => {
           projectDeleteMutation.mutate(projectId, {
             onSuccess: () => {
