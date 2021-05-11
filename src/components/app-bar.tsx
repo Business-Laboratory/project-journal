@@ -153,7 +153,7 @@ const CustomMenuLink = forwardRef<HTMLAnchorElement, CustomMenuLinkProps>(
   }
 )
 
-const menuItemTw = tw`flex w-full px-3 py-1 text-xs uppercase cursor-pointer text-gray-yellow-200 hover:bg-gray-yellow-200 hover:text-gray-yellow-600 focus:bg-gray-yellow-200 focus:text-gray-yellow-600`
+const menuItemTw = tw`flex w-full px-3 py-1 bl-text-xs uppercase cursor-pointer text-gray-yellow-200 hover:bg-gray-yellow-200 hover:text-gray-yellow-600 focus:bg-gray-yellow-200 focus:text-gray-yellow-600`
 
 const appbarElementRingCss = css`
   &.focus-visible {
