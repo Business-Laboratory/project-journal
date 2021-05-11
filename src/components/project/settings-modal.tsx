@@ -274,25 +274,23 @@ type ClientSelectProps = {
 function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
   return (
     <ListboxInput
-      css={[
-        tw`w-full`,
-        tw`border-b border-gray-yellow-600`,
-        tw`hover:border-copper-300 focus:border focus:border-copper-400 focus:outline-none`,
-        css`
-          &[data-reach-listbox-input][data-state='expanded'] {
-            border-color: ${theme('colors[copper].400')};
-          }
-        `,
-      ]}
+      css={[tw`w-full`]}
       aria-labelledby={label}
       value={client?.toString() ?? '-1'}
       onChange={(value) => onChange(value)}
     >
       <ListboxButton
         css={[
-          tw`flex justify-between items-center bl-text-3xl border-none`,
+          tw`flex justify-between items-center bl-text-3xl`,
+          tw`border-0 border-b border-gray-yellow-600`,
+          tw`hover:border-copper-300 focus:border focus:border-copper-400 focus:outline-none`,
           tw`p-0 bl-text-3xl flex justify-between items-center focus:outline-none`,
           !client ? tw`text-gray-yellow-400` : tw`text-gray-yellow-600`,
+          css`
+            &[data-reach-listbox-button]:focus-visible {
+              ${tw`outline-none border border-copper-400`}
+            }
+          `,
         ]}
         arrow={<ExpandIcon tw="fill-gray-yellow-400 w-6 h-6" />}
       />
