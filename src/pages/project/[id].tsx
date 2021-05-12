@@ -64,18 +64,7 @@ function ProjectById({ projectId }: { projectId: number }) {
         {userRole === null || status !== 'success' || data === undefined ? (
           <LoadingSummary status={status} />
         ) : (
-          <Summary
-            projectId={projectId}
-            userRole={userRole}
-            name={data.name ?? ''}
-            imageUrl={data.imageUrl ?? ''}
-            summary={data.summary}
-            clientName={data.client?.name ?? ''}
-            clientEmployees={
-              data.client?.employees.map(({ user }) => user) ?? []
-            }
-            team={data.team}
-          />
+          <Summary projectId={projectId} userRole={userRole} project={data} />
         )}
       </main>
     </>

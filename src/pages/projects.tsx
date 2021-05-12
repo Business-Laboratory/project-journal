@@ -5,13 +5,15 @@ import Link from 'next/link'
 import Image from 'next/image'
 
 import { PlusIcon } from 'icons'
-import { IconLink } from '@components/icon-link'
 import { LoadingSpinner } from '@components/loading-spinner'
 import { DataErrorMessage } from '@components/data-error-message'
 import { useAuth } from '@components/auth-context'
 import { useProjects } from '@queries/useProjects'
 import { usePrefetchProject } from '@queries/useProject'
 import { usePrefetchUpdates } from '@queries/useUpdates'
+import { useNewProject } from '@queries/useNewProject'
+import { useRouter } from 'next/router'
+import { IconButton } from '@components/icon-button'
 
 export default function Projects() {
   return (
@@ -68,11 +70,31 @@ function CardGrid() {
 }
 
 function AddProjectLink() {
-  return (
-    <IconLink href="#">
-      <PlusIcon tw="w-6 h-6 fill-copper-300" />
-      <span tw="bl-text-2xl">Add project</span>
-    </IconLink>
+  const router = useRouter()
+  const newProjectMutation = useNewProject()
+  return newProjectMutation.status !== 'loading' ? (
+    <>
+      <IconButton
+        onClick={() => {
+          newProjectMutation.mutate(
+            { id: 'new' },
+            {
+              onSuccess: (project) => {
+                router.push(`/project/${project.id}?edit=settings`)
+              },
+            }
+          )
+        }}
+      >
+        <PlusIcon tw="w-6 h-6 fill-copper-300" />
+        <span tw="bl-text-2xl">Add project</span>
+      </IconButton>
+      {newProjectMutation.status === 'error' && (
+        <span tw="pl-4 bl-text-2xl text-matisse-red-200">Failed to create</span>
+      )}
+    </>
+  ) : (
+    <span tw="bl-text-2xl">Creating project...</span>
   )
 }
 

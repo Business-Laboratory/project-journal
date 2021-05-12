@@ -13,7 +13,13 @@ export { Modal, MarkdownTextArea, SaveButton }
 
 function Modal({ children, onDismiss, ...props }: DialogOverlayProps) {
   return (
-    <DialogOverlay css={dialogCss} onDismiss={onDismiss} {...props}>
+    // Remove dangerouslyBypassFocusLock once https://github.com/reach/reach-ui/issues/736 is closed
+    <DialogOverlay
+      css={dialogCss}
+      onDismiss={onDismiss}
+      dangerouslyBypassFocusLock={true}
+      {...props}
+    >
       <DialogContent css={dialogContentCss} aria-label="modal-content">
         <button
           className="group"
