@@ -9,6 +9,7 @@ import UpdateLinkIcon from './update-link-icon.svg'
 import CloseIcon from './close-icon.svg'
 import CameraIcon from './camera-icon.svg'
 import DeleteIcon from './delete-icon.svg'
+import ExpandIcon from './expand-icon.svg'
 import CheckIcon from './check-icon.svg'
 
 export {
@@ -23,5 +24,6 @@ export {
   UpdateLinkIcon,
   CameraIcon,
   DeleteIcon,
+  ExpandIcon,
   CheckIcon,
 }

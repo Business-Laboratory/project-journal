@@ -18,13 +18,14 @@ export default async function handler(
 
   try {
     const { id, fileName } = checkBody(req.body)
+    const fileNameNoWhitespace = fileName.replace(/\s/g, '')
     // assuming id is project id for now
     checkIfProjectExists(id)
 
     // get a SAS url to upload the image. This will also create the container if it does not exist
     const sasUrl = await generateSasUrlForImageUpload(
       'project-images', // for now we're just adding all project images to the same container
-      `project-${id}-${fileName}`
+      `project-${id}-${fileNameNoWhitespace}`
     )
 
     res.status(200).json({ sasUrl })
