@@ -60,7 +60,7 @@ function ProjectInformation({
   return (
     <ProjectInformationContainer>
       <SearchBar updates={updates} disabled={updates.length === 0} />
-      <TeamMultiSelect updates={updates} />
+      <TeamMultiSelect />
       {userRole === 'ADMIN' ? (
         <>
           <AddUpdateButton projectId={projectId} />

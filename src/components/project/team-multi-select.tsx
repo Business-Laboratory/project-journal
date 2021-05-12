@@ -6,109 +6,70 @@ import {
   ComboboxList,
   ComboboxOption,
   ComboboxOptionText,
-  useComboboxContext,
+  // useComboboxContext,
 } from '@reach/combobox'
 import { useRef, useState, useMemo, useEffect } from 'react'
 import { useRect } from '@reach/rect'
 import { matchSorter } from 'match-sorter'
 
-import type { Updates } from '@queries/useUpdates'
-import { CloseIcon } from 'icons'
+import { CloseIcon, ExpandIcon } from 'icons'
+import { useAdmins } from '@queries/useAdmins'
+
+import type { Admins } from '@queries/useAdmins'
 
 const inputPaddingY = theme('spacing.3')
 
 type TeamMultiSelectProps = {
-  updates: Updates
   id?: string
   disabled?: boolean
 }
 export function TeamMultiSelect({
-  updates,
   id = 'team-multi-select',
   disabled = false,
 }: TeamMultiSelectProps) {
+  const { data, status } = useAdmins()
   const [searchTerm, setSearchTerm] = useState('')
-  const matchedUpdates = useMatchedUpdates(updates, searchTerm)
-  const [blurring, setBlurring] = useState(false)
+  const [selectedAdmins, setSelectedAdmins] = useState<Admins>([])
+  const matchedAdmins = useMatchedAdmins(data ?? [], searchTerm)
 
-  return (
-    <Combobox
-      aria-label="search projects"
-      openOnFocus
-      onSelect={(selectedValue) => {
-        const selectedUpdate = matchedUpdates.find(
-          ({ value }) => value === selectedValue
-        )
-        console.log(selectedUpdate)
-        setSearchTerm('')
-      }}
-    >
-      <InnerCombobox
-        updates={matchedUpdates}
-        id={id}
-        disabled={disabled}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        blurring={blurring}
-        setBlurring={setBlurring}
-      />
-    </Combobox>
-  )
-}
-
-/**
- * Inspired by https://github.com/reach/reach-ui/blob/develop/packages/combobox/examples/utils.ts
- * @param term
- */
-function useMatchedUpdates(updates: Updates, searchTerm: string) {
-  const updateValuesAndHashLinks = useMemo(
-    () =>
-      updates.map(({ title, hashLink }) => ({
-        value: title,
-        hashLink,
-      })),
-    [updates]
-  )
-  return useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase()
-    return normalizedSearchTerm === ''
-      ? updateValuesAndHashLinks
-      : matchSorter(updateValuesAndHashLinks, searchTerm, {
-          keys: [(item) => item.value],
-        })
-  }, [searchTerm, updateValuesAndHashLinks])
-}
-
-type InnerComboboxProps = Omit<TeamMultiSelectProps, 'updates'> & {
-  updates: ReturnType<typeof useMatchedUpdates>
-  searchTerm: string
-  setSearchTerm: React.Dispatch<React.SetStateAction<string>>
-  blurring: boolean
-  setBlurring: (blurring: boolean) => void
-}
-function InnerCombobox({
-  updates,
-  id,
-  disabled = false,
-  searchTerm,
-  setSearchTerm,
-  blurring,
-  setBlurring,
-}: InnerComboboxProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const rect = useRect(containerRef)
 
   // blur the input after an option has been selected – this can't
   // be added to `onSelect`, because Reach refocuses after clicks
-  useBlurOnIdle(inputRef, blurring, setBlurring)
+  // const [blurring, setBlurring] = useState(false)
+  // useBlurOnIdle(inputRef, blurring, setBlurring)
+
+  useEffect(() => {
+    if (data) {
+      setSelectedAdmins(data.slice(0, 1))
+    }
+  }, [data])
+  // TODO: pass in as a prop once David's PR is merged in
+  if (status !== 'success') {
+    return null
+  }
 
   return (
-    <>
+    <Combobox
+      aria-label="select project team"
+      openOnFocus
+      // onSelect={(selectedValue) => {
+      //   const selectedUpdate = matchedUpdates.find(
+      //     ({ value }) => value === selectedValue
+      //   )
+      //   console.log(selectedUpdate)
+      //   setSearchTerm('')
+      // }}
+    >
+      <label htmlFor={id} tw="bl-text-xs text-gray-yellow-300">
+        Project team
+      </label>
       <div
         ref={containerRef}
         css={[
-          tw`pb-2 flex flex-row flex-wrap`,
+          tw`flex flex-row items-center`,
           css`
             /* need to inherit these css properties so the font can be overwritten properly */
             letter-spacing: inherit;
@@ -124,27 +85,52 @@ function InnerCombobox({
           `,
         ]}
       >
-        <Pill />
-        <Pill />
-        <Pill />
-        <Pill />
-        <ComboboxInput
-          id={id}
-          ref={inputRef}
-          tw="flex-grow placeholder-gray-yellow-300 focus:outline-none disabled:bg-transparent"
-          placeholder="Search project updates..."
-          autoComplete="off"
-          autocomplete={false}
-          disabled={disabled}
-          onChange={(e) => setSearchTerm(e.currentTarget.value)}
-          value={searchTerm}
-        />
+        <div tw="flex flex-row flex-wrap items-center flex-grow">
+          {selectedAdmins.map(({ name, id }) => (
+            <SelectedAdmin key={id} name={name ?? ''} />
+          ))}
+          {selectedAdmins.map(({ name, id }) => (
+            <SelectedAdmin key={id} name={name ?? ''} />
+          ))}
+
+          <ComboboxInput
+            id={id}
+            ref={inputRef}
+            tw="flex-grow placeholder-gray-yellow-300 focus:outline-none disabled:bg-transparent my-2"
+            placeholder={
+              'Search project team...'
+              // selectedAdmins.length > 0 ? 'Search project team...' : ''
+            }
+            autoComplete="off"
+            autocomplete={false}
+            disabled={disabled}
+            onChange={(e) => setSearchTerm(e.currentTarget.value)}
+            value={searchTerm}
+          />
+        </div>
+        <div tw="flex flex-row items-center">
+          <button tw="w-12 h-12" aria-label="clear all" onClick={() => {}}>
+            <CloseIcon tw="w-3 h-3 m-auto" aria-hidden />
+          </button>
+
+          <button
+            tw="w-12 h-12"
+            aria-label="open dropdown"
+            onClick={() => {
+              const input = inputRef.current
+              if (input === null) return
+              input.focus()
+            }}
+          >
+            <ExpandIcon tw="w-3 h-3 m-auto" aria-hidden />
+          </button>
+        </div>
       </div>
 
       <ComboboxPopover css={comboboxPopoverCss(rect)}>
         <ComboboxList>
-          {updates.length > 0 ? (
-            updates.slice(0, 10).map(({ value }, idx) => {
+          {matchedAdmins.length > 0 ? (
+            matchedAdmins.slice(0, 10).map(({ value }, idx) => {
               return (
                 <ComboboxOption
                   key={idx} // key has to be index to that using the arrow keys has the correct order
@@ -160,14 +146,39 @@ function InnerCombobox({
           )}
         </ComboboxList>
       </ComboboxPopover>
-    </>
+    </Combobox>
   )
 }
 
-function Pill() {
+/**
+ * Inspired by https://github.com/reach/reach-ui/blob/develop/packages/combobox/examples/utils.ts
+ */
+function useMatchedAdmins(admins: Admins, searchTerm: string) {
+  const adminValues = useMemo(() => {
+    let adminValues = []
+    for (const { name } of admins) {
+      if (name !== null) {
+        adminValues.push({ value: name })
+      }
+    }
+    return adminValues
+  }, [admins])
+
+  return useMemo(() => {
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase()
+    return normalizedSearchTerm === ''
+      ? adminValues
+      : matchSorter(adminValues, searchTerm, {
+          keys: [(item) => item.value],
+        })
+  }, [searchTerm, adminValues])
+}
+
+type SelectedAdminProps = { name: string }
+function SelectedAdmin({ name }: SelectedAdminProps) {
   return (
-    <div tw="flex flex-row items-center px-2 bg-copper-400 text-gray-yellow-100 rounded-lg max-w-fit mr-6 mb-2">
-      Tripp Lybrand
+    <div tw="flex flex-row items-center px-2 bg-copper-400 text-gray-yellow-100 rounded-lg max-w-fit mr-6">
+      {name}
       <button
         // TODO: make touch area larger
         tw="w-3 h-3 ml-3"
@@ -178,20 +189,20 @@ function Pill() {
   )
 }
 
-function useBlurOnIdle(
-  inputRef: React.MutableRefObject<HTMLInputElement | null>,
-  blurring: boolean,
-  setBlurring: (blurring: boolean) => void
-) {
-  const { state } = useComboboxContext()
+// function useBlurOnIdle(
+//   inputRef: React.MutableRefObject<HTMLInputElement | null>,
+//   blurring: boolean,
+//   setBlurring: (blurring: boolean) => void
+// ) {
+//   const { state } = useComboboxContext()
 
-  useEffect(() => {
-    if (blurring && state === 'IDLE') {
-      inputRef.current?.blur()
-      setBlurring(false)
-    }
-  }, [blurring, inputRef, setBlurring, state])
-}
+//   useEffect(() => {
+//     if (blurring && state === 'IDLE') {
+//       inputRef.current?.blur()
+//       setBlurring(false)
+//     }
+//   }, [blurring, inputRef, setBlurring, state])
+// }
 
 // styles
 
