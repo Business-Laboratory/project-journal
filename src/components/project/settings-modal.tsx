@@ -4,7 +4,6 @@ import React, { useReducer, useState } from 'react'
 
 import { DeleteSection, Modal, SaveButton } from '@components/modal'
 import { useClients } from '@queries/useClients'
-import { useAdmins } from '@queries/useAdmins'
 import { Button } from '@components/button'
 import { CameraIcon, ExpandIcon } from 'icons'
 import { ClientsData } from 'pages/api/clients'
@@ -70,7 +69,6 @@ function SettingsEditModalContent({
     initialState(project)
   )
   const { data: clientsData, status: clientsStatus } = useClients()
-  const { data: adminData, status: adminStatus } = useAdmins()
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [tempImageUrl, setTempImageUrl] = useState(project.imageUrl)
   const [imageUpload, setImageUpload] = useState<'idle' | 'loading'>('idle')
@@ -79,18 +77,9 @@ function SettingsEditModalContent({
   const projectDeleteMutation = useDeleteProject()
 
   const disabled =
-    checkDisabled(
-      project,
-      name,
-      imageFile,
-      clientId,
-      team,
-      clientsStatus,
-      adminStatus
-    ) ||
+    checkDisabled(project, name, imageFile, clientId, team, clientsStatus) ||
     projectMutation.status === 'loading' ||
-    imageUpload === 'loading' ||
-    !adminData
+    imageUpload === 'loading'
 
   const handleProjectSave = async () => {
     if (imageFile !== null) {
@@ -197,7 +186,12 @@ function SettingsEditModalContent({
         ) : null}
       </div>
       <div tw="w-full">
-        <TeamMultiSelect />
+        <TeamMultiSelect
+          team={team}
+          setTeam={(newTeam) => {
+            dispatch({ type: 'SET_TEAM', payload: newTeam })
+          }}
+        />
       </div>
       <SaveButton
         onClick={() => {
@@ -349,21 +343,19 @@ function createSettingsHref(projectId: number) {
   }
 }
 
+// TODO: clean this up
 const checkDisabled = (
   project: ProjectData,
   name: string,
   file: File | null,
   clientId: number | null,
   team: number[],
-  clientsStatus: 'error' | 'idle' | 'loading' | 'success',
-  adminStatus: 'error' | 'idle' | 'loading' | 'success'
+  clientsStatus: 'error' | 'idle' | 'loading' | 'success'
 ) => {
   if (
     (project.name === name && !file && project.client?.id === clientId) ||
     clientsStatus === 'loading' ||
-    clientsStatus === 'error' ||
-    adminStatus === 'loading' ||
-    adminStatus === 'error'
+    clientsStatus === 'error'
   ) {
     return true
   }

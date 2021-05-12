@@ -19,27 +19,27 @@ import type { Admins } from '@queries/useAdmins'
 const inputPaddingY = theme('spacing.3')
 
 type TeamMultiSelectProps = {
+  team: number[]
+  setTeam: (admins: number[]) => void
   id?: string
   disabled?: boolean
 }
 export function TeamMultiSelect({
+  team,
+  setTeam,
   id = 'team-multi-select',
   disabled = false,
 }: TeamMultiSelectProps) {
-  // TODO: make this come from the props
-  const [selectedAdmins, setSelectedAdmins] = useState<Admins>([])
-
   const { data, status } = useAdmins()
   const [searchTerm, setSearchTerm] = useState('')
-  const matchedAdmins = useMatchedAdmins(data ?? [], selectedAdmins, searchTerm)
+  const { matchedAdmins, selectedAdmins } = useMatchedAndSelectedAdmins(
+    data ?? [],
+    team,
+    searchTerm
+  )
 
   const containerRef = useRef<HTMLDivElement | null>(null)
   const rect = useRect(containerRef)
-
-  // TODO: pass in as a prop once David's PR is merged in
-  if (status !== 'success') {
-    return null
-  }
 
   return (
     <Combobox
@@ -51,17 +51,18 @@ export function TeamMultiSelect({
         if (!selectedAdmin) {
           throw new Error(`No admin found with the id ${id}`)
         }
-        setSelectedAdmins((prevAdmins) => prevAdmins.concat(selectedAdmin))
+        setTeam(team.concat(selectedAdmin.id))
         setSearchTerm('')
       }}
     >
       <CustomInput
         ref={containerRef}
         id={id}
-        disabled={disabled}
+        disabled={status === 'success' ? disabled : true}
         selectedAdmins={selectedAdmins}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
+        setTeam={setTeam}
       />
 
       <ComboboxPopover css={comboboxPopoverCss(rect)}>
@@ -93,10 +94,11 @@ type CustomInputProps = {
   selectedAdmins: Admins
   searchTerm: string
   setSearchTerm: (searchTerm: string) => void
+  setTeam: (admins: number[]) => void
 }
 const CustomInput = forwardRef<HTMLDivElement, CustomInputProps>(
   function CustomInput(
-    { id, disabled, selectedAdmins, searchTerm, setSearchTerm },
+    { id, disabled, selectedAdmins, searchTerm, setSearchTerm, setTeam },
     ref
   ) {
     const inputRef = useRef<HTMLInputElement | null>(null)
@@ -127,7 +129,18 @@ const CustomInput = forwardRef<HTMLDivElement, CustomInputProps>(
         >
           <div tw="flex flex-row flex-wrap items-center flex-grow">
             {selectedAdmins.map(({ name, id }) => (
-              <SelectedAdmin key={id} name={name ?? ''} />
+              <SelectedAdmin
+                key={id}
+                name={name ?? ''}
+                onDelete={() => {
+                  let newTeam = []
+                  for (const admin of selectedAdmins) {
+                    if (admin.id === id) continue
+                    newTeam.push(admin.id)
+                  }
+                  setTeam(newTeam)
+                }}
+              />
             ))}
 
             <ComboboxInput
@@ -146,7 +159,11 @@ const CustomInput = forwardRef<HTMLDivElement, CustomInputProps>(
             />
           </div>
           <div tw="flex flex-row items-center">
-            <button tw="w-12 h-12" aria-label="clear all" onClick={() => {}}>
+            <button
+              tw="w-12 h-12"
+              aria-label="clear all"
+              onClick={() => setTeam([])}
+            >
               <CloseIcon tw="w-4 h-4 m-auto" aria-hidden />
             </button>
             <button
@@ -169,23 +186,29 @@ const CustomInput = forwardRef<HTMLDivElement, CustomInputProps>(
 /**
  * Inspired by https://github.com/reach/reach-ui/blob/develop/packages/combobox/examples/utils.ts
  */
-function useMatchedAdmins(
+function useMatchedAndSelectedAdmins(
   admins: Admins,
-  selectedAdmins: Admins,
+  team: number[],
   searchTerm: string
 ) {
-  const adminValues = useMemo(() => {
-    const selectedIds = new Set(selectedAdmins.map(({ id }) => id))
+  const { adminValues, selectedAdmins } = useMemo(() => {
+    const selectedIds = new Set(team)
     let adminValues = []
-    for (const { id, name } of admins) {
-      if (name !== null && !selectedIds.has(id)) {
+    let selectedAdmins = []
+    for (const admin of admins) {
+      const { id, name } = admin
+      // skip admins without names, they shouldn't be in the database
+      if (name === null) continue
+      if (selectedIds.has(id)) {
+        selectedAdmins.push(admin)
+      } else {
         adminValues.push({ value: name })
       }
     }
-    return adminValues
-  }, [admins, selectedAdmins])
+    return { adminValues, selectedAdmins }
+  }, [admins, team])
 
-  return useMemo(() => {
+  const matchedAdmins = useMemo(() => {
     const normalizedSearchTerm = searchTerm.trim().toLowerCase()
     return normalizedSearchTerm === ''
       ? adminValues
@@ -193,16 +216,19 @@ function useMatchedAdmins(
           keys: [(item) => item.value],
         })
   }, [searchTerm, adminValues])
+
+  return { matchedAdmins, selectedAdmins }
 }
 
-type SelectedAdminProps = { name: string }
-function SelectedAdmin({ name }: SelectedAdminProps) {
+type SelectedAdminProps = { name: string; onDelete: () => void }
+function SelectedAdmin({ name, onDelete }: SelectedAdminProps) {
   return (
     <div tw="flex flex-row items-center px-2 bg-copper-400 text-gray-yellow-100 rounded-lg max-w-fit mr-6">
       {name}
       <button
         // TODO: make touch area larger
         tw="w-3 h-3 ml-3"
+        onClick={onDelete}
       >
         <CloseIcon tw="fill-gray-yellow-100 h-3 w-3 " />
       </button>
