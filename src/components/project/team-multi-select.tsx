@@ -108,7 +108,7 @@ const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
         <label htmlFor={id} tw="bl-text-xs text-gray-yellow-300">
           Project team
         </label>
-        <div ref={ref} className="group" css={wrapperCss(disabled)}>
+        <div ref={ref} css={wrapperCss(disabled)}>
           <div tw="flex flex-row flex-wrap items-center flex-grow">
             {selectedAdmins.map(({ name, id }) => (
               <SelectedAdmin
@@ -146,11 +146,22 @@ const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
           </div>
           <div tw="flex flex-row items-center">
             <button
-              tw="w-12 h-12"
+              className="group"
+              css={[
+                tw`w-12 h-12 hover:text-copper-300 focus:outline-none`,
+                css`
+                  &.focus-visible > svg {
+                    ${tw`ring ring-copper-400`}
+                  }
+                `,
+              ]}
               aria-label="clear all"
               onClick={() => setTeam([])}
             >
-              <CloseIcon tw="w-4 h-4 m-auto" aria-hidden />
+              <CloseIcon
+                tw="w-4 h-4 m-auto fill-gray-yellow-400 group-hover:fill-copper-300"
+                aria-hidden
+              />
             </button>
             <button
               tw="w-12 h-12"
@@ -161,7 +172,7 @@ const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
                 input.focus()
               }}
             >
-              <ExpandIcon tw="w-4 h-4 m-auto" aria-hidden />
+              <ExpandIcon tw="w-5 h-5 m-auto" aria-hidden />
             </button>
           </div>
         </div>
@@ -172,7 +183,7 @@ const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
 
 function wrapperCss(disabled: boolean) {
   return [
-    tw`flex flex-row items-center group-hover:`,
+    tw`flex flex-row items-center`,
     css`
       /* need to inherit these css properties so the font can be overwritten properly */
       letter-spacing: inherit;
@@ -199,11 +210,12 @@ function SelectedAdmin({ name, onDelete }: SelectedAdminProps) {
     <div tw="flex flex-row items-center px-2 bg-copper-400 text-gray-yellow-100 rounded-lg max-w-fit mr-6">
       {name}
       <button
+        className="group"
         // TODO: make touch area larger
-        tw="w-3 h-3 ml-3"
+        tw="w-6 h-6 ml-3 focus:outline-none"
         onClick={onDelete}
       >
-        <CloseIcon tw="fill-gray-yellow-100 h-3 w-3 " />
+        <CloseIcon tw="fill-gray-yellow-100 h-3 w-3 m-auto group-hover:fill-gray-yellow-600 group-focus:(ring-2 ring-copper-100)" />
       </button>
     </div>
   )
