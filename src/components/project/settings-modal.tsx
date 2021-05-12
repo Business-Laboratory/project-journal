@@ -18,6 +18,7 @@ import {
 } from '@reach/listbox'
 import '@reach/listbox/styles.css'
 import Image from 'next/image'
+import { TeamMultiSelect } from './team-multi-select'
 import { useProjectMutation } from '@queries/useProjectMutation'
 import { useDeleteProject } from '@queries/useDeleteProject'
 
@@ -195,6 +196,9 @@ function SettingsEditModalContent({
           </div>
         ) : null}
       </div>
+      <div tw="w-full">
+        <TeamMultiSelect />
+      </div>
       <SaveButton
         onClick={() => {
           if (disabled) return
@@ -298,7 +302,7 @@ function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
       />
       <ListboxPopover
         css={[
-          tw`z-50 bg-gray-yellow-100 mt-6 shadow-bl focus-within:shadow-bl`,
+          tw`bg-gray-yellow-100 mt-6 shadow-bl focus-within:shadow-bl`,
           tw`border rounded border-copper-400`,
           // Don't know if we can not hardcode the font weight
           css`

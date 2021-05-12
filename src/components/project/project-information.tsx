@@ -26,7 +26,6 @@ import { createEditUpdateHref } from './update-modal'
 import type { Updates } from '@queries/useUpdates'
 import type { QueryStatus } from 'react-query'
 import type { Role } from '@prisma/client'
-import { TeamMultiSelect } from '@components/project/team-multi-select'
 
 export { ProjectInformation, LoadingProjectInformation }
 
@@ -60,7 +59,6 @@ function ProjectInformation({
   return (
     <ProjectInformationContainer>
       <SearchBar updates={updates} disabled={updates.length === 0} />
-      <TeamMultiSelect />
       {userRole === 'ADMIN' ? (
         <>
           <AddUpdateButton projectId={projectId} />
@@ -79,10 +77,9 @@ function ProjectInformation({
 // Container which handles scroll events
 
 export type OnScrollFunction = () => void
-const OnScrollRefContext =
-  createContext<React.MutableRefObject<OnScrollFunction | null> | undefined>(
-    undefined
-  )
+const OnScrollRefContext = createContext<
+  React.MutableRefObject<OnScrollFunction | null> | undefined
+>(undefined)
 
 function ProjectInformationContainer({
   children,
@@ -165,8 +162,9 @@ function AddUpdateButton({ projectId }: { projectId: number }) {
 // container for all of the updates which provisions refs for each of the children through context providers
 // and also handles all of the complex logic for synchronizing the scroll with the hash links
 
-const UpdateRefContext =
-  createContext<React.RefObject<HTMLElement> | undefined>(undefined)
+const UpdateRefContext = createContext<
+  React.RefObject<HTMLElement> | undefined
+>(undefined)
 
 function UpdatesContainer({ children }: { children: React.ReactNode }) {
   const childrenWithRefs = useChildrenWithRefs(children)
