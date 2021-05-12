@@ -8,8 +8,8 @@ export function useDeleteProject() {
     onSuccess: async (_, id) => {
       const updateKey = ['project', { id }]
       await queryClient.cancelQueries(updateKey)
-      const previousProjects =
-        queryClient.getQueryData<Projects>('projects') ?? []
+      const previousProjects = queryClient.getQueryData<Projects>('projects')
+      if (!previousProjects) return
       const deleteIdIdx = previousProjects.findIndex((u) => u.id === id)
       if (deleteIdIdx === -1) {
         throw new Error(`Update with id ${id} not found in query cache`)
