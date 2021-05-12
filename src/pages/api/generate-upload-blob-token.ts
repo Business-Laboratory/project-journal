@@ -18,7 +18,7 @@ export default async function handler(
 
   try {
     const { id, fileName } = checkBody(req.body)
-    const fileNameNoWhitespace = fileName
+    const fileNameNoWhitespace = fileName.replace(/\s/g, '')
     // assuming id is project id for now
     checkIfProjectExists(id)
 
@@ -47,7 +47,7 @@ function checkBody({ id, fileName }: { id: unknown; fileName: unknown }) {
     throw new Error(`Invalid fileName ${JSON.stringify(fileName)}`)
   }
 
-  return { id: Number(id), fileName: fileName.replace(/\s/g, '') }
+  return { id: Number(id), fileName }
 }
 
 async function checkIfProjectExists(id: number) {

@@ -158,7 +158,7 @@ function SettingsEditModalContent({
       <div tw="flex flex-row w-full justify-between space-x-8">
         <Button tw="min-w-min self-start inline-flex">
           <label htmlFor="image" tw="space-x-4 items-center inline-flex">
-            <CameraIcon tw="inline fill-gray-yellow-600" />
+            <CameraIcon tw="inline fill-gray-yellow-600 w-5 h-5" />
             <span tw="bl-text-lg">
               {!tempImageUrl ? 'Upload project image' : 'Change project image'}
             </span>
@@ -231,7 +231,6 @@ function SettingsEditModalContent({
 
 const initialState = ({
   name,
-  imageUrl,
   client,
   team,
 }: ProjectData): Omit<ProjectMutationBody, 'imageStorageBlobUrl' | 'id'> => ({
@@ -295,7 +294,7 @@ function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
             }
           `,
         ]}
-        arrow={<ExpandIcon tw="fill-gray-yellow-400 w-6 h-6" />}
+        arrow={<ExpandIcon tw="fill-gray-yellow-400 w-4 h-4" />}
       />
       <ListboxPopover
         css={[

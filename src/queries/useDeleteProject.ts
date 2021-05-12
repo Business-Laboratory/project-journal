@@ -1,11 +1,26 @@
+import produce from 'immer'
 import { useQueryClient, useMutation } from 'react-query'
+import { Projects } from './useProjects'
 
 export function useDeleteProject() {
   const queryClient = useQueryClient()
   return useMutation(deleteProject, {
     onSuccess: async (_, id) => {
-      const updateKey = ['projects', { id }]
+      const updateKey = ['project', { id }]
       await queryClient.cancelQueries(updateKey)
+      const previousProjects =
+        queryClient.getQueryData<Projects>('projects') ?? []
+      const deleteIdIdx = previousProjects.findIndex((u) => u.id === id)
+      if (deleteIdIdx === -1) {
+        throw new Error(`Update with id ${id} not found in query cache`)
+      }
+      const newProjects = produce(previousProjects, (draft) => {
+        draft.splice(deleteIdIdx, 1)
+      })
+      queryClient.setQueryData('projects', newProjects)
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries('projects')
     },
   })
 }

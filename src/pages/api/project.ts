@@ -185,19 +185,20 @@ async function updateProject(
     }
 
     return project
+  } else {
+    return await prisma.project.update({
+      where: { id },
+      data: {
+        name,
+        clientId,
+        // When uncommented, TS complains about an error related to clientId
+        // All examples in prisma docs show this working
+        // team: {
+        //   set: team.map(id=> ({ id }))
+        // }
+      },
+    })
   }
-  return await prisma.project.update({
-    where: { id },
-    data: {
-      name,
-      clientId,
-      // When uncommented, TS complains about an error related to clientId
-      // All examples in prisma docs show this working
-      // team: {
-      //   set: team.map(id=> ({ id }))
-      // }
-    },
-  })
 }
 
 async function newProject() {
@@ -235,16 +236,17 @@ async function newProject() {
 
 async function deleteProject(id: number) {
   // Change to delete once the projectId is marked as unique in schema
-  await prisma.summary.deleteMany({
+  const deleteSummary = prisma.summary.deleteMany({
     where: {
       projectId: id,
     },
   })
-  await prisma.update.deleteMany({
+  const deleteUpdates = prisma.update.deleteMany({
     where: {
       projectId: id,
     },
   })
+  await Promise.all([deleteSummary, deleteUpdates])
   await prisma.project.delete({
     where: {
       id,

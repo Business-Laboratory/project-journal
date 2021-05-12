@@ -72,7 +72,7 @@ function CardGrid() {
 function AddProjectLink() {
   const router = useRouter()
   const newProjectMutation = useNewProject()
-  return newProjectMutation.status === 'error' ? (
+  return newProjectMutation.status !== 'loading' ? (
     <>
       <IconButton
         onClick={() => {
@@ -89,26 +89,12 @@ function AddProjectLink() {
         <PlusIcon tw="w-6 h-6 fill-copper-300" />
         <span tw="bl-text-2xl">Add project</span>
       </IconButton>
-      <span tw="pl-4 bl-text-2xl text-matisse-red-200">Failed to create</span>
+      {newProjectMutation.status === 'error' && (
+        <span tw="pl-4 bl-text-2xl text-matisse-red-200">Failed to create</span>
+      )}
     </>
-  ) : newProjectMutation.status === 'loading' ? (
-    <span tw="bl-text-2xl">Creating project...</span>
   ) : (
-    <IconButton
-      onClick={() => {
-        newProjectMutation.mutate(
-          { id: 'new' },
-          {
-            onSuccess: (project) => {
-              router.push(`/project/${project.id}?edit=settings`)
-            },
-          }
-        )
-      }}
-    >
-      <PlusIcon tw="w-6 h-6 fill-copper-300" />
-      <span tw="bl-text-2xl">Add project</span>
-    </IconButton>
+    <span tw="bl-text-2xl">Creating project...</span>
   )
 }
 
