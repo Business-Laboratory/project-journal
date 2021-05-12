@@ -20,6 +20,7 @@ import Image from 'next/image'
 import { TeamMultiSelect } from './team-multi-select'
 import { useProjectMutation } from '@queries/useProjectMutation'
 import { useDeleteProject } from '@queries/useDeleteProject'
+import { TextInput } from '@components/text-input'
 
 export { SettingsModal, createSettingsHref }
 
@@ -117,21 +118,13 @@ function SettingsEditModalContent({
 
   return (
     <div tw="space-y-8 flex flex-col items-end">
-      <label tw="flex flex-col w-full">
-        <span tw="bl-text-xs text-gray-yellow-300">Project name</span>
-        <input
-          css={[
-            tw`w-full bl-text-3xl placeholder-gray-yellow-400`,
-            tw`focus:outline-none border-b border-gray-yellow-600`,
-          ]}
-          type="text"
-          value={name}
-          onChange={(e) =>
-            dispatch({ type: 'SET_NAME', payload: e.target.value })
-          }
-          placeholder="Untitled project"
-        />
-      </label>
+      <TextInput
+        tw="w-full bl-text-3xl"
+        value={name}
+        onChange={(newName) => dispatch({ type: 'SET_NAME', payload: newName })}
+        label="Project name"
+        placeholder="Untitled project"
+      />
       <label tw="flex flex-col w-full" htmlFor="client-select">
         <span id="client-select" tw="bl-text-xs text-gray-yellow-300">
           Client

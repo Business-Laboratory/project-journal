@@ -16,7 +16,7 @@ import { useAdmins } from '@queries/useAdmins'
 
 import type { Admins } from '@queries/useAdmins'
 
-const inputPaddingY = theme('spacing.3')
+const inputMarginY = theme('spacing.3')
 
 type TeamMultiSelectProps = {
   team: number[]
@@ -55,7 +55,7 @@ export function TeamMultiSelect({
         setSearchTerm('')
       }}
     >
-      <CustomInput
+      <MultiSelectInput
         ref={containerRef}
         id={id}
         disabled={status === 'success' ? disabled : true}
@@ -88,7 +88,7 @@ export function TeamMultiSelect({
   )
 }
 
-type CustomInputProps = {
+type MultiSelectInputProps = {
   id: string
   disabled: boolean
   selectedAdmins: Admins
@@ -96,8 +96,8 @@ type CustomInputProps = {
   setSearchTerm: (searchTerm: string) => void
   setTeam: (admins: number[]) => void
 }
-const CustomInput = forwardRef<HTMLDivElement, CustomInputProps>(
-  function CustomInput(
+const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
+  function MultiSelectInput(
     { id, disabled, selectedAdmins, searchTerm, setSearchTerm, setTeam },
     ref
   ) {
@@ -108,25 +108,7 @@ const CustomInput = forwardRef<HTMLDivElement, CustomInputProps>(
         <label htmlFor={id} tw="bl-text-xs text-gray-yellow-300">
           Project team
         </label>
-        <div
-          ref={ref}
-          css={[
-            tw`flex flex-row items-center`,
-            css`
-              /* need to inherit these css properties so the font can be overwritten properly */
-              letter-spacing: inherit;
-              font-weight: inherit;
-
-              box-shadow: inset 0 -1px 0 0 ${theme('colors[gray-yellow].600')};
-              &:focus {
-                box-shadow: inset 0 -2px 0 0 ${theme('colors[copper].400')};
-              }
-              &:hover {
-                box-shadow: inset 0 -2px 0 0 ${theme('colors[copper].300')};
-              }
-            `,
-          ]}
-        >
+        <div ref={ref} className="group" css={wrapperCss(disabled)}>
           <div tw="flex flex-row flex-wrap items-center flex-grow">
             {selectedAdmins.map(({ name, id }) => (
               <SelectedAdmin
@@ -146,7 +128,11 @@ const CustomInput = forwardRef<HTMLDivElement, CustomInputProps>(
             <ComboboxInput
               id={id}
               ref={inputRef}
-              tw="flex-grow placeholder-gray-yellow-300 focus:outline-none disabled:bg-transparent my-2"
+              tw="flex-grow placeholder-gray-yellow-300 focus:outline-none disabled:bg-transparent"
+              css={css`
+                margin-top: ${inputMarginY};
+                margin-bottom: ${inputMarginY};
+              `}
               placeholder={
                 'Search project team...'
                 // selectedAdmins.length > 0 ? 'Search project team...' : ''
@@ -183,9 +169,46 @@ const CustomInput = forwardRef<HTMLDivElement, CustomInputProps>(
     )
   }
 )
-/**
- * Inspired by https://github.com/reach/reach-ui/blob/develop/packages/combobox/examples/utils.ts
- */
+
+function wrapperCss(disabled: boolean) {
+  return [
+    tw`flex flex-row items-center group-hover:`,
+    css`
+      /* need to inherit these css properties so the font can be overwritten properly */
+      letter-spacing: inherit;
+      font-weight: inherit;
+      box-shadow: inset 0 -1px 0 0 ${theme('colors[gray-yellow].600')};
+    `,
+    !disabled
+      ? css`
+          &:focus,
+          &:focus-within {
+            box-shadow: inset 0 -2px 0 0 ${theme('colors[copper].400')};
+          }
+          &:hover {
+            box-shadow: inset 0 -2px 0 0 ${theme('colors[copper].300')};
+          }
+        `
+      : null,
+  ]
+}
+
+type SelectedAdminProps = { name: string; onDelete: () => void }
+function SelectedAdmin({ name, onDelete }: SelectedAdminProps) {
+  return (
+    <div tw="flex flex-row items-center px-2 bg-copper-400 text-gray-yellow-100 rounded-lg max-w-fit mr-6">
+      {name}
+      <button
+        // TODO: make touch area larger
+        tw="w-3 h-3 ml-3"
+        onClick={onDelete}
+      >
+        <CloseIcon tw="fill-gray-yellow-100 h-3 w-3 " />
+      </button>
+    </div>
+  )
+}
+
 function useMatchedAndSelectedAdmins(
   admins: Admins,
   team: number[],
@@ -220,28 +243,12 @@ function useMatchedAndSelectedAdmins(
   return { matchedAdmins, selectedAdmins }
 }
 
-type SelectedAdminProps = { name: string; onDelete: () => void }
-function SelectedAdmin({ name, onDelete }: SelectedAdminProps) {
-  return (
-    <div tw="flex flex-row items-center px-2 bg-copper-400 text-gray-yellow-100 rounded-lg max-w-fit mr-6">
-      {name}
-      <button
-        // TODO: make touch area larger
-        tw="w-3 h-3 ml-3"
-        onClick={onDelete}
-      >
-        <CloseIcon tw="fill-gray-yellow-100 h-3 w-3 " />
-      </button>
-    </div>
-  )
-}
-
 // styles
 
 const comboboxPopoverCss = (rect: DOMRect | null) => [
   tw`py-1 bg-gray-yellow-100 border rounded border-copper-400 shadow-bl`,
   css`
-    margin-top: calc(${inputPaddingY} + ${theme('spacing.2')});
+    margin-top: calc(${inputMarginY} + ${theme('spacing.2')});
   `,
   rect
     ? // unfortunately have to pass important in here to override reach's default positioning
@@ -251,19 +258,6 @@ const comboboxPopoverCss = (rect: DOMRect | null) => [
       `
     : null,
 ]
-
-// const labelCss = (disabled: boolean) => [
-//   tw`
-//     flex items-center w-full px-8 bl-text-base text-gray-yellow-600
-//     ring-1 ring-inset ring-gray-yellow-600
-//     focus-within:(ring-2 ring-copper-400)
-//   `,
-//   !disabled ? tw`hover:(ring-2 ring-copper-300)` : null,
-//   css`
-//     padding-top: ${inputPaddingY};
-//     padding-bottom: ${inputPaddingY};
-//   `,
-// ]
 
 const optionCss = tw`block px-8 py-2 bl-text-xs`
 
