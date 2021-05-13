@@ -152,9 +152,7 @@ const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
                 margin-top: ${inputMarginY};
                 margin-bottom: ${inputMarginY};
               `}
-              placeholder={
-                selectedAdmins.length === 0 ? 'Search project team...' : ''
-              }
+              placeholder={selectedAdmins.length === 0 ? 'Select team...' : ''}
               autoComplete="off"
               autocomplete={false}
               disabled={disabled}
@@ -244,12 +242,19 @@ function SelectedAdmin({ name, onDelete, focus, onBlur }: SelectedAdminProps) {
         ref={ref}
         className="group"
         aria-label={`remove ${name} from team`}
-        tw="w-6 h-6 ml-3 focus:outline-none"
+        css={[
+          tw`w-6 h-6 ml-3 focus:outline-none`,
+          css`
+            &.focus-visible > svg {
+              ${tw`ring-2 ring-copper-100`}
+            }
+          `,
+        ]}
         onClick={onDelete}
         onBlur={onBlur}
         tabIndex={-1}
       >
-        <CloseIcon tw="fill-gray-yellow-100 h-3 w-3 m-auto group-hover:fill-gray-yellow-600 group-focus:(ring-2 ring-copper-100)" />
+        <CloseIcon tw="fill-gray-yellow-100 h-3 w-3 m-auto group-hover:fill-gray-yellow-600 focus:outline-none" />
       </button>
     </div>
   )
