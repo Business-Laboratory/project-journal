@@ -1,3 +1,10 @@
+// typically I wouldn't disable accessibility linting, but in this case the keyboard interactions
+// of the multi select are already accessible, and the reason we're adding click events is to add
+// a larger/more expected click area for mouse-users. I'm sure this isn't 100% correct, but it
+// seems to be a better user experience for both types of users, while adding a role to the divs
+// where the click events are added would cause confusion to any potential users with screen readers
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events  */
 import tw, { css, theme } from 'twin.macro'
 import {
   Combobox,
@@ -6,6 +13,7 @@ import {
   ComboboxList,
   ComboboxOption,
   ComboboxOptionText,
+  useComboboxContext,
 } from '@reach/combobox'
 import {
   useRef,
@@ -113,7 +121,7 @@ const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
       selectedAdmins,
       inputRef
     )
-    useKeepPopupOpen(searchTerm, inputRef)
+    useKeepPopupOpen(inputRef)
 
     return (
       <>
@@ -121,7 +129,14 @@ const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
           Project team
         </label>
         <div ref={ref} css={inputWrapperCss(disabled)}>
-          <div tw="flex flex-row flex-wrap items-center flex-grow max-w-xl">
+          <div
+            tw="flex flex-row flex-wrap items-center flex-grow max-w-xl"
+            // we want to focus the input when this area is clicked, since for sighted mouse-users this
+            // looks like part of the input
+            onClick={() => {
+              inputRef.current?.focus()
+            }}
+          >
             {selectedAdmins.map(({ name, id }) => (
               <SelectedAdmin
                 key={id}
@@ -236,7 +251,11 @@ function SelectedAdmin({ name, onDelete, focus, onBlur }: SelectedAdminProps) {
   }, [focus])
 
   return (
-    <div tw="flex flex-row items-center px-2 bg-copper-400 text-gray-yellow-100 rounded-lg max-w-fit mr-6">
+    <div
+      tw="flex flex-row items-center px-2 bg-copper-400 text-gray-yellow-100 rounded-lg max-w-fit mr-6"
+      // we need to stop propagation so that we can click on the wrapper of the input to focus the input
+      onClick={(e) => e.stopPropagation()}
+    >
       {name}
       <button
         ref={ref}
@@ -365,19 +384,41 @@ function useFocusAdmin(
 }
 
 function useKeepPopupOpen(
-  searchTerm: string,
   inputRef: React.MutableRefObject<HTMLInputElement | null>
 ) {
+  const previousComboboxContext = useRef<Pick<
+    ReturnType<typeof useComboboxContext>,
+    'state' | 'isExpanded'
+  > | null>(null)
+  const { state, isExpanded } = useComboboxContext()
   // this is a total hack, and is very unfortunately the only way to get the popup to
   // stay up after selecting a value: https://github.com/reach/reach-ui/issues/709
   useEffect(() => {
-    if (searchTerm === '') {
-      setTimeout(() => {
+    const prev = previousComboboxContext.current
+    if (prev === null) {
+      previousComboboxContext.current = { state, isExpanded }
+      return
+    }
+
+    const { state: prevState, isExpanded: prevIsExpanded } = prev
+    if (
+      (prevState === 'INTERACTING' || prevState === 'NAVIGATING') &&
+      prevIsExpanded &&
+      state === 'IDLE' &&
+      !isExpanded
+    ) {
+      const timeoutId = setTimeout(() => {
         inputRef.current?.blur()
         inputRef.current?.focus()
       }, 50)
+      return () => {
+        console.log('clearing')
+        clearTimeout(timeoutId)
+      }
     }
-  }, [inputRef, searchTerm])
+
+    previousComboboxContext.current = { state, isExpanded }
+  }, [inputRef, isExpanded, state])
 }
 
 // styles
