@@ -187,6 +187,7 @@ const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
               ]}
               aria-label="clear all"
               onClick={() => setTeam([])}
+              disabled={disabled}
             >
               <CloseIcon
                 tw="w-4 h-4 m-auto fill-gray-yellow-400 group-hover:fill-copper-300"

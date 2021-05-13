@@ -255,13 +255,15 @@ type ClientSelectProps = {
 function ClientSelect({ label, client, onChange }: ClientSelectProps) {
   const { data: clients, status } = useClients()
 
+  const disabled = status !== 'success'
+
   return (
     <ListboxInput
       css={[tw`w-full`]}
       aria-labelledby={label}
       value={status !== 'success' || client === null ? '-1' : client.toString()}
       onChange={(value) => onChange(value)}
-      disabled={status !== 'success'}
+      disabled={disabled}
     >
       <ListboxButton
         css={[
@@ -270,20 +272,27 @@ function ClientSelect({ label, client, onChange }: ClientSelectProps) {
           !client ? tw`text-gray-yellow-400` : tw`text-gray-yellow-600`,
           css`
             box-shadow: inset 0 -1px 0 0 ${theme('colors[gray-yellow].600')};
-            &:focus,
-            &:focus-within {
-              box-shadow: inset 0 -2px 0 0 ${theme('colors[copper].400')};
-              .expand-icon {
-                ${tw`fill-copper-400`}
-              }
-            }
-            &:hover {
-              box-shadow: inset 0 -2px 0 0 ${theme('colors[copper].300')};
-              .expand-icon {
-                ${tw`fill-copper-300`}
-              }
-            }
           `,
+          !disabled
+            ? css`
+                &:focus,
+                &:focus-within {
+                  box-shadow: inset 0 -2px 0 0 ${theme('colors[copper].400')};
+                  .expand-icon {
+                    ${tw`fill-copper-400`}
+                  }
+                }
+                &:hover {
+                  box-shadow: inset 0 -2px 0 0 ${theme('colors[copper].300')};
+                  .expand-icon {
+                    ${tw`fill-copper-300`}
+                  }
+                }
+              `
+            : // right now we just get rid of focus styles for disabled states, though it probably should have it's own state
+              css`
+                opacity: 1 !important;
+              `,
         ]}
         arrow={
           <ExpandIcon
