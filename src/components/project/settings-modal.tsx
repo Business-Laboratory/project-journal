@@ -46,7 +46,6 @@ function SettingsModal({ projectId, project }: SettingsModalProps) {
       <SettingsEditModalContent
         projectId={projectId}
         onDismiss={handleOnDismiss}
-        edit={edit}
         project={project}
       />
     </Modal>
@@ -55,13 +54,11 @@ function SettingsModal({ projectId, project }: SettingsModalProps) {
 
 type SettingsEditModalContentProps = SettingsModalProps & {
   onDismiss: () => void
-  edit: 'settings'
   project: ProjectData
 }
 function SettingsEditModalContent({
   projectId,
   onDismiss,
-  edit,
   project,
 }: SettingsEditModalContentProps) {
   const router = useRouter()
@@ -195,8 +192,8 @@ function SettingsEditModalContent({
         error={projectMutation.status === 'error'}
       >
         {projectMutation.status === 'loading' || imageUpload === 'loading'
-          ? `Saving ${edit}...`
-          : `Save ${edit}`}
+          ? `Saving settings...`
+          : `Save settings`}
       </SaveButton>
       <DeleteSection
         tw="mt-16 w-full"
@@ -271,36 +268,38 @@ function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
     >
       <ListboxButton
         css={[
-          tw`flex justify-between items-center bl-text-3xl`,
-          tw`border-0 border-b border-gray-yellow-600`,
-          tw`hover:border-copper-300 focus:border-copper-400 focus:outline-none`,
+          tw`flex justify-between items-center bl-text-3xl border-none`,
           tw`p-0 bl-text-3xl flex justify-between items-center focus:outline-none`,
           !client ? tw`text-gray-yellow-400` : tw`text-gray-yellow-600`,
           css`
-            &[data-reach-listbox-button]:focus-visible {
-              ${tw`outline-none`}
+            box-shadow: inset 0 -1px 0 0 ${theme('colors[gray-yellow].600')};
+            &:focus,
+            &:focus-within {
+              box-shadow: inset 0 -2px 0 0 ${theme('colors[copper].400')};
+              .expand-icon {
+                ${tw`fill-copper-400`}
+              }
             }
-            &[data-reach-listbox-button][aria-expanded='true'] {
-              ${tw`border-copper-400`}
+            &:hover {
+              box-shadow: inset 0 -2px 0 0 ${theme('colors[copper].300')};
+              .expand-icon {
+                ${tw`fill-copper-300`}
+              }
             }
           `,
         ]}
-        arrow={<ExpandIcon tw="fill-gray-yellow-400 w-4 h-4" />}
+        arrow={
+          <ExpandIcon
+            className="expand-icon" // target for hover and focus
+            tw="fill-gray-yellow-400 w-4 h-4"
+          />
+        }
       />
       <ListboxPopover
         css={[
-          tw`bg-gray-yellow-100 mt-6 shadow-bl focus-within:shadow-bl`,
+          tw`bg-gray-yellow-100 mt-2 shadow-bl focus-within:shadow-bl`,
           tw`border rounded border-copper-400`,
-          // Don't know if we can not hardcode the font weight
           css`
-            [data-reach-listbox-option][data-current-selected] {
-              font-weight: 500;
-              color: ${theme('colors[copper].400')};
-            }
-            [data-reach-listbox-option][data-current-nav] {
-              color: ${theme('colors[gray-yellow].600')};
-              background-color: ${theme('colors[copper].100')};
-            }
             &[data-reach-listbox-popover]:focus-within {
               ${tw`outline-none`}
             }
@@ -309,14 +308,14 @@ function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
       >
         <ListboxList tw="bl-text-xs my-2">
           <ListboxOption
-            css={[tw`text-gray-yellow-400 py-2 px-4`, tw`hover:bg-copper-100`]}
+            css={[...listboxOptionCss, tw`text-gray-yellow-400`]}
             value={'-1'}
           >
             Select client
           </ListboxOption>
           {clients?.map(({ id, name }) => (
             <ListboxOption
-              css={[tw`py-2 px-4`, tw`hover:bg-copper-100`]}
+              css={listboxOptionCss}
               key={id}
               value={id.toString()}
             >
@@ -328,6 +327,18 @@ function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
     </ListboxInput>
   )
 }
+
+const listboxOptionCss = [
+  tw`py-2 px-4 bl-text-xs hover:bg-copper-100`,
+  css`
+    &[data-current-selected] {
+      ${tw`bl-text-xs text-copper-400`}
+    }
+    &[data-current-nav] {
+      ${tw`text-gray-yellow-600 bg-copper-100`}
+    }
+  `,
+]
 
 function createSettingsHref(projectId: number) {
   return {

@@ -144,7 +144,7 @@ const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
               value={searchTerm}
             />
           </div>
-          <div tw="flex flex-row items-center">
+          <div tw="flex flex-row items-center -mr-3">
             <button
               className="group"
               css={[
@@ -171,8 +171,13 @@ const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
                 if (input === null) return
                 input.focus()
               }}
+              tabIndex={-1}
             >
-              <ExpandIcon tw="w-5 h-5 m-auto" aria-hidden />
+              <ExpandIcon
+                className="expand-icon" // target for hover and focus
+                tw="w-5 h-5 m-auto fill-gray-yellow-400"
+                aria-hidden
+              />
             </button>
           </div>
         </div>
@@ -195,9 +200,15 @@ function wrapperCss(disabled: boolean) {
           &:focus,
           &:focus-within {
             box-shadow: inset 0 -2px 0 0 ${theme('colors[copper].400')};
+            .expand-icon {
+              ${tw`fill-copper-400`}
+            }
           }
           &:hover {
             box-shadow: inset 0 -2px 0 0 ${theme('colors[copper].300')};
+            .expand-icon {
+              ${tw`fill-copper-300`}
+            }
           }
         `
       : null,
