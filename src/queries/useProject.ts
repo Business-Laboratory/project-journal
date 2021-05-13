@@ -9,7 +9,7 @@ import type { QueryData } from '@types'
 export { useProject, usePrefetchProject }
 export type Project = QueryData<typeof useProject>
 
-function useProject(id: number) {
+function useProject(id: number | 'new') {
   const placeholderData = useProjectPlaceholderData(id)
   return useQuery(['project', { id }], fetchProject, {
     placeholderData,
@@ -30,7 +30,9 @@ function usePrefetchProject(id: number, staleTime = 10000) {
     )
 }
 
-function useProjectPlaceholderData(projectId: number): ProjectData | undefined {
+function useProjectPlaceholderData(
+  projectId: number | 'new'
+): ProjectData | undefined {
   const queryClient = useQueryClient()
   const projects = queryClient.getQueryData<Projects>('projects')
   const project = projects?.find(({ id }) => id === projectId)
@@ -56,15 +58,17 @@ function useProjectPlaceholderData(projectId: number): ProjectData | undefined {
   }, [project])
 }
 
-type ProjectQueryKey = ['project', { id: number }]
+type ProjectQueryKey = ['project', { id: number | 'new' }]
 const fetchProject: QueryFunction<ProjectData, ProjectQueryKey> = async ({
   queryKey,
 }) => {
   const [, { id }] = queryKey
 
+  console.log(id)
   if (!id) {
     throw new Error(`No project provided`)
   }
+  if (id === 'new') return Promise.resolve()
 
   const res = await fetch(`/api/project?id=${id}`, {
     method: 'GET',

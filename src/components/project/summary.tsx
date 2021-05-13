@@ -38,15 +38,14 @@ function LoadingSummary({ status }: LoadingSummaryProps) {
 }
 
 type SummaryProps = {
-  projectId: number
+  projectId: number | 'new'
   userRole: Role
-  project: ProjectData
+  project: ProjectData | undefined
 }
 function Summary({ projectId, userRole, project }: SummaryProps) {
-  const { name, imageUrl, client, team, summary } = project
-  const clientEmployees = client?.employees.map(({ user }) => user) ?? []
-  // Is there a situation where summary would ever be null?
-  if (!summary) return null
+  const clientEmployees =
+    project?.client?.employees.map(({ user }) => user) ?? []
+  if (project && !project.summary) return null
 
   return (
     <>
@@ -54,26 +53,28 @@ function Summary({ projectId, userRole, project }: SummaryProps) {
         {userRole === 'ADMIN' ? (
           <IconLink href={createSettingsHref(projectId)} replace={true}>
             <GearIcon tw="h-6 w-6 fill-copper-300" />
-            {!name || name === '' ? (
+            {!project?.name || project?.name === '' ? (
               <h1 tw="bl-text-4xl text-gray-yellow-300 inline capitalize">
                 Untitled project
               </h1>
             ) : (
-              <h1 tw="bl-text-4xl inline">{name}</h1>
+              <h1 tw="bl-text-4xl inline">{project?.name}</h1>
             )}
           </IconLink>
         ) : (
           <h1 tw="bl-text-4xl">
-            {name === '' || !name ? 'Untitled Project' : name}
+            {project?.name === '' || !project?.name
+              ? 'Untitled Project'
+              : project?.name}
           </h1>
         )}
-        {imageUrl ? (
+        {project?.imageUrl ? (
           <div tw="relative h-60 w-full">
             <Image
               tw="object-contain"
               layout="fill"
-              src={imageUrl ?? ''}
-              alt={name ?? ''}
+              src={project?.imageUrl ?? ''}
+              alt={project?.name ?? ''}
             />
           </div>
         ) : null}
@@ -89,8 +90,8 @@ function Summary({ projectId, userRole, project }: SummaryProps) {
           ) : (
             <h2 tw="bl-text-3xl">Project Description</h2>
           )}
-          {summary.description ? (
-            <RenderMarkdown>{summary.description}</RenderMarkdown>
+          {project?.summary?.description ? (
+            <RenderMarkdown>{project?.summary?.description}</RenderMarkdown>
           ) : null}
         </div>
         <div tw="space-y-2">
@@ -102,8 +103,8 @@ function Summary({ projectId, userRole, project }: SummaryProps) {
           ) : (
             <h2 tw="bl-text-3xl">Project Roadmap</h2>
           )}
-          {summary.roadmap ? (
-            <RenderMarkdown>{summary.roadmap}</RenderMarkdown>
+          {project?.summary?.roadmap ? (
+            <RenderMarkdown>{project?.summary?.roadmap}</RenderMarkdown>
           ) : null}
         </div>
         <div tw="space-y-2">
@@ -111,16 +112,16 @@ function Summary({ projectId, userRole, project }: SummaryProps) {
           <div tw="space-y-6">
             <div>
               <div tw="bl-text-2xl">Client</div>
-              <div tw="bl-text-base">{client?.name ?? ''}</div>
+              <div tw="bl-text-base">{project?.client?.name ?? ''}</div>
             </div>
             <TeamSection title="Client Team" team={clientEmployees} />
-            <TeamSection title="Project Team" team={team} />
+            <TeamSection title="Project Team" team={project?.team ?? []} />
           </div>
         </div>
       </SummaryWrapper>
       {userRole === 'ADMIN' ? (
         <>
-          <SummaryModal projectId={projectId} summary={summary} />
+          <SummaryModal projectId={projectId} summary={project?.summary} />
           <SettingsModal projectId={projectId} project={project} />
         </>
       ) : null}

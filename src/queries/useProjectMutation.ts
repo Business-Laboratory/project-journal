@@ -8,7 +8,7 @@ export type UpdateBody = Parameters<
   ReturnType<typeof useProjectMutation>['mutate']
 >[0]
 
-function useProjectMutation(projectId: number) {
+function useProjectMutation(projectId: number | 'new') {
   const queryClient = useQueryClient()
   const projectKey = ['project', { id: projectId }]
   return useMutation(projectMutation, {
@@ -28,6 +28,7 @@ function useProjectMutation(projectId: number) {
 }
 
 async function projectMutation(data: ProjectMutationBody) {
+  if (data.id === 'new') return Promise.resolve()
   const res = await fetch(`/api/project`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

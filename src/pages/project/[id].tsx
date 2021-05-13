@@ -30,14 +30,14 @@ export default function Project() {
   }
 
   const numberId = Number(id)
-  if (!id || Array.isArray(id) || Number.isNaN(numberId)) {
+  if ((!id || Array.isArray(id) || Number.isNaN(numberId)) && id !== 'new') {
     throw new Error(`Invalid id: ${id}`)
   }
 
-  return <ProjectById projectId={numberId} />
+  return <ProjectById projectId={id === 'new' ? id : numberId} />
 }
 
-function ProjectById({ projectId }: { projectId: number }) {
+function ProjectById({ projectId }: { projectId: number | 'new' }) {
   const { data, status } = useProject(projectId)
   // we need to be loading all of the loading indicators if the user hasn't loaded, since it effects the layout
   const user = useAuth()
@@ -61,7 +61,7 @@ function ProjectById({ projectId }: { projectId: number }) {
           projectId={projectId}
           userRole={userRole}
         />
-        {userRole === null || status !== 'success' || data === undefined ? (
+        {userRole === null || status !== 'success' ? (
           <LoadingSummary status={status} />
         ) : (
           <Summary projectId={projectId} userRole={userRole} project={data} />
@@ -72,7 +72,7 @@ function ProjectById({ projectId }: { projectId: number }) {
 }
 
 type TimelineAndProjectInformationProps = {
-  projectId: number
+  projectId: number | 'new'
   userRole: Role | null
 }
 // this function is memoized because it is simplest to render it inside of another function that has data

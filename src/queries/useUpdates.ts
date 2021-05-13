@@ -8,7 +8,7 @@ import type { QueryData } from '@types'
 export { useUpdates, usePrefetchUpdates, preprocessUpdate }
 export type Updates = QueryData<typeof useUpdates>
 
-function useUpdates(projectId: number) {
+function useUpdates(projectId: number | 'new') {
   const query = useQuery(['updates', { projectId }], fetchProjectUpdates)
 
   const originalData = query.data
@@ -34,28 +34,27 @@ function usePrefetchUpdates(projectId: number, staleTime = 10000) {
     )
 }
 
-type UpdatesQueryKey = ['updates', { projectId: number }]
-const fetchProjectUpdates: QueryFunction<
-  UpdatesData,
-  UpdatesQueryKey
-> = async ({ queryKey }) => {
-  const [, { projectId }] = queryKey
+type UpdatesQueryKey = ['updates', { projectId: number | 'new' }]
+const fetchProjectUpdates: QueryFunction<UpdatesData, UpdatesQueryKey> =
+  async ({ queryKey }) => {
+    const [, { projectId }] = queryKey
 
-  if (!projectId) {
-    throw new Error(`No project provided`)
-  }
+    if (!projectId) {
+      throw new Error(`No project provided`)
+    }
+    if (projectId === 'new') return
 
-  const res = await fetch(`/api/updates`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ projectId }),
-  })
-  const data = await res.json()
-  if (!res.ok) {
-    throw new Error(data?.error ?? `Something went wrong`)
+    const res = await fetch(`/api/updates`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectId }),
+    })
+    const data = await res.json()
+    if (!res.ok) {
+      throw new Error(data?.error ?? `Something went wrong`)
+    }
+    return data
   }
-  return data
-}
 
 function preprocessUpdate(update: UpdatesData[0]) {
   return {

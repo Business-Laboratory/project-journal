@@ -20,11 +20,12 @@ import '@reach/listbox/styles.css'
 import Image from 'next/image'
 import { useProjectMutation } from '@queries/useProjectMutation'
 import { useDeleteProject } from '@queries/useDeleteProject'
+// import { useNewProject } from '@queries/useNewProject'
 
 export { SettingsModal, createSettingsHref }
 
 type SettingsModalProps = {
-  projectId: number
+  projectId: number | 'new'
   project: ProjectData
 }
 
@@ -55,7 +56,7 @@ function SettingsModal({ projectId, project }: SettingsModalProps) {
 type SettingsEditModalContentProps = SettingsModalProps & {
   onDismiss: () => void
   edit: 'settings'
-  project: ProjectData
+  project: ProjectData | undefined
 }
 function SettingsEditModalContent({
   projectId,
@@ -71,9 +72,10 @@ function SettingsEditModalContent({
   const { data: clientsData, status: clientsStatus } = useClients()
   const { data: adminData, status: adminStatus } = useAdmins()
   const [imageFile, setImageFile] = useState<File | null>(null)
-  const [tempImageUrl, setTempImageUrl] = useState(project.imageUrl)
+  const [tempImageUrl, setTempImageUrl] = useState(project?.imageUrl)
   const [imageUpload, setImageUpload] = useState<'idle' | 'loading'>('idle')
 
+  // const newProjectMutation = useNewProject()
   const projectMutation = useProjectMutation(projectId)
   const projectDeleteMutation = useDeleteProject()
 
@@ -184,7 +186,7 @@ function SettingsEditModalContent({
           </label>
         </Button>
         {/*Hardcoded width and height*/}
-        {tempImageUrl !== null ? (
+        {tempImageUrl ? (
           <div tw="relative self-end w-64 h-36">
             <Image
               tw="object-cover"
@@ -207,36 +209,36 @@ function SettingsEditModalContent({
           ? `Saving ${edit}...`
           : `Save ${edit}`}
       </SaveButton>
-      <DeleteSection
-        tw="mt-16 w-full"
-        label="Verify project name"
-        verificationText={name || 'Project Name'}
-        buttonText={
-          projectDeleteMutation.status === 'loading'
-            ? 'Deleting...'
-            : 'Delete project'
-        }
-        onDelete={() => {
-          projectDeleteMutation.mutate(projectId, {
-            onSuccess: () => {
-              router.push('/projects')
-            },
-          })
-        }}
-        status={projectDeleteMutation.status}
-      />
+      {projectId !== 'new' ? (
+        <DeleteSection
+          tw="mt-16 w-full"
+          label="Verify project name"
+          verificationText={name || 'Project Name'}
+          buttonText={
+            projectDeleteMutation.status === 'loading'
+              ? 'Deleting...'
+              : 'Delete project'
+          }
+          onDelete={() => {
+            projectDeleteMutation.mutate(projectId, {
+              onSuccess: () => {
+                router.push('/projects')
+              },
+            })
+          }}
+          status={projectDeleteMutation.status}
+        />
+      ) : null}
     </div>
   )
 }
 
-const initialState = ({
-  name,
-  client,
-  team,
-}: ProjectData): Omit<ProjectMutationBody, 'imageStorageBlobUrl' | 'id'> => ({
-  name: name ?? '',
-  clientId: client?.id ?? null,
-  team: team.map(({ id }) => id) ?? [],
+const initialState = (
+  project: ProjectData | undefined
+): Omit<ProjectMutationBody, 'imageStorageBlobUrl' | 'id'> => ({
+  name: project?.name ?? '',
+  clientId: project?.client?.id ?? null,
+  team: project?.team.map(({ id }) => id) ?? [],
 })
 
 type ActionType =
@@ -338,7 +340,7 @@ function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
   )
 }
 
-function createSettingsHref(projectId: number) {
+function createSettingsHref(projectId: number | 'new') {
   return {
     pathname: `/project/${projectId}`,
     query: { edit: 'settings' },
@@ -346,7 +348,7 @@ function createSettingsHref(projectId: number) {
 }
 
 const checkDisabled = (
-  project: ProjectData,
+  project: ProjectData | undefined,
   name: string,
   file: File | null,
   clientId: number | null,
@@ -355,7 +357,9 @@ const checkDisabled = (
   adminStatus: 'error' | 'idle' | 'loading' | 'success'
 ) => {
   if (
-    (project.name === name && !file && project.client?.id === clientId) ||
+    name.trim() === '' ||
+    !clientId ||
+    (project?.name === name && !file && project?.client?.id === clientId) ||
     clientsStatus === 'loading' ||
     clientsStatus === 'error' ||
     adminStatus === 'loading' ||

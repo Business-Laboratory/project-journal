@@ -11,7 +11,7 @@ export type ProjectData = PrepareAPIData<ReturnType<typeof getProject>>
 export type ProjectUpdateData = PrepareAPIData<ReturnType<typeof updateProject>>
 export type NewProjectData = PrepareAPIData<ReturnType<typeof newProject>>
 export type ProjectMutationBody = {
-  id: number
+  id: number | 'new'
   name: string
   imageStorageBlobUrl?: string
   clientId: number | null
@@ -57,13 +57,8 @@ export default async function handler(
         return
       }
 
-      const {
-        id,
-        name,
-        imageStorageBlobUrl,
-        clientId,
-        team,
-      } = req.body as ProjectMutationBody
+      const { id, name, imageStorageBlobUrl, clientId, team } =
+        req.body as ProjectMutationBody
       const project = await updateProject(
         id,
         name,

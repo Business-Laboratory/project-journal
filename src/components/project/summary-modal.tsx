@@ -9,7 +9,7 @@ import { useUpdateSummary } from '@queries/useUpdateSummary'
 export { SummaryModal, createEditDescriptionHref, createEditRoadmapHref }
 
 type SummaryModalProps = {
-  projectId: number
+  projectId: number | 'new'
   summary: Exclude<Project['summary'], null>
 }
 
@@ -93,14 +93,14 @@ function SummaryEditModalContent({
   )
 }
 
-function createEditDescriptionHref(projectId: number) {
+function createEditDescriptionHref(projectId: number | 'new') {
   return {
     pathname: `/project/${projectId}`,
     query: { edit: 'description' },
   }
 }
 
-function createEditRoadmapHref(projectId: number) {
+function createEditRoadmapHref(projectId: number | 'new') {
   return {
     pathname: `/project/${projectId}`,
     query: { edit: 'roadmap' },

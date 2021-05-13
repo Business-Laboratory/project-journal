@@ -47,7 +47,7 @@ function LoadingProjectInformation({ status }: LoadingProjectInformationProps) {
 }
 
 type ProjectInformationProps = {
-  projectId: number
+  projectId: number | 'new'
   userRole: Role
   updates: Updates
 }
@@ -77,9 +77,10 @@ function ProjectInformation({
 // Container which handles scroll events
 
 export type OnScrollFunction = () => void
-const OnScrollRefContext = createContext<
-  React.MutableRefObject<OnScrollFunction | null> | undefined
->(undefined)
+const OnScrollRefContext =
+  createContext<React.MutableRefObject<OnScrollFunction | null> | undefined>(
+    undefined
+  )
 
 function ProjectInformationContainer({
   children,
@@ -162,9 +163,8 @@ function AddUpdateButton({ projectId }: { projectId: number }) {
 // container for all of the updates which provisions refs for each of the children through context providers
 // and also handles all of the complex logic for synchronizing the scroll with the hash links
 
-const UpdateRefContext = createContext<
-  React.RefObject<HTMLElement> | undefined
->(undefined)
+const UpdateRefContext =
+  createContext<React.RefObject<HTMLElement> | undefined>(undefined)
 
 function UpdatesContainer({ children }: { children: React.ReactNode }) {
   const childrenWithRefs = useChildrenWithRefs(children)
