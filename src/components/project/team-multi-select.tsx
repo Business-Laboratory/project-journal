@@ -121,7 +121,7 @@ const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
           Project team
         </label>
         <div ref={ref} css={inputWrapperCss(disabled)}>
-          <div tw="flex flex-row flex-wrap items-center flex-grow">
+          <div tw="flex flex-row flex-wrap items-center flex-grow max-w-xl">
             {selectedAdmins.map(({ name, id }) => (
               <SelectedAdmin
                 key={id}
