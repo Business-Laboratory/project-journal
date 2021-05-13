@@ -241,6 +241,7 @@ function SelectedAdmin({ name, onDelete, focus, onBlur }: SelectedAdminProps) {
       <button
         ref={ref}
         className="group"
+        aria-label={`remove ${name} from team`}
         // TODO: make touch area larger
         tw="w-6 h-6 ml-3 focus:outline-none"
         onClick={onDelete}
@@ -259,15 +260,15 @@ function useMatchedAndSelectedAdmins(
   searchTerm: string
 ) {
   const { adminValues, selectedAdmins } = useMemo(() => {
-    const selectedIds = new Set(team)
     let adminValues = []
     let selectedAdmins = []
     for (const admin of admins) {
       const { id, name } = admin
       // skip admins without names, they shouldn't be in the database
       if (name === null) continue
-      if (selectedIds.has(id)) {
-        selectedAdmins.push(admin)
+      const teamIdx = team.findIndex((teamId) => teamId === id)
+      if (teamIdx !== -1) {
+        selectedAdmins[teamIdx] = admin
       } else {
         adminValues.push({ value: name })
       }

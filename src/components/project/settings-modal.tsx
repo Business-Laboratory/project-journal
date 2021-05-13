@@ -66,7 +66,8 @@ function SettingsEditModalContent({
     settingsReducer,
     initialState(project)
   )
-  const { data: clientsData, status: clientsStatus } = useClients()
+  // TODO: move into the client select
+  const { data: clientsData } = useClients()
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [tempImageUrl, setTempImageUrl] = useState(project.imageUrl)
   const [imageUpload, setImageUpload] = useState<'idle' | 'loading'>('idle')
@@ -75,9 +76,7 @@ function SettingsEditModalContent({
   const projectDeleteMutation = useDeleteProject()
 
   const disabled =
-    checkDisabled(project, name, imageFile, clientId, team, clientsStatus) ||
-    projectMutation.status === 'loading' ||
-    imageUpload === 'loading'
+    !name || projectMutation.status === 'loading' || imageUpload === 'loading'
 
   const handleProjectSave = async () => {
     if (imageFile !== null) {
@@ -346,23 +345,4 @@ function createSettingsHref(projectId: number) {
     pathname: `/project/${projectId}`,
     query: { edit: 'settings' },
   }
-}
-
-// TODO: clean this up
-const checkDisabled = (
-  project: ProjectData,
-  name: string,
-  file: File | null,
-  clientId: number | null,
-  team: number[],
-  clientsStatus: 'error' | 'idle' | 'loading' | 'success'
-) => {
-  if (
-    (project.name === name && !file && project.client?.id === clientId) ||
-    clientsStatus === 'loading' ||
-    clientsStatus === 'error'
-  ) {
-    return true
-  }
-  return false
 }
