@@ -7,7 +7,14 @@ import {
   ComboboxOption,
   ComboboxOptionText,
 } from '@reach/combobox'
-import { useRef, useState, useMemo, forwardRef } from 'react'
+import {
+  useRef,
+  useState,
+  useMemo,
+  forwardRef,
+  useEffect,
+  FocusEventHandler,
+} from 'react'
 import { useRect } from '@reach/rect'
 import { matchSorter } from 'match-sorter'
 
@@ -102,13 +109,17 @@ const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
     ref
   ) {
     const inputRef = useRef<HTMLInputElement | null>(null)
+    const [focusedAdmin, setFocusedAdmin] = useFocusAdmin(
+      selectedAdmins,
+      inputRef
+    )
 
     return (
       <>
         <label htmlFor={id} tw="bl-text-xs text-gray-yellow-300">
           Project team
         </label>
-        <div ref={ref} css={wrapperCss(disabled)}>
+        <div ref={ref} css={inputWrapperCss(disabled)}>
           <div tw="flex flex-row flex-wrap items-center flex-grow">
             {selectedAdmins.map(({ name, id }) => (
               <SelectedAdmin
@@ -122,6 +133,13 @@ const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
                   }
                   setTeam(newTeam)
                 }}
+                focus={id === focusedAdmin.id}
+                onBlur={() => {
+                  // if the id didn't change, yet the button blurred, that means all focus was lost
+                  if (id === focusedAdmin.id) {
+                    setFocusedAdmin({ state: 'idle', id: null })
+                  }
+                }}
               />
             ))}
 
@@ -134,14 +152,26 @@ const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
                 margin-bottom: ${inputMarginY};
               `}
               placeholder={
-                'Search project team...'
-                // selectedAdmins.length > 0 ? 'Search project team...' : ''
+                selectedAdmins.length === 0 ? 'Search project team...' : ''
               }
               autoComplete="off"
               autocomplete={false}
               disabled={disabled}
               onChange={(e) => setSearchTerm(e.currentTarget.value)}
               value={searchTerm}
+              onKeyDownCapture={(e) => {
+                const key = e.key
+                // handle deletes and left arrow for navigating the selected elements
+                if (!searchTerm && selectedAdmins.length > 0) {
+                  if (key === 'Backspace' || e.key === 'Delete') {
+                    let newTeam = selectedAdmins.map(({ id }) => id)
+                    newTeam.pop()
+                    setTeam(newTeam)
+                  } else if (key === 'ArrowLeft') {
+                    setFocusedAdmin({ state: 'selecting', id: null })
+                  }
+                }
+              }}
             />
           </div>
           <div tw="flex flex-row items-center -mr-3">
@@ -186,45 +216,36 @@ const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
   }
 )
 
-function wrapperCss(disabled: boolean) {
-  return [
-    tw`flex flex-row items-center`,
-    css`
-      /* need to inherit these css properties so the font can be overwritten properly */
-      letter-spacing: inherit;
-      font-weight: inherit;
-      box-shadow: inset 0 -1px 0 0 ${theme('colors[gray-yellow].600')};
-    `,
-    !disabled
-      ? css`
-          &:focus,
-          &:focus-within {
-            box-shadow: inset 0 -2px 0 0 ${theme('colors[copper].400')};
-            .expand-icon {
-              ${tw`fill-copper-400`}
-            }
-          }
-          &:hover {
-            box-shadow: inset 0 -2px 0 0 ${theme('colors[copper].300')};
-            .expand-icon {
-              ${tw`fill-copper-300`}
-            }
-          }
-        `
-      : null,
-  ]
+type SelectedAdminProps = {
+  name: string
+  onDelete: () => void
+  focus: boolean
+  onBlur?: FocusEventHandler<HTMLButtonElement>
 }
+function SelectedAdmin({ name, onDelete, focus, onBlur }: SelectedAdminProps) {
+  const ref = useRef<HTMLButtonElement>(null)
 
-type SelectedAdminProps = { name: string; onDelete: () => void }
-function SelectedAdmin({ name, onDelete }: SelectedAdminProps) {
+  useEffect(() => {
+    const node = ref.current
+    if (!node) return
+    if (focus) {
+      node.focus()
+    } else {
+      node.blur()
+    }
+  }, [focus])
+
   return (
     <div tw="flex flex-row items-center px-2 bg-copper-400 text-gray-yellow-100 rounded-lg max-w-fit mr-6">
       {name}
       <button
+        ref={ref}
         className="group"
         // TODO: make touch area larger
         tw="w-6 h-6 ml-3 focus:outline-none"
         onClick={onDelete}
+        onBlur={onBlur}
+        tabIndex={-1}
       >
         <CloseIcon tw="fill-gray-yellow-100 h-3 w-3 m-auto group-hover:fill-gray-yellow-600 group-focus:(ring-2 ring-copper-100)" />
       </button>
@@ -266,7 +287,106 @@ function useMatchedAndSelectedAdmins(
   return { matchedAdmins, selectedAdmins }
 }
 
+/**
+ * Handle focus management of SelectedAdmin delete buttons when using arrow keys
+ * @param selectedAdmins
+ * @param inputRef
+ * @returns
+ */
+function useFocusAdmin(
+  selectedAdmins: Admins,
+  inputRef: React.MutableRefObject<HTMLInputElement | null>
+) {
+  const [focusedAdmin, setFocusedAdmin] = useState<{
+    state: 'selecting' | 'idle'
+    id: number | null
+  }>({ state: 'idle', id: null })
+
+  useEffect(() => {
+    // if there's a focused admin, then we're still navigating
+    if (focusedAdmin.state === 'idle') return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const key = e.key
+      const currentId = focusedAdmin.id
+      if (key === 'ArrowLeft') {
+        if (currentId === null) {
+          setFocusedAdmin({
+            state: 'selecting',
+            id: selectedAdmins[selectedAdmins.length - 1].id,
+          })
+        } else {
+          const focusedAdminIdx = selectedAdmins.findIndex(
+            ({ id }) => id === currentId
+          )
+          // only select a new admin when there are more to select
+          if (focusedAdminIdx > 0) {
+            setFocusedAdmin({
+              state: 'selecting',
+              id: selectedAdmins[focusedAdminIdx - 1].id,
+            })
+          }
+        }
+      } else if (key === 'ArrowRight') {
+        const focusedAdminIdx = selectedAdmins.findIndex(
+          ({ id }) => id === currentId
+        )
+        // refocus the input if the focused admin is the last admin
+        if (
+          focusedAdminIdx === selectedAdmins.length - 1 ||
+          focusedAdminIdx === -1
+        ) {
+          inputRef.current?.focus()
+          setFocusedAdmin({ state: 'idle', id: null })
+        } else {
+          setFocusedAdmin({
+            state: 'selecting',
+            id: selectedAdmins[focusedAdminIdx + 1].id,
+          })
+        }
+      } else if (key === 'ArrowUp' || key === 'ArrowDown') {
+        inputRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [focusedAdmin.id, focusedAdmin.state, inputRef, selectedAdmins])
+
+  return [focusedAdmin, setFocusedAdmin] as const
+}
+
 // styles
+
+function inputWrapperCss(disabled: boolean) {
+  return [
+    tw`flex flex-row items-center`,
+    css`
+      /* need to inherit these css properties so the font can be overwritten properly */
+      letter-spacing: inherit;
+      font-weight: inherit;
+      box-shadow: inset 0 -1px 0 0 ${theme('colors[gray-yellow].600')};
+    `,
+    !disabled
+      ? css`
+          &:focus,
+          &:focus-within {
+            box-shadow: inset 0 -2px 0 0 ${theme('colors[copper].400')};
+            .expand-icon {
+              ${tw`fill-copper-400`}
+            }
+          }
+          &:hover {
+            box-shadow: inset 0 -2px 0 0 ${theme('colors[copper].300')};
+            .expand-icon {
+              ${tw`fill-copper-300`}
+            }
+          }
+        `
+      : null,
+  ]
+}
 
 const comboboxPopoverCss = (rect: DOMRect | null) => [
   tw`py-1 bg-gray-yellow-100 border rounded border-copper-400 shadow-bl`,

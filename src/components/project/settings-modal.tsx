@@ -290,8 +290,9 @@ function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
         ]}
         arrow={
           <ExpandIcon
+            aria-hidden
             className="expand-icon" // target for hover and focus
-            tw="fill-gray-yellow-400 w-4 h-4"
+            tw="fill-gray-yellow-400 w-5 h-5"
           />
         }
       />
