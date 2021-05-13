@@ -242,7 +242,6 @@ function SelectedAdmin({ name, onDelete, focus, onBlur }: SelectedAdminProps) {
         ref={ref}
         className="group"
         aria-label={`remove ${name} from team`}
-        // TODO: make touch area larger
         tw="w-6 h-6 ml-3 focus:outline-none"
         onClick={onDelete}
         onBlur={onBlur}

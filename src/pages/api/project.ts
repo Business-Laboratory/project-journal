@@ -104,21 +104,7 @@ async function getProject(user: UserData, id: number) {
     where: {
       id,
     },
-    include: {
-      client: {
-        select: {
-          id: true,
-          name: true,
-          employees: {
-            select: {
-              user: true,
-            },
-          },
-        },
-      },
-      team: true,
-      summary: true,
-    },
+    include: includeClause,
   })
 
   if (project === null) {
@@ -176,6 +162,7 @@ async function updateProject(
       imageStorageBlobUrl,
       imageUrl,
     },
+    include: includeClause,
   })
   // no idea why, but this has to be done separately
   const teamPromise = prisma.project.update({
@@ -205,25 +192,7 @@ async function newProject() {
         },
       },
     },
-    select: {
-      id: true,
-      name: true,
-      imageUrl: true,
-      imageStorageBlobUrl: true,
-      client: {
-        select: {
-          id: true,
-          name: true,
-          employees: {
-            select: {
-              user: true,
-            },
-          },
-        },
-      },
-      team: true,
-      summary: true,
-    },
+    include: includeClause,
   })
 }
 
@@ -245,4 +214,20 @@ async function deleteProject(id: number) {
       id,
     },
   })
+}
+
+const includeClause = {
+  client: {
+    select: {
+      id: true,
+      name: true,
+      employees: {
+        select: {
+          user: true,
+        },
+      },
+    },
+  },
+  team: true,
+  summary: true,
 }

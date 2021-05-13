@@ -6,7 +6,6 @@ import { DeleteSection, Modal, SaveButton } from '@components/modal'
 import { useClients } from '@queries/useClients'
 import { Button } from '@components/button'
 import { CameraIcon, ExpandIcon } from 'icons'
-import { ClientsData } from 'pages/api/clients'
 import { ProjectData, ProjectMutationBody } from 'pages/api/project'
 import {
   ListboxButton,
@@ -66,8 +65,6 @@ function SettingsEditModalContent({
     settingsReducer,
     initialState(project)
   )
-  // TODO: move into the client select
-  const { data: clientsData } = useClients()
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [tempImageUrl, setTempImageUrl] = useState(project.imageUrl)
   const [imageUpload, setImageUpload] = useState<'idle' | 'loading'>('idle')
@@ -127,7 +124,6 @@ function SettingsEditModalContent({
         </span>
         <ClientSelect
           label={'client-select'}
-          clients={clientsData ?? []}
           client={clientId}
           onChange={(value) =>
             dispatch({ type: 'SET_CLIENT', payload: Number(value) })
@@ -253,17 +249,19 @@ function settingsReducer(
 
 type ClientSelectProps = {
   label: string
-  clients: ClientsData
   client: number | null
   onChange: (newValue: string) => void
 }
-function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
+function ClientSelect({ label, client, onChange }: ClientSelectProps) {
+  const { data: clients, status } = useClients()
+
   return (
     <ListboxInput
       css={[tw`w-full`]}
       aria-labelledby={label}
-      value={client?.toString() ?? '-1'}
+      value={status !== 'success' || client === null ? '-1' : client.toString()}
       onChange={(value) => onChange(value)}
+      disabled={status !== 'success'}
     >
       <ListboxButton
         css={[
