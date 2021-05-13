@@ -113,6 +113,7 @@ const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
       selectedAdmins,
       inputRef
     )
+    useKeepPopupOpen(searchTerm, inputRef)
 
     return (
       <>
@@ -356,6 +357,22 @@ function useFocusAdmin(
   }, [focusedAdmin.id, focusedAdmin.state, inputRef, selectedAdmins])
 
   return [focusedAdmin, setFocusedAdmin] as const
+}
+
+function useKeepPopupOpen(
+  searchTerm: string,
+  inputRef: React.MutableRefObject<HTMLInputElement | null>
+) {
+  // this is a total hack, and is very unfortunately the only way to get the popup to
+  // stay up after selecting a value: https://github.com/reach/reach-ui/issues/709
+  useEffect(() => {
+    if (searchTerm === '') {
+      setTimeout(() => {
+        inputRef.current?.blur()
+        inputRef.current?.focus()
+      }, 50)
+    }
+  }, [inputRef, searchTerm])
 }
 
 // styles
