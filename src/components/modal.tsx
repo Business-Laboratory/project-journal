@@ -36,8 +36,7 @@ function Modal({ children, onDismiss, ...props }: DialogOverlayProps) {
 }
 
 const dialogCss = [
-  // need z-10 because the app bar is in the same stacking context, and also z-10
-  tw`bg-gray-yellow-200 bg-opacity-50 z-10 inset-0 fixed overflow-auto`,
+  tw`bg-gray-yellow-200 bg-opacity-50 inset-0 fixed overflow-auto`,
   // does not work in firefox
   css`
     backdrop-filter: blur(4px);

@@ -4,10 +4,8 @@ import React, { useReducer, useState } from 'react'
 
 import { DeleteSection, Modal, SaveButton } from '@components/modal'
 import { useClients } from '@queries/useClients'
-import { useAdmins } from '@queries/useAdmins'
 import { Button } from '@components/button'
 import { CameraIcon, ExpandIcon } from 'icons'
-import { ClientsData } from 'pages/api/clients'
 import { ProjectData, ProjectMutationBody } from 'pages/api/project'
 import {
   ListboxButton,
@@ -18,8 +16,10 @@ import {
 } from '@reach/listbox'
 import '@reach/listbox/styles.css'
 import Image from 'next/image'
+import { TeamMultiSelect } from './team-multi-select'
 import { useProjectMutation } from '@queries/useProjectMutation'
 import { useDeleteProject } from '@queries/useDeleteProject'
+import { TextInput } from '@components/text-input'
 
 export { SettingsModal, createSettingsHref }
 
@@ -45,7 +45,6 @@ function SettingsModal({ projectId, project }: SettingsModalProps) {
       <SettingsEditModalContent
         projectId={projectId}
         onDismiss={handleOnDismiss}
-        edit={edit}
         project={project}
       />
     </Modal>
@@ -54,13 +53,11 @@ function SettingsModal({ projectId, project }: SettingsModalProps) {
 
 type SettingsEditModalContentProps = SettingsModalProps & {
   onDismiss: () => void
-  edit: 'settings'
   project: ProjectData
 }
 function SettingsEditModalContent({
   projectId,
   onDismiss,
-  edit,
   project,
 }: SettingsEditModalContentProps) {
   const router = useRouter()
@@ -68,8 +65,6 @@ function SettingsEditModalContent({
     settingsReducer,
     initialState(project)
   )
-  const { data: clientsData, status: clientsStatus } = useClients()
-  const { data: adminData, status: adminStatus } = useAdmins()
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [tempImageUrl, setTempImageUrl] = useState(project.imageUrl)
   const [imageUpload, setImageUpload] = useState<'idle' | 'loading'>('idle')
@@ -78,18 +73,7 @@ function SettingsEditModalContent({
   const projectDeleteMutation = useDeleteProject()
 
   const disabled =
-    checkDisabled(
-      project,
-      name,
-      imageFile,
-      clientId,
-      team,
-      clientsStatus,
-      adminStatus
-    ) ||
-    projectMutation.status === 'loading' ||
-    imageUpload === 'loading' ||
-    !adminData
+    !name || projectMutation.status === 'loading' || imageUpload === 'loading'
 
   const handleProjectSave = async () => {
     if (imageFile !== null) {
@@ -127,28 +111,19 @@ function SettingsEditModalContent({
 
   return (
     <div tw="space-y-8 flex flex-col items-end">
-      <label tw="flex flex-col w-full">
-        <span tw="bl-text-xs text-gray-yellow-300">Project name</span>
-        <input
-          css={[
-            tw`w-full bl-text-3xl placeholder-gray-yellow-400`,
-            tw`focus:outline-none border-b border-gray-yellow-600`,
-          ]}
-          type="text"
-          value={name}
-          onChange={(e) =>
-            dispatch({ type: 'SET_NAME', payload: e.target.value })
-          }
-          placeholder="Untitled project"
-        />
-      </label>
+      <TextInput
+        tw="w-full bl-text-3xl"
+        value={name}
+        onChange={(newName) => dispatch({ type: 'SET_NAME', payload: newName })}
+        label="Project name"
+        placeholder="Untitled project"
+      />
       <label tw="flex flex-col w-full" htmlFor="client-select">
         <span id="client-select" tw="bl-text-xs text-gray-yellow-300">
           Client
         </span>
         <ClientSelect
           label={'client-select'}
-          clients={clientsData ?? []}
           client={clientId}
           onChange={(value) =>
             dispatch({ type: 'SET_CLIENT', payload: Number(value) })
@@ -195,6 +170,14 @@ function SettingsEditModalContent({
           </div>
         ) : null}
       </div>
+      <div tw="w-full">
+        <TeamMultiSelect
+          team={team}
+          setTeam={(newTeam) => {
+            dispatch({ type: 'SET_TEAM', payload: newTeam })
+          }}
+        />
+      </div>
       <SaveButton
         onClick={() => {
           if (disabled) return
@@ -204,8 +187,8 @@ function SettingsEditModalContent({
         error={projectMutation.status === 'error'}
       >
         {projectMutation.status === 'loading' || imageUpload === 'loading'
-          ? `Saving ${edit}...`
-          : `Save ${edit}`}
+          ? `Saving settings...`
+          : `Save settings`}
       </SaveButton>
       <DeleteSection
         tw="mt-16 w-full"
@@ -266,50 +249,64 @@ function settingsReducer(
 
 type ClientSelectProps = {
   label: string
-  clients: ClientsData
   client: number | null
   onChange: (newValue: string) => void
 }
-function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
+function ClientSelect({ label, client, onChange }: ClientSelectProps) {
+  const { data: clients, status } = useClients()
+
+  const disabled = status !== 'success'
+
   return (
     <ListboxInput
       css={[tw`w-full`]}
       aria-labelledby={label}
-      value={client?.toString() ?? '-1'}
+      value={status !== 'success' || client === null ? '-1' : client.toString()}
       onChange={(value) => onChange(value)}
+      disabled={disabled}
     >
       <ListboxButton
         css={[
-          tw`flex justify-between items-center bl-text-3xl`,
-          tw`border-0 border-b border-gray-yellow-600`,
-          tw`hover:border-copper-300 focus:border-copper-400 focus:outline-none`,
+          tw`flex justify-between items-center bl-text-3xl border-none`,
           tw`p-0 bl-text-3xl flex justify-between items-center focus:outline-none`,
           !client ? tw`text-gray-yellow-400` : tw`text-gray-yellow-600`,
           css`
-            &[data-reach-listbox-button]:focus-visible {
-              ${tw`outline-none`}
-            }
-            &[data-reach-listbox-button][aria-expanded='true'] {
-              ${tw`border-copper-400`}
-            }
+            box-shadow: inset 0 -1px 0 0 ${theme('colors[gray-yellow].600')};
           `,
+          !disabled
+            ? css`
+                &:focus,
+                &:focus-within {
+                  box-shadow: inset 0 -2px 0 0 ${theme('colors[copper].400')};
+                  .expand-icon {
+                    ${tw`fill-copper-400`}
+                  }
+                }
+                &:hover {
+                  box-shadow: inset 0 -2px 0 0 ${theme('colors[copper].300')};
+                  .expand-icon {
+                    ${tw`fill-copper-300`}
+                  }
+                }
+              `
+            : // right now we just get rid of focus styles for disabled states, though it probably should have it's own state
+              css`
+                opacity: 1 !important;
+              `,
         ]}
-        arrow={<ExpandIcon tw="fill-gray-yellow-400 w-4 h-4" />}
+        arrow={
+          <ExpandIcon
+            aria-hidden
+            className="expand-icon" // target for hover and focus
+            tw="fill-gray-yellow-400 w-5 h-5"
+          />
+        }
       />
       <ListboxPopover
         css={[
-          tw`z-50 bg-gray-yellow-100 mt-6 shadow-bl focus-within:shadow-bl`,
+          tw`bg-gray-yellow-100 mt-2 shadow-bl focus-within:shadow-bl`,
           tw`border rounded border-copper-400`,
-          // Don't know if we can not hardcode the font weight
           css`
-            [data-reach-listbox-option][data-current-selected] {
-              font-weight: 500;
-              color: ${theme('colors[copper].400')};
-            }
-            [data-reach-listbox-option][data-current-nav] {
-              color: ${theme('colors[gray-yellow].600')};
-              background-color: ${theme('colors[copper].100')};
-            }
             &[data-reach-listbox-popover]:focus-within {
               ${tw`outline-none`}
             }
@@ -318,14 +315,14 @@ function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
       >
         <ListboxList tw="bl-text-xs my-2">
           <ListboxOption
-            css={[tw`text-gray-yellow-400 py-2 px-4`, tw`hover:bg-copper-100`]}
+            css={[...listboxOptionCss, tw`text-gray-yellow-400`]}
             value={'-1'}
           >
             Select client
           </ListboxOption>
           {clients?.map(({ id, name }) => (
             <ListboxOption
-              css={[tw`py-2 px-4`, tw`hover:bg-copper-100`]}
+              css={listboxOptionCss}
               key={id}
               value={id.toString()}
             >
@@ -338,30 +335,21 @@ function ClientSelect({ label, clients, client, onChange }: ClientSelectProps) {
   )
 }
 
+const listboxOptionCss = [
+  tw`py-2 px-4 bl-text-xs hover:bg-copper-100`,
+  css`
+    &[data-current-selected] {
+      ${tw`bl-text-xs text-copper-400`}
+    }
+    &[data-current-nav] {
+      ${tw`text-gray-yellow-600 bg-copper-100`}
+    }
+  `,
+]
+
 function createSettingsHref(projectId: number) {
   return {
     pathname: `/project/${projectId}`,
     query: { edit: 'settings' },
   }
-}
-
-const checkDisabled = (
-  project: ProjectData,
-  name: string,
-  file: File | null,
-  clientId: number | null,
-  team: number[],
-  clientsStatus: 'error' | 'idle' | 'loading' | 'success',
-  adminStatus: 'error' | 'idle' | 'loading' | 'success'
-) => {
-  if (
-    (project.name === name && !file && project.client?.id === clientId) ||
-    clientsStatus === 'loading' ||
-    clientsStatus === 'error' ||
-    adminStatus === 'loading' ||
-    adminStatus === 'error'
-  ) {
-    return true
-  }
-  return false
 }

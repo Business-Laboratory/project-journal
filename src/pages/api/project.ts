@@ -104,25 +104,7 @@ async function getProject(user: UserData, id: number) {
     where: {
       id,
     },
-    select: {
-      id: true,
-      name: true,
-      imageUrl: true,
-      imageStorageBlobUrl: true,
-      client: {
-        select: {
-          id: true,
-          name: true,
-          employees: {
-            select: {
-              user: true,
-            },
-          },
-        },
-      },
-      team: true,
-      summary: true,
-    },
+    include: includeClause,
   })
 
   if (project === null) {
@@ -153,6 +135,7 @@ async function updateProject(
   clientId: number | null,
   team: number[]
 ) {
+  let imageUrl = undefined
   if (imageStorageBlobUrl !== undefined) {
     // get the previous image storage blob url
     const previousProject = await prisma.project.findUnique({
@@ -161,21 +144,7 @@ async function updateProject(
     })
     const previousImageStorageBlobUrl = previousProject?.imageStorageBlobUrl
     // update the url to the newest url
-    const newImageUrl = await generateSasUrl(null, imageStorageBlobUrl)
-    const project = await prisma.project.update({
-      where: { id },
-      data: {
-        name,
-        imageStorageBlobUrl,
-        imageUrl: newImageUrl,
-        clientId,
-        // When uncommented, TS complains about an error related to clientId
-        // All examples in prisma docs show this working
-        // team: {
-        //   set: team.map(id => ({ id }))
-        // }
-      },
-    })
+    imageUrl = await generateSasUrl(null, imageStorageBlobUrl)
     // delete previous image if one existed and is different than the new one
     if (
       previousImageStorageBlobUrl &&
@@ -183,22 +152,33 @@ async function updateProject(
     ) {
       await deleteImage(previousImageStorageBlobUrl)
     }
-
-    return project
-  } else {
-    return await prisma.project.update({
-      where: { id },
-      data: {
-        name,
-        clientId,
-        // When uncommented, TS complains about an error related to clientId
-        // All examples in prisma docs show this working
-        // team: {
-        //   set: team.map(id=> ({ id }))
-        // }
-      },
-    })
   }
+
+  const projectPromise = prisma.project.update({
+    where: { id },
+    data: {
+      name,
+      clientId,
+      imageStorageBlobUrl,
+      imageUrl,
+    },
+    include: includeClause,
+  })
+  // no idea why, but this has to be done separately
+  const teamPromise = prisma.project.update({
+    where: { id },
+    data: {
+      team: {
+        set: team.map((id) => ({ id })),
+      },
+    },
+    select: {
+      team: true,
+    },
+  })
+
+  const [newProject, newTeam] = await Promise.all([projectPromise, teamPromise])
+  return { ...newProject, team: newTeam.team }
 }
 
 async function newProject() {
@@ -212,25 +192,7 @@ async function newProject() {
         },
       },
     },
-    select: {
-      id: true,
-      name: true,
-      imageUrl: true,
-      imageStorageBlobUrl: true,
-      client: {
-        select: {
-          id: true,
-          name: true,
-          employees: {
-            select: {
-              user: true,
-            },
-          },
-        },
-      },
-      team: true,
-      summary: true,
-    },
+    include: includeClause,
   })
 }
 
@@ -252,4 +214,20 @@ async function deleteProject(id: number) {
       id,
     },
   })
+}
+
+const includeClause = {
+  client: {
+    select: {
+      id: true,
+      name: true,
+      employees: {
+        select: {
+          user: true,
+        },
+      },
+    },
+  },
+  team: true,
+  summary: true,
 }
