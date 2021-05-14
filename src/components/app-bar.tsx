@@ -22,7 +22,7 @@ function AppBar() {
 
   return (
     <header
-      tw="sticky w-screen px-4 flex flex-row items-center justify-between bg-gray-yellow-500 top-0 z-10"
+      tw="sticky w-screen px-4 flex flex-row items-center justify-between bg-gray-yellow-500 top-0"
       css={css`
         height: ${appBarHeight};
       `}

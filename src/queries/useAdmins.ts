@@ -2,8 +2,10 @@ import { useQuery } from 'react-query'
 import { AdminsData } from 'pages/api/admins'
 
 import type { QueryFunction } from 'react-query'
+import type { QueryData } from '@types'
 
 export { useAdmins }
+export type Admins = QueryData<typeof useAdmins>
 
 function useAdmins() {
   return useQuery('admins', fetchAdmins)

@@ -19,6 +19,7 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
           </label>
         ) : null}
         <input
+          tw="w-full"
           ref={ref}
           id={id}
           css={inputCss}

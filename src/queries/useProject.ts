@@ -43,6 +43,7 @@ function useProjectPlaceholderData(
           id: project.id,
           imageUrl: project.imageUrl,
           name: project.name,
+          clientId: null,
           client: null,
           team: [],
           summary: project.summary
