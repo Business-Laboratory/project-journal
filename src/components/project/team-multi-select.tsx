@@ -252,7 +252,7 @@ function SelectedAdmin({ name, onDelete, focus, onBlur }: SelectedAdminProps) {
 
   return (
     <div
-      tw="flex flex-row items-center px-2 bg-copper-400 text-gray-yellow-100 rounded-lg max-w-fit mr-6"
+      tw="flex flex-row items-center px-2 bg-copper-400 text-gray-yellow-100 rounded-lg max-w-fit mr-6 bl-text-base"
       // we need to stop propagation so that we can click on the wrapper of the input to focus the input
       onClick={(e) => e.stopPropagation()}
     >
