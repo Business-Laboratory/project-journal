@@ -12,8 +12,8 @@ import { useProjects } from '@queries/useProjects'
 import { usePrefetchProject } from '@queries/useProject'
 import { usePrefetchUpdates } from '@queries/useUpdates'
 import { useNewProject } from '@queries/useNewProject'
-import { useRouter } from 'next/router'
-import { IconButton } from '@components/icon-button'
+import { IconLink } from '@components/icon-link'
+import { createSettingsHref } from '@components/project'
 
 export default function Projects() {
   return (
@@ -70,25 +70,13 @@ function CardGrid() {
 }
 
 function AddProjectLink() {
-  const router = useRouter()
   const newProjectMutation = useNewProject()
   return newProjectMutation.status !== 'loading' ? (
     <>
-      <IconButton
-        onClick={() => {
-          newProjectMutation.mutate(
-            { id: 'new' },
-            {
-              onSuccess: (project) => {
-                router.push(`/project/${project.id}?edit=settings`)
-              },
-            }
-          )
-        }}
-      >
+      <IconLink href={createSettingsHref('new')}>
         <PlusIcon tw="w-6 h-6 fill-copper-300" />
         <span tw="bl-text-2xl">Add project</span>
-      </IconButton>
+      </IconLink>
       {newProjectMutation.status === 'error' && (
         <span tw="pl-4 bl-text-2xl text-matisse-red-200">Failed to create</span>
       )}

@@ -47,7 +47,7 @@ function LoadingProjectInformation({ status }: LoadingProjectInformationProps) {
 }
 
 type ProjectInformationProps = {
-  projectId: number
+  projectId: number | 'new'
   userRole: Role
   updates: Updates
 }
@@ -65,11 +65,13 @@ function ProjectInformation({
           <UpdateModal projectId={projectId} updates={updates} />
         </>
       ) : null}
-      <UpdatesList
-        updates={updates}
-        userRole={userRole}
-        projectId={projectId}
-      />
+      {projectId !== 'new' ? (
+        <UpdatesList
+          updates={updates}
+          userRole={userRole}
+          projectId={projectId}
+        />
+      ) : null}
     </ProjectInformationContainer>
   )
 }
@@ -77,9 +79,10 @@ function ProjectInformation({
 // Container which handles scroll events
 
 export type OnScrollFunction = () => void
-const OnScrollRefContext = createContext<
-  React.MutableRefObject<OnScrollFunction | null> | undefined
->(undefined)
+const OnScrollRefContext =
+  createContext<React.MutableRefObject<OnScrollFunction | null> | undefined>(
+    undefined
+  )
 
 function ProjectInformationContainer({
   children,
@@ -150,7 +153,7 @@ function useOnScroll(onScroll: OnScrollFunction) {
   onScrollRef.current = onScroll
 }
 
-function AddUpdateButton({ projectId }: { projectId: number }) {
+function AddUpdateButton({ projectId }: { projectId: number | 'new' }) {
   return (
     <IconLink href={createEditUpdateHref(projectId, 'new')} replace={true}>
       <PlusIcon tw="w-6 h-6 fill-copper-300" />
@@ -162,9 +165,8 @@ function AddUpdateButton({ projectId }: { projectId: number }) {
 // container for all of the updates which provisions refs for each of the children through context providers
 // and also handles all of the complex logic for synchronizing the scroll with the hash links
 
-const UpdateRefContext = createContext<
-  React.RefObject<HTMLElement> | undefined
->(undefined)
+const UpdateRefContext =
+  createContext<React.RefObject<HTMLElement> | undefined>(undefined)
 
 function UpdatesContainer({ children }: { children: React.ReactNode }) {
   const childrenWithRefs = useChildrenWithRefs(children)

@@ -7,7 +7,7 @@ import type { getClients } from './clients'
 import { isValidEmail } from '@utils/is-valid-email'
 
 export type UpdateClientBody = {
-  id: 'new' | number
+  id: number | 'new'
   name: string
   employees: {
     userId: number

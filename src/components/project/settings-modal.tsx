@@ -347,7 +347,7 @@ const listboxOptionCss = [
   `,
 ]
 
-function createSettingsHref(projectId: number) {
+function createSettingsHref(projectId: number | 'new') {
   return {
     pathname: `/project/${projectId}`,
     query: { edit: 'settings' },

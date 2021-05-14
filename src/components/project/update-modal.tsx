@@ -18,7 +18,7 @@ import type { Updates } from '@queries/useUpdates'
 export { UpdateModal, createEditUpdateHref }
 
 type UpdateModalProps = {
-  projectId: number
+  projectId: number | 'new'
   updates: Updates
 }
 function UpdateModal({ projectId, updates }: UpdateModalProps) {
@@ -51,7 +51,7 @@ function UpdateModal({ projectId, updates }: UpdateModalProps) {
 }
 
 type ProjectEditModalContentProps = {
-  projectId: number
+  projectId: number | 'new'
   data?: Omit<UpdateBody, 'projectId'>
   onDismiss: () => void
 }
@@ -68,7 +68,6 @@ function ProjectEditModalContent({
   const deleteMutation = useDeleteUpdateMutation(projectId)
 
   const disabled = !title || !body || updateMutation.status === 'loading'
-
   return (
     <>
       <div tw="space-y-8 flex flex-col items-end">
@@ -90,7 +89,7 @@ function ProjectEditModalContent({
             if (disabled) return
             updateMutation.mutate(
               { id, title, body, projectId },
-              { onSuccess: onDismiss }
+              projectId !== 'new' ? { onSuccess: onDismiss } : undefined
             )
           }}
           disabled={disabled}
@@ -126,7 +125,7 @@ function ProjectEditModalContent({
 /**
  * Any update id that isn't found in our data defaults to path /project/projectId?edit=update&updateId=new
  */
-function useRedirectNewUpdate(projectId: number, id: UpdateBody['id']) {
+function useRedirectNewUpdate(projectId: number | 'new', id: UpdateBody['id']) {
   const router = useRouter()
   const { updateId } = router.query
 
@@ -139,7 +138,10 @@ function useRedirectNewUpdate(projectId: number, id: UpdateBody['id']) {
   }, [id, projectId, router, updateId])
 }
 
-function createEditUpdateHref(projectId: number, updateId: UpdateBody['id']) {
+function createEditUpdateHref(
+  projectId: number | 'new',
+  updateId: UpdateBody['id']
+) {
   return {
     pathname: `/project/${projectId}`,
     query: { edit: 'update', updateId: String(updateId) },

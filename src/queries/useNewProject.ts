@@ -5,7 +5,7 @@ import type { NewProjectData } from 'pages/api/project'
 import { Projects } from './useProjects'
 import produce from 'immer'
 
-export { useNewProject }
+export { useNewProject, createNewProject }
 export type UpdateBody = Parameters<
   ReturnType<typeof useNewProject>['mutate']
 >[0]
@@ -13,7 +13,7 @@ export type UpdateBody = Parameters<
 function useNewProject() {
   const queryClient = useQueryClient()
   const projectsKey = 'projects'
-  return useMutation(newProjectMutation, {
+  return useMutation(createNewProject, {
     onSuccess: async (project) => {
       await queryClient.cancelQueries(projectsKey)
       const projectKey = ['project', { id: project.id }]
@@ -34,7 +34,7 @@ function useNewProject() {
   })
 }
 
-async function newProjectMutation(data: { id: 'new' }) {
+async function createNewProject(data: { id: 'new' }) {
   const res = await fetch(`/api/project`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
