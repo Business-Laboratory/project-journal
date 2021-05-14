@@ -412,7 +412,6 @@ function useKeepPopupOpen(
         inputRef.current?.focus()
       }, 50)
       return () => {
-        console.log('clearing')
         clearTimeout(timeoutId)
       }
     }
