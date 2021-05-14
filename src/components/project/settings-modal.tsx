@@ -25,7 +25,7 @@ export { SettingsModal, createSettingsHref }
 
 type SettingsModalProps = {
   projectId: number
-  project: ProjectData
+  project: Omit<ProjectData, 'id'> // we don't need the id here, since it's already passed in as prop
 }
 
 function SettingsModal({ projectId, project }: SettingsModalProps) {
@@ -53,7 +53,7 @@ function SettingsModal({ projectId, project }: SettingsModalProps) {
 
 type SettingsEditModalContentProps = SettingsModalProps & {
   onDismiss: () => void
-  project: ProjectData
+  project: Omit<ProjectData, 'id'> // we don't need the id here, since it's already passed in as prop
 }
 function SettingsEditModalContent({
   projectId,

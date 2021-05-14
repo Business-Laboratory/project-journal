@@ -6,6 +6,7 @@ import { generateSasUrl, deleteImage } from '@lib/azure-storage-blob'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import type { PrepareAPIData } from '@types'
 import type { UserData } from '@utils/api/check-authentication'
+import type { Summary } from '@prisma/client'
 
 export type ProjectData = PrepareAPIData<ReturnType<typeof getProject>>
 export type ProjectUpdateData = PrepareAPIData<ReturnType<typeof updateProject>>
@@ -57,13 +58,8 @@ export default async function handler(
         return
       }
 
-      const {
-        id,
-        name,
-        imageStorageBlobUrl,
-        clientId,
-        team,
-      } = req.body as ProjectMutationBody
+      const { id, name, imageStorageBlobUrl, clientId, team } =
+        req.body as ProjectMutationBody
       const project = await updateProject(
         id,
         name,
@@ -182,7 +178,7 @@ async function updateProject(
 }
 
 async function newProject() {
-  return await prisma.project.create({
+  const project = await prisma.project.create({
     data: {
       name: 'Untitled Project',
       summary: {
@@ -192,8 +188,23 @@ async function newProject() {
         },
       },
     },
-    include: includeClause,
+    include: {
+      summary: true,
+    },
   })
+
+  const summary = project.summary
+  if (!hasSummary(summary)) {
+    throw new Error(
+      'Project does not have a summary. It should have just been created'
+    )
+  }
+
+  return { ...project, summary }
+}
+
+function hasSummary(summary: Summary | null): summary is Summary {
+  return summary !== null
 }
 
 async function deleteProject(id: number) {

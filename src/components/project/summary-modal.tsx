@@ -9,8 +9,8 @@ import { useUpdateSummary } from '@queries/useUpdateSummary'
 export { SummaryModal, createEditDescriptionHref, createEditRoadmapHref }
 
 type SummaryModalProps = {
-  projectId: number
-  summary: Exclude<Project['summary'], null>
+  projectId: number | 'new'
+  summary: Project['summary']
 }
 
 function SummaryModal({ projectId, summary }: SummaryModalProps) {
@@ -51,10 +51,10 @@ function SummaryEditModalContent({
   onDismiss,
   edit,
 }: SummaryEditModalContentProps) {
-  const id = summary.id
+  const id = summary?.id
   const [body, setBody] = useState(() => {
     const originalBody =
-      edit === 'description' ? summary['description'] : summary['roadmap']
+      edit === 'description' ? summary?.description : summary?.roadmap
     return originalBody ?? ''
   })
   const summaryMutation = useUpdateSummary(projectId)
@@ -79,7 +79,7 @@ function SummaryEditModalContent({
             edit === 'description'
               ? { id, description: body }
               : { id, roadmap: body },
-            { onSuccess: onDismiss }
+            projectId !== 'new' ? { onSuccess: onDismiss } : undefined
           )
         }}
         disabled={disabled}
@@ -93,14 +93,14 @@ function SummaryEditModalContent({
   )
 }
 
-function createEditDescriptionHref(projectId: number) {
+function createEditDescriptionHref(projectId: number | 'new') {
   return {
     pathname: `/project/${projectId}`,
     query: { edit: 'description' },
   }
 }
 
-function createEditRoadmapHref(projectId: number) {
+function createEditRoadmapHref(projectId: number | 'new') {
   return {
     pathname: `/project/${projectId}`,
     query: { edit: 'roadmap' },

@@ -34,11 +34,11 @@ function useNewProject() {
   })
 }
 
-async function createNewProject(data: { id: 'new' }) {
+async function createNewProject() {
   const res = await fetch(`/api/project`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+    body: JSON.stringify({ id: 'new' }),
   })
   const response = await res.json()
   if (!res.ok) {

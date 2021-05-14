@@ -38,15 +38,13 @@ function LoadingSummary({ status }: LoadingSummaryProps) {
 }
 
 type SummaryProps = {
-  projectId: number
+  projectId: number | 'new'
   userRole: Role
-  project: ProjectData
+  project: Omit<ProjectData, 'id'> // we don't need the id here, since it's already passed in as prop
 }
 function Summary({ projectId, userRole, project }: SummaryProps) {
   const { name, imageUrl, client, team, summary } = project
   const clientEmployees = client?.employees.map(({ user }) => user) ?? []
-  // Is there a situation where summary would ever be null?
-  if (!summary) return null
 
   return (
     <>
@@ -89,7 +87,7 @@ function Summary({ projectId, userRole, project }: SummaryProps) {
           ) : (
             <h2 tw="bl-text-3xl">Project Description</h2>
           )}
-          {summary.description ? (
+          {summary?.description ? (
             <RenderMarkdown>{summary.description}</RenderMarkdown>
           ) : null}
         </div>
@@ -102,7 +100,7 @@ function Summary({ projectId, userRole, project }: SummaryProps) {
           ) : (
             <h2 tw="bl-text-3xl">Project Roadmap</h2>
           )}
-          {summary.roadmap ? (
+          {summary?.roadmap ? (
             <RenderMarkdown>{summary.roadmap}</RenderMarkdown>
           ) : null}
         </div>

@@ -65,13 +65,18 @@ function ProjectInformation({
           <UpdateModal projectId={projectId} updates={updates} />
         </>
       ) : null}
-      {projectId !== 'new' ? (
-        <UpdatesList
-          updates={updates}
-          userRole={userRole}
-          projectId={projectId}
-        />
-      ) : null}
+
+      {updates.length > 0 ? (
+        projectId !== 'new' ? (
+          <UpdatesList
+            updates={updates}
+            userRole={userRole}
+            projectId={projectId}
+          />
+        ) : null
+      ) : (
+        <h1 tw="bl-text-3xl max-w-prose">No updates have been added</h1>
+      )}
     </ProjectInformationContainer>
   )
 }
@@ -335,7 +340,7 @@ function UpdatesList({ updates, userRole, projectId }: UpdatesListProps) {
 
   const routerHash = window.location.hash
 
-  return updates?.length > 0 ? (
+  return (
     <UpdatesContainer>
       {updates.map(({ id, hashLink, title, body, createdAt }) => {
         return (
@@ -394,8 +399,6 @@ function UpdatesList({ updates, userRole, projectId }: UpdatesListProps) {
         )
       })}
     </UpdatesContainer>
-  ) : (
-    <h1 tw="bl-text-3xl max-w-prose">No updates have been added</h1>
   )
 }
 

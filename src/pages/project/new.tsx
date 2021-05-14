@@ -1,15 +1,13 @@
 import { css } from 'twin.macro'
 import Header from 'next/head'
-// import { QueryStatus } from 'react-query'
 import { memo } from 'react'
-// import { useRouter } from 'next/router'
 
 import {
   Timeline,
   ProjectInformation,
-  // Summary,
+  Summary,
   HashLinkProvider,
-  // LoadingSummary,
+  LoadingSummary,
   LoadingTimeline,
   LoadingProjectInformation,
 } from '@components/project'
@@ -17,20 +15,20 @@ import { appBarHeight } from '@components/app-bar'
 
 import { useAuth } from '@components/auth-context'
 
-// import type { Project } from '@queries/useProject'
+import type { Project } from '@queries/useProject'
 import type { Updates } from '@queries/useUpdates'
 import type { Role } from '@prisma/client'
 
+const emptyProject: Omit<Project, 'id'> = {
+  imageUrl: null,
+  name: null,
+  clientId: null,
+  client: null,
+  team: [],
+  summary: null,
+}
+
 export default function NewProject() {
-  // const data: Project = {
-  //   imageUrl: null,
-  //   id: -1, // TODO: change
-  //   name: null,
-  //   clientId: null,
-  //   client: null,
-  //   team: [],
-  //   summary: null,
-  // }
   // we need to be loading all of the loading indicators if the user hasn't loaded, since it effects the layout
   const user = useAuth()
   const userRole = user?.role ?? null
@@ -49,7 +47,15 @@ export default function NewProject() {
         `}
       >
         <TimelineAndProjectInformation projectId={'new'} userRole={userRole} />
-        {/* <Summary projectId={projectId} userRole={userRole} project={data} /> */}
+        {userRole === null ? (
+          <LoadingSummary status={'loading'} />
+        ) : (
+          <Summary
+            projectId={'new'}
+            userRole={userRole}
+            project={emptyProject}
+          />
+        )}
       </main>
     </>
   )

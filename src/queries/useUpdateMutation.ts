@@ -6,7 +6,7 @@ import type { Updates } from './useUpdates'
 import type { Update } from 'pages/api/update'
 import { useRouter } from 'next/router'
 
-export { useUpdateMutation }
+export { useUpdateMutation, createUpdateKey }
 export type UpdateBody = Parameters<
   ReturnType<typeof useUpdateMutation>['mutate']
 >[0]
@@ -66,7 +66,7 @@ async function createOrUpdateUpdate(data: UpdateData) {
   // if this update belongs to a new project, create the project first
   let bodyData = data
   if (data.projectId === 'new') {
-    const newProject = await createNewProject({ id: 'new' })
+    const newProject = await createNewProject()
     bodyData = { ...bodyData, projectId: newProject.id }
   }
   console.log(bodyData)
