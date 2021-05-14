@@ -6,7 +6,7 @@ import { DeleteSection, Modal, SaveButton } from '@components/modal'
 import { useClients } from '@queries/useClients'
 import { Button } from '@components/button'
 import { CameraIcon, ExpandIcon } from 'icons'
-import { ProjectData, ProjectMutationBody } from 'pages/api/project'
+import { ProjectMutationBody } from 'pages/api/project'
 import {
   ListboxButton,
   ListboxInput,
@@ -21,11 +21,13 @@ import { useProjectMutation } from '@queries/useProjectMutation'
 import { useDeleteProject } from '@queries/useDeleteProject'
 import { TextInput } from '@components/text-input'
 
+import type { Project } from '@queries/useProject'
+
 export { SettingsModal, createSettingsHref }
 
 type SettingsModalProps = {
-  projectId: number
-  project: Omit<ProjectData, 'id'> // we don't need the id here, since it's already passed in as prop
+  projectId: number | 'new'
+  project: Omit<Project, 'id'> // we don't need the id here, since it's already passed in as prop
 }
 
 function SettingsModal({ projectId, project }: SettingsModalProps) {
@@ -53,7 +55,7 @@ function SettingsModal({ projectId, project }: SettingsModalProps) {
 
 type SettingsEditModalContentProps = SettingsModalProps & {
   onDismiss: () => void
-  project: Omit<ProjectData, 'id'> // we don't need the id here, since it's already passed in as prop
+  project: Omit<Project, 'id'> // we don't need the id here, since it's already passed in as prop
 }
 function SettingsEditModalContent({
   projectId,
@@ -94,17 +96,19 @@ function SettingsEditModalContent({
       const imageStorageBlobUrl = await uploadImage(sasUrl, imageFile)
       projectMutation.mutate(
         { id: projectId, name, imageStorageBlobUrl, clientId, team },
-        {
-          onSuccess: () => {
-            setImageUpload('idle')
-            onDismiss()
-          },
-        }
+        projectId !== 'new'
+          ? {
+              onSuccess: () => {
+                setImageUpload('idle')
+                onDismiss()
+              },
+            }
+          : undefined
       )
     } else {
       projectMutation.mutate(
         { id: projectId, name, clientId, team },
-        { onSuccess: onDismiss }
+        projectId !== 'new' ? { onSuccess: onDismiss } : undefined
       )
     }
   }
@@ -190,33 +194,36 @@ function SettingsEditModalContent({
           ? `Saving settings...`
           : `Save settings`}
       </SaveButton>
-      <DeleteSection
-        tw="mt-16 w-full"
-        label="Verify project name"
-        verificationText={name || 'Project Name'}
-        buttonText={
-          projectDeleteMutation.status === 'loading'
-            ? 'Deleting...'
-            : 'Delete project'
-        }
-        onDelete={() => {
-          projectDeleteMutation.mutate(projectId, {
-            onSuccess: () => {
-              router.push('/projects')
-            },
-          })
-        }}
-        status={projectDeleteMutation.status}
-      />
+      {projectId !== 'new' ? (
+        <DeleteSection
+          tw="mt-16 w-full"
+          label="Verify project name"
+          verificationText={name || 'Project Name'}
+          buttonText={
+            projectDeleteMutation.status === 'loading'
+              ? 'Deleting...'
+              : 'Delete project'
+          }
+          onDelete={() => {
+            projectDeleteMutation.mutate(projectId, {
+              onSuccess: () => {
+                router.push('/projects')
+              },
+            })
+          }}
+          status={projectDeleteMutation.status}
+        />
+      ) : null}
     </div>
   )
 }
 
+type SettingsState = Omit<ProjectMutationBody, 'imageStorageBlobUrl' | 'id'>
 const initialState = ({
   name,
   client,
   team,
-}: ProjectData): Omit<ProjectMutationBody, 'imageStorageBlobUrl' | 'id'> => ({
+}: Pick<Project, 'name' | 'client' | 'team'>): SettingsState => ({
   name: name ?? '',
   clientId: client?.id ?? null,
   team: team.map(({ id }) => id) ?? [],
@@ -227,10 +234,7 @@ type ActionType =
   | { type: 'SET_CLIENT'; payload: number | null }
   | { type: 'SET_TEAM'; payload: number[] }
 
-function settingsReducer(
-  state: ReturnType<typeof initialState>,
-  action: ActionType
-) {
+function settingsReducer(state: SettingsState, action: ActionType) {
   switch (action.type) {
     case 'SET_NAME': {
       return { ...state, name: action.payload }

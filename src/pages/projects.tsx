@@ -55,7 +55,9 @@ function CardGrid() {
             <Card
               key={project.id}
               id={project.id}
-              name={project.name ?? `Untitled Project (${idx + 1})`}
+              name={
+                project.name ? project.name : `Untitled Project (${idx + 1})`
+              }
               description={project.summary?.description ?? null}
               imageUrl={project.imageUrl}
             />

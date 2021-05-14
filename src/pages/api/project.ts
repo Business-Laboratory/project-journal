@@ -10,9 +10,9 @@ import type { Summary } from '@prisma/client'
 
 export type ProjectData = PrepareAPIData<ReturnType<typeof getProject>>
 export type ProjectUpdateData = PrepareAPIData<ReturnType<typeof updateProject>>
-export type NewProjectData = PrepareAPIData<ReturnType<typeof newProject>>
+export type NewProjectData = PrepareAPIData<ReturnType<typeof createProject>>
 export type ProjectMutationBody = {
-  id: number
+  id: number | 'new'
   name: string
   imageStorageBlobUrl?: string
   clientId: number | null
@@ -52,14 +52,15 @@ export default async function handler(
         return
       }
 
-      if (req.body.id === 'new') {
-        const project = await newProject()
-        res.status(200).json(project)
-        return
+      let { id, name, imageStorageBlobUrl, clientId, team } =
+        req.body as ProjectMutationBody
+
+      // if this is a new project, create it first
+      if (id === 'new') {
+        const project = await createProject()
+        id = project.id
       }
 
-      const { id, name, imageStorageBlobUrl, clientId, team } =
-        req.body as ProjectMutationBody
       const project = await updateProject(
         id,
         name,
@@ -67,6 +68,7 @@ export default async function handler(
         clientId,
         team
       )
+
       res.status(200).json(project)
       return
     }
@@ -177,10 +179,9 @@ async function updateProject(
   return { ...newProject, team: newTeam.team }
 }
 
-async function newProject() {
+async function createProject() {
   const project = await prisma.project.create({
     data: {
-      name: 'Untitled Project',
       summary: {
         create: {
           description: '',

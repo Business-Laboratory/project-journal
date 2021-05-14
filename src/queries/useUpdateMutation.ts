@@ -1,6 +1,6 @@
 import { useQueryClient, useMutation } from 'react-query'
 import { preprocessUpdate } from './useUpdates'
-import { createNewProject } from './useNewProject'
+import { createNewProject } from './useProjectMutation'
 
 import type { Updates } from './useUpdates'
 import type { Update } from 'pages/api/update'
@@ -69,7 +69,6 @@ async function createOrUpdateUpdate(data: UpdateData) {
     const newProject = await createNewProject()
     bodyData = { ...bodyData, projectId: newProject.id }
   }
-  console.log(bodyData)
   const res = await fetch(`/api/update`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

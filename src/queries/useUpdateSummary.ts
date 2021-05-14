@@ -1,6 +1,7 @@
 import { useQueryClient, useMutation } from 'react-query'
 import { useRouter } from 'next/router'
-import { createNewProject } from './useNewProject'
+import { createNewProject } from './useProjectMutation'
+import { createProjectKey } from './useProject'
 import { createUpdateKey } from './useUpdateMutation'
 
 import type { Project } from './useProject'
@@ -31,12 +32,9 @@ function useUpdateSummary(projectId: number | 'new') {
         router.replace(`./${summary.projectId}`)
       }
     },
-    onSettled: (summary) => {
+    onSettled: () => {
       if (projectId !== 'new') {
         queryClient.invalidateQueries(createProjectKey(projectId))
-      } else {
-        if (!summary) return
-        queryClient.invalidateQueries(createProjectKey(summary.projectId))
       }
     },
   })
@@ -63,10 +61,6 @@ function updateSummary(projectId: number | 'new') {
     }
     return response as Summary
   }
-}
-
-function createProjectKey(projectId: number) {
-  return ['project', { id: projectId }]
 }
 
 function createEmptyProject(id: number): Project {
