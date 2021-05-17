@@ -6,12 +6,12 @@ import type { ProjectData } from 'pages/api/project'
 import type { Projects } from './useProjects'
 import type { QueryData } from '@types'
 
-export { useProject, usePrefetchProject }
+export { useProject, usePrefetchProject, createProjectKey }
 export type Project = QueryData<typeof useProject>
 
 function useProject(id: number) {
   const placeholderData = useProjectPlaceholderData(id)
-  return useQuery(['project', { id }], fetchProject, {
+  return useQuery(createProjectKey(id), fetchProject, {
     placeholderData,
   })
 }
@@ -24,7 +24,7 @@ function usePrefetchProject(id: number, staleTime = 10000) {
   // The results of this query will be cached like a normal query
   return async () =>
     await queryClient.prefetchQuery(
-      ['project', { id }],
+      createProjectKey(id),
       fetchProject,
       { staleTime } // wait this long before another prefetch is attempted
     )
@@ -57,10 +57,10 @@ function useProjectPlaceholderData(projectId: number): ProjectData | undefined {
   }, [project])
 }
 
-type ProjectQueryKey = ['project', { id: number }]
-const fetchProject: QueryFunction<ProjectData, ProjectQueryKey> = async ({
-  queryKey,
-}) => {
+const fetchProject: QueryFunction<
+  ProjectData,
+  ReturnType<typeof createProjectKey>
+> = async ({ queryKey }) => {
   const [, { id }] = queryKey
 
   if (!id) {
@@ -74,4 +74,8 @@ const fetchProject: QueryFunction<ProjectData, ProjectQueryKey> = async ({
     throw new Error(`Something went wrong`)
   }
   return res.json()
+}
+
+function createProjectKey(projectId: number) {
+  return ['project', { id: projectId }] as const
 }

@@ -14,11 +14,12 @@ import { useDeleteUpdateMutation } from '@queries/useDeleteUpdateMutation'
 
 import type { UpdateBody } from '@queries/useUpdateMutation'
 import type { Updates } from '@queries/useUpdates'
+import type { ProjectId } from 'pages/api/project'
 
 export { UpdateModal, createEditUpdateHref }
 
 type UpdateModalProps = {
-  projectId: number
+  projectId: ProjectId
   updates: Updates
 }
 function UpdateModal({ projectId, updates }: UpdateModalProps) {
@@ -51,7 +52,7 @@ function UpdateModal({ projectId, updates }: UpdateModalProps) {
 }
 
 type ProjectEditModalContentProps = {
-  projectId: number
+  projectId: ProjectId
   data?: Omit<UpdateBody, 'projectId'>
   onDismiss: () => void
 }
@@ -60,6 +61,7 @@ function ProjectEditModalContent({
   data = { id: 'new', title: '', body: '' },
   onDismiss,
 }: ProjectEditModalContentProps) {
+  const router = useRouter()
   const { id, title: originalTitle, body: originalBody } = data
   const [title, setTitle] = useState(originalTitle)
   const [body, setBody] = useState(originalBody)
@@ -68,7 +70,6 @@ function ProjectEditModalContent({
   const deleteMutation = useDeleteUpdateMutation(projectId)
 
   const disabled = !title || !body || updateMutation.status === 'loading'
-
   return (
     <>
       <div tw="space-y-8 flex flex-col items-end">
@@ -90,7 +91,15 @@ function ProjectEditModalContent({
             if (disabled) return
             updateMutation.mutate(
               { id, title, body, projectId },
-              { onSuccess: onDismiss }
+              {
+                onSuccess: (update) => {
+                  if (projectId === 'new') {
+                    router.replace(`./${update.projectId}`)
+                  } else {
+                    onDismiss()
+                  }
+                },
+              }
             )
           }}
           disabled={disabled}
@@ -101,24 +110,29 @@ function ProjectEditModalContent({
             : 'Save update'}
         </SaveButton>
       </div>
-      {id !== 'new' ? (
-        <DeleteSection
-          tw="mt-16"
-          label="Verify update title"
-          verificationText={title}
-          buttonText={
-            deleteMutation.status === 'loading'
-              ? 'Deleting...'
-              : 'Delete update'
-          }
-          onDelete={() => {
-            deleteMutation.mutate(id, {
-              onSuccess: onDismiss,
-            })
-          }}
-          status={deleteMutation.status}
-        />
-      ) : null}
+      {
+        // cannot delete new updates or updates that belong to new projects which haven't been uploaded yet
+        id !== 'new' && projectId !== 'new' ? (
+          <DeleteSection
+            tw="mt-16"
+            label="Verify update title"
+            verificationText={title}
+            buttonText={
+              deleteMutation.status === 'loading'
+                ? 'Deleting...'
+                : 'Delete update'
+            }
+            onDelete={() => {
+              deleteMutation.mutate(id, {
+                onSuccess: () => {
+                  onDismiss()
+                },
+              })
+            }}
+            status={deleteMutation.status}
+          />
+        ) : null
+      }
     </>
   )
 }
@@ -126,7 +140,7 @@ function ProjectEditModalContent({
 /**
  * Any update id that isn't found in our data defaults to path /project/projectId?edit=update&updateId=new
  */
-function useRedirectNewUpdate(projectId: number, id: UpdateBody['id']) {
+function useRedirectNewUpdate(projectId: ProjectId, id: UpdateBody['id']) {
   const router = useRouter()
   const { updateId } = router.query
 
@@ -139,7 +153,10 @@ function useRedirectNewUpdate(projectId: number, id: UpdateBody['id']) {
   }, [id, projectId, router, updateId])
 }
 
-function createEditUpdateHref(projectId: number, updateId: UpdateBody['id']) {
+function createEditUpdateHref(
+  projectId: ProjectId,
+  updateId: UpdateBody['id']
+) {
   return {
     pathname: `/project/${projectId}`,
     query: { edit: 'update', updateId: String(updateId) },

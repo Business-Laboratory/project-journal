@@ -1,7 +1,7 @@
 import { css } from 'twin.macro'
 import Header from 'next/head'
 import { QueryStatus } from 'react-query'
-import { memo } from 'react'
+import React, { memo } from 'react'
 import { useRouter } from 'next/router'
 
 import {
@@ -29,19 +29,26 @@ export default function Project() {
     return null
   }
 
-  const numberId = Number(id)
-  if (!id || Array.isArray(id) || Number.isNaN(numberId)) {
+  if (!id || Array.isArray(id)) {
     throw new Error(`Invalid id: ${id}`)
   }
 
-  return <ProjectById projectId={numberId} />
+  if (id === 'new') {
+    return <NewProject />
+  }
+
+  const numberId = Number(id)
+  if (!Number.isNaN(numberId)) {
+    return <ExistingProject projectId={numberId} />
+  }
+
+  throw new Error(`Invalid id: ${id}`)
 }
 
-function ProjectById({ projectId }: { projectId: number }) {
+function ExistingProject({ projectId }: { projectId: number }) {
   const { data, status } = useProject(projectId)
   // we need to be loading all of the loading indicators if the user hasn't loaded, since it effects the layout
   const user = useAuth()
-
   const userRole = user?.role ?? null
 
   return (
@@ -49,14 +56,7 @@ function ProjectById({ projectId }: { projectId: number }) {
       <Header>
         <title>{getProjectTitle(status, data?.name ?? undefined)}</title>
       </Header>
-      <main
-        tw="fixed overflow-hidden h-full w-full"
-        css={css`
-          height: calc(100% - ${appBarHeight});
-          display: grid;
-          grid-template-columns: 80px auto 500px;
-        `}
-      >
+      <Wrapper>
         <TimelineAndProjectInformation
           projectId={projectId}
           userRole={userRole}
@@ -64,10 +64,75 @@ function ProjectById({ projectId }: { projectId: number }) {
         {userRole === null || status !== 'success' || data === undefined ? (
           <LoadingSummary status={status} />
         ) : (
-          <Summary projectId={projectId} userRole={userRole} project={data} />
+          <Summary userRole={userRole} project={data} />
         )}
-      </main>
+      </Wrapper>
     </>
+  )
+}
+
+const emptyProject = {
+  id: 'new' as const,
+  imageUrl: null,
+  name: null,
+  clientId: null,
+  client: null,
+  team: [],
+  summary: null,
+}
+
+function NewProject() {
+  // we need to be loading all of the loading indicators if the user hasn't loaded, since it effects the layout
+  const user = useAuth()
+  const userRole = user?.role ?? null
+
+  return (
+    <>
+      <Header>
+        <title>New Project | Project Journal</title>
+      </Header>
+      <Wrapper>
+        <HashLinkProvider>
+          {userRole === null ? (
+            <>
+              <LoadingTimeline />
+              <LoadingProjectInformation status={'loading'} />
+            </>
+          ) : (
+            <>
+              <Timeline updates={[]} />
+              <ProjectInformation
+                projectId={'new'}
+                userRole={userRole}
+                updates={[]}
+              />
+            </>
+          )}
+        </HashLinkProvider>
+        {userRole === null ? (
+          <LoadingSummary status={'loading'} />
+        ) : (
+          <Summary userRole={userRole} project={emptyProject} />
+        )}
+      </Wrapper>
+    </>
+  )
+}
+
+// Auxillary components
+
+function Wrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <main
+      tw="fixed overflow-hidden h-full w-full"
+      css={css`
+        height: calc(100% - ${appBarHeight});
+        display: grid;
+        grid-template-columns: 80px auto 500px;
+      `}
+    >
+      {children}
+    </main>
   )
 }
 

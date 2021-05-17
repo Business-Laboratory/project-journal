@@ -3,14 +3,16 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 
 import { MarkdownTextArea, Modal, SaveButton } from '@components/modal'
-import { Project } from '@queries/useProject'
 import { useUpdateSummary } from '@queries/useUpdateSummary'
+
+import type { Project } from '@queries/useProject'
+import type { ProjectId } from 'pages/api/project'
 
 export { SummaryModal, createEditDescriptionHref, createEditRoadmapHref }
 
 type SummaryModalProps = {
-  projectId: number
-  summary: Exclude<Project['summary'], null>
+  projectId: ProjectId
+  summary: Project['summary']
 }
 
 function SummaryModal({ projectId, summary }: SummaryModalProps) {
@@ -51,10 +53,10 @@ function SummaryEditModalContent({
   onDismiss,
   edit,
 }: SummaryEditModalContentProps) {
-  const id = summary.id
+  const id = summary?.id
   const [body, setBody] = useState(() => {
     const originalBody =
-      edit === 'description' ? summary['description'] : summary['roadmap']
+      edit === 'description' ? summary?.description : summary?.roadmap
     return originalBody ?? ''
   })
   const summaryMutation = useUpdateSummary(projectId)
@@ -79,7 +81,7 @@ function SummaryEditModalContent({
             edit === 'description'
               ? { id, description: body }
               : { id, roadmap: body },
-            { onSuccess: onDismiss }
+            projectId !== 'new' ? { onSuccess: onDismiss } : undefined
           )
         }}
         disabled={disabled}
@@ -93,14 +95,14 @@ function SummaryEditModalContent({
   )
 }
 
-function createEditDescriptionHref(projectId: number) {
+function createEditDescriptionHref(projectId: ProjectId) {
   return {
     pathname: `/project/${projectId}`,
     query: { edit: 'description' },
   }
 }
 
-function createEditRoadmapHref(projectId: number) {
+function createEditRoadmapHref(projectId: ProjectId) {
   return {
     pathname: `/project/${projectId}`,
     query: { edit: 'roadmap' },

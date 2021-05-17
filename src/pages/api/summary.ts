@@ -4,10 +4,11 @@ import { checkAuthentication } from '@utils/api/check-authentication'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import type { PrepareAPIData } from '@types'
 
+// have to make the id optional for creating a project by creating the summary first in `useUpdateSummary`
 export type UpdateSummaryBody =
-  | { id: number; description: string }
-  | { id: number; roadmap: string }
-  | { id: number; description: string; roadmap: string }
+  | { id?: number; description: string }
+  | { id?: number; roadmap: string }
+  | { id?: number; description: string; roadmap: string }
 export type Summary = PrepareAPIData<ReturnType<typeof updateSummary>>
 
 /**

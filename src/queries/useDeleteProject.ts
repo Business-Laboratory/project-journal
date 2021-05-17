@@ -11,13 +11,12 @@ export function useDeleteProject() {
       const previousProjects = queryClient.getQueryData<Projects>('projects')
       if (!previousProjects) return
       const deleteIdIdx = previousProjects.findIndex((u) => u.id === id)
-      if (deleteIdIdx === -1) {
-        throw new Error(`Update with id ${id} not found in query cache`)
+      if (deleteIdIdx !== -1) {
+        const newProjects = produce(previousProjects, (draft) => {
+          draft.splice(deleteIdIdx, 1)
+        })
+        queryClient.setQueryData('projects', newProjects)
       }
-      const newProjects = produce(previousProjects, (draft) => {
-        draft.splice(deleteIdIdx, 1)
-      })
-      queryClient.setQueryData('projects', newProjects)
     },
     onSettled: () => {
       queryClient.invalidateQueries('projects')

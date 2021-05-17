@@ -15,7 +15,7 @@ import {
 } from './index'
 import type { QueryStatus } from 'react-query'
 import type { Role } from '@prisma/client'
-import type { ProjectData } from 'pages/api/project'
+import type { ProjectData, ProjectId } from 'pages/api/project'
 
 export { Summary, LoadingSummary }
 
@@ -38,15 +38,12 @@ function LoadingSummary({ status }: LoadingSummaryProps) {
 }
 
 type SummaryProps = {
-  projectId: number
   userRole: Role
-  project: ProjectData
+  project: Omit<ProjectData, 'id'> & { id: ProjectId }
 }
-function Summary({ projectId, userRole, project }: SummaryProps) {
-  const { name, imageUrl, client, team, summary } = project
+function Summary({ userRole, project }: SummaryProps) {
+  const { id: projectId, name, imageUrl, client, team, summary } = project
   const clientEmployees = client?.employees.map(({ user }) => user) ?? []
-  // Is there a situation where summary would ever be null?
-  if (!summary) return null
 
   return (
     <>
@@ -89,7 +86,7 @@ function Summary({ projectId, userRole, project }: SummaryProps) {
           ) : (
             <h2 tw="bl-text-3xl">Project Description</h2>
           )}
-          {summary.description ? (
+          {summary?.description ? (
             <RenderMarkdown>{summary.description}</RenderMarkdown>
           ) : null}
         </div>
@@ -102,7 +99,7 @@ function Summary({ projectId, userRole, project }: SummaryProps) {
           ) : (
             <h2 tw="bl-text-3xl">Project Roadmap</h2>
           )}
-          {summary.roadmap ? (
+          {summary?.roadmap ? (
             <RenderMarkdown>{summary.roadmap}</RenderMarkdown>
           ) : null}
         </div>
@@ -121,7 +118,7 @@ function Summary({ projectId, userRole, project }: SummaryProps) {
       {userRole === 'ADMIN' ? (
         <>
           <SummaryModal projectId={projectId} summary={summary} />
-          <SettingsModal projectId={projectId} project={project} />
+          <SettingsModal project={project} />
         </>
       ) : null}
     </>

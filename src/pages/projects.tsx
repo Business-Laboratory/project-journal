@@ -11,9 +11,8 @@ import { useAuth } from '@components/auth-context'
 import { useProjects } from '@queries/useProjects'
 import { usePrefetchProject } from '@queries/useProject'
 import { usePrefetchUpdates } from '@queries/useUpdates'
-import { useNewProject } from '@queries/useNewProject'
-import { useRouter } from 'next/router'
-import { IconButton } from '@components/icon-button'
+import { IconLink } from '@components/icon-link'
+import { createSettingsHref } from '@components/project'
 
 export default function Projects() {
   return (
@@ -44,57 +43,32 @@ function CardGrid() {
   const userNameFormatted = user.name ?? 'you'
   const projects = data ?? []
 
-  return projects.length > 0 ? (
+  return (
     <>
-      <AddProjectLink />
-      <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
-        {projects.map((project, idx) => (
-          <Card
-            key={project.id}
-            id={project.id}
-            name={project.name ?? `Untitled Project (${idx + 1})`}
-            description={project.summary?.description ?? null}
-            imageUrl={project.imageUrl}
-          />
-        ))}
-      </div>
-    </>
-  ) : (
-    <>
-      <AddProjectLink />
-      <h1 tw="bl-text-3xl max-w-prose text-center">
-        There are currently no projects assigned to {userNameFormatted}
-      </h1>
-    </>
-  )
-}
-
-function AddProjectLink() {
-  const router = useRouter()
-  const newProjectMutation = useNewProject()
-  return newProjectMutation.status !== 'loading' ? (
-    <>
-      <IconButton
-        onClick={() => {
-          newProjectMutation.mutate(
-            { id: 'new' },
-            {
-              onSuccess: (project) => {
-                router.push(`/project/${project.id}?edit=settings`)
-              },
-            }
-          )
-        }}
-      >
+      <IconLink href={createSettingsHref('new')}>
         <PlusIcon tw="w-6 h-6 fill-copper-300" />
         <span tw="bl-text-2xl">Add project</span>
-      </IconButton>
-      {newProjectMutation.status === 'error' && (
-        <span tw="pl-4 bl-text-2xl text-matisse-red-200">Failed to create</span>
+      </IconLink>
+      {projects.length > 0 ? (
+        <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
+          {projects.map((project, idx) => (
+            <Card
+              key={project.id}
+              id={project.id}
+              name={
+                project.name ? project.name : `Untitled Project (${idx + 1})`
+              }
+              description={project.summary?.description ?? null}
+              imageUrl={project.imageUrl}
+            />
+          ))}
+        </div>
+      ) : (
+        <h1 tw="bl-text-3xl max-w-prose text-center">
+          There are currently no projects assigned to {userNameFormatted}
+        </h1>
       )}
     </>
-  ) : (
-    <span tw="bl-text-2xl">Creating project...</span>
   )
 }
 
