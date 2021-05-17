@@ -25,12 +25,13 @@ import type { Project } from '@queries/useProject'
 
 export { SettingsModal, createSettingsHref }
 
+type ProjectData = Omit<Project, 'id'> & { id: ProjectId }
+
 type SettingsModalProps = {
-  projectId: ProjectId
-  project: Omit<Project, 'id'> // we don't need the id here, since it's already passed in as prop
+  project: ProjectData
 }
 
-function SettingsModal({ projectId, project }: SettingsModalProps) {
+function SettingsModal({ project }: SettingsModalProps) {
   const router = useRouter()
   const { edit } = router.query
 
@@ -39,29 +40,25 @@ function SettingsModal({ projectId, project }: SettingsModalProps) {
   }
 
   const handleOnDismiss = () => {
-    router.replace(`/project/${projectId}`, undefined, { shallow: true })
+    router.replace(`/project/${project.id}`, undefined, { shallow: true })
   }
 
   return (
     <Modal isOpen onDismiss={handleOnDismiss}>
-      <SettingsEditModalContent
-        projectId={projectId}
-        onDismiss={handleOnDismiss}
-        project={project}
-      />
+      <SettingsEditModalContent onDismiss={handleOnDismiss} project={project} />
     </Modal>
   )
 }
 
-type SettingsEditModalContentProps = SettingsModalProps & {
+type SettingsEditModalContentProps = {
+  project: ProjectData
   onDismiss: () => void
-  project: Omit<Project, 'id'> // we don't need the id here, since it's already passed in as prop
 }
 function SettingsEditModalContent({
-  projectId,
   onDismiss,
   project,
 }: SettingsEditModalContentProps) {
+  const projectId = project.id
   const router = useRouter()
   const [{ name, clientId, team }, dispatch] = useReducer(
     settingsReducer,

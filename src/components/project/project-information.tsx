@@ -67,17 +67,11 @@ function ProjectInformation({
         </>
       ) : null}
 
-      {updates.length > 0 ? (
-        projectId !== 'new' ? (
-          <UpdatesList
-            updates={updates}
-            userRole={userRole}
-            projectId={projectId}
-          />
-        ) : null
-      ) : (
-        <h1 tw="bl-text-3xl max-w-prose">No updates have been added</h1>
-      )}
+      <UpdatesList
+        updates={updates}
+        userRole={userRole}
+        projectId={projectId}
+      />
     </ProjectInformationContainer>
   )
 }
@@ -334,12 +328,16 @@ const applyToFirstChild = (
 type UpdatesListProps = {
   updates: Updates
   userRole: Role
-  projectId: number
+  projectId: ProjectId
 }
 function UpdatesList({ updates, userRole, projectId }: UpdatesListProps) {
   const router = useRouter()
 
   const routerHash = window.location.hash
+
+  if (updates.length === 0) {
+    return <h1 tw="bl-text-3xl max-w-prose">No updates have been added</h1>
+  }
 
   return (
     <UpdatesContainer>

@@ -29,17 +29,17 @@ export default function Project() {
     return null
   }
 
-  const numberId = Number(id)
   if (!id || Array.isArray(id)) {
     throw new Error(`Invalid id: ${id}`)
   }
 
-  if (Number.isNaN(numberId)) {
-    return <ExistingProject projectId={numberId} />
-  }
-
   if (id === 'new') {
     return <NewProject />
+  }
+
+  const numberId = Number(id)
+  if (!Number.isNaN(numberId)) {
+    return <ExistingProject projectId={numberId} />
   }
 
   throw new Error(`Invalid id: ${id}`)
@@ -64,7 +64,7 @@ function ExistingProject({ projectId }: { projectId: number }) {
         {userRole === null || status !== 'success' || data === undefined ? (
           <LoadingSummary status={status} />
         ) : (
-          <Summary projectId={projectId} userRole={userRole} project={data} />
+          <Summary userRole={userRole} project={data} />
         )}
       </Wrapper>
     </>
@@ -72,6 +72,7 @@ function ExistingProject({ projectId }: { projectId: number }) {
 }
 
 const emptyProject = {
+  id: 'new' as const,
   imageUrl: null,
   name: null,
   clientId: null,
@@ -111,11 +112,7 @@ function NewProject() {
         {userRole === null ? (
           <LoadingSummary status={'loading'} />
         ) : (
-          <Summary
-            projectId={'new'}
-            userRole={userRole}
-            project={emptyProject}
-          />
+          <Summary userRole={userRole} project={emptyProject} />
         )}
       </Wrapper>
     </>

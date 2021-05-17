@@ -38,12 +38,11 @@ function LoadingSummary({ status }: LoadingSummaryProps) {
 }
 
 type SummaryProps = {
-  projectId: ProjectId
   userRole: Role
-  project: Omit<ProjectData, 'id'> // we don't need the id here, since it's already passed in as prop
+  project: Omit<ProjectData, 'id'> & { id: ProjectId }
 }
-function Summary({ projectId, userRole, project }: SummaryProps) {
-  const { name, imageUrl, client, team, summary } = project
+function Summary({ userRole, project }: SummaryProps) {
+  const { id: projectId, name, imageUrl, client, team, summary } = project
   const clientEmployees = client?.employees.map(({ user }) => user) ?? []
 
   return (
@@ -119,7 +118,7 @@ function Summary({ projectId, userRole, project }: SummaryProps) {
       {userRole === 'ADMIN' ? (
         <>
           <SummaryModal projectId={projectId} summary={summary} />
-          <SettingsModal projectId={projectId} project={project} />
+          <SettingsModal project={project} />
         </>
       ) : null}
     </>
