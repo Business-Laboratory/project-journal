@@ -1,11 +1,12 @@
 import { useQueryClient, useMutation } from 'react-query'
 import { preprocessUpdate } from './useUpdates'
 import { createNewProject } from './useProjectMutation'
-import { useRouter } from 'next/router'
+import { createProjectKey } from './useProject'
 
 import type { Updates } from './useUpdates'
 import type { Update } from 'pages/api/update'
 import type { ProjectId } from 'pages/api/project'
+import type { Project } from './useProject'
 
 export { useUpdateMutation, createUpdateKey }
 export type UpdateBody = Parameters<
@@ -14,17 +15,21 @@ export type UpdateBody = Parameters<
 
 function useUpdateMutation(projectId: ProjectId) {
   const queryClient = useQueryClient()
-  const router = useRouter()
   return useMutation(createOrUpdateUpdate, {
     onSuccess: async (update, { id }) => {
       // redirect if we created a new project
       if (projectId === 'new') {
         const newProjectId = update.projectId
-        queryClient.setQueryData(
-          ['updates', { projectId: newProjectId }],
-          [update]
-        )
-        router.replace(`./${newProjectId}`)
+        queryClient.setQueryData(createUpdateKey(newProjectId), [update])
+        queryClient.setQueryData<Project>(createProjectKey(newProjectId), {
+          id: newProjectId,
+          imageUrl: null,
+          name: null,
+          clientId: null,
+          client: null,
+          team: [],
+          summary: null,
+        })
         return
       }
 

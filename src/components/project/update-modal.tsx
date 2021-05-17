@@ -61,11 +61,13 @@ function ProjectEditModalContent({
   data = { id: 'new', title: '', body: '' },
   onDismiss,
 }: ProjectEditModalContentProps) {
+  const router = useRouter()
   const { id, title: originalTitle, body: originalBody } = data
   const [title, setTitle] = useState(originalTitle)
   const [body, setBody] = useState(originalBody)
   useRedirectNewUpdate(projectId, id)
   const updateMutation = useUpdateMutation(projectId)
+  const deleteMutation = useDeleteUpdateMutation(projectId)
 
   const disabled = !title || !body || updateMutation.status === 'loading'
   return (
@@ -89,7 +91,15 @@ function ProjectEditModalContent({
             if (disabled) return
             updateMutation.mutate(
               { id, title, body, projectId },
-              projectId !== 'new' ? { onSuccess: onDismiss } : undefined
+              {
+                onSuccess: (update) => {
+                  if (projectId === 'new') {
+                    router.replace(`./${update.projectId}`)
+                  } else {
+                    onDismiss()
+                  }
+                },
+              }
             )
           }}
           disabled={disabled}
@@ -103,47 +113,27 @@ function ProjectEditModalContent({
       {
         // cannot delete new updates or updates that belong to new projects which haven't been uploaded yet
         id !== 'new' && projectId !== 'new' ? (
-          <DeleteUpdate
-            projectId={projectId}
-            updateId={id}
-            title={title}
-            onDismiss={onDismiss}
+          <DeleteSection
+            tw="mt-16"
+            label="Verify update title"
+            verificationText={title}
+            buttonText={
+              deleteMutation.status === 'loading'
+                ? 'Deleting...'
+                : 'Delete update'
+            }
+            onDelete={() => {
+              deleteMutation.mutate(id, {
+                onSuccess: () => {
+                  onDismiss()
+                },
+              })
+            }}
+            status={deleteMutation.status}
           />
         ) : null
       }
     </>
-  )
-}
-
-type DeleteUpdateProps = {
-  projectId: number
-  updateId: number
-  title: string
-  onDismiss: ProjectEditModalContentProps['onDismiss']
-}
-function DeleteUpdate({
-  projectId,
-  updateId,
-  title,
-  onDismiss,
-}: DeleteUpdateProps) {
-  const deleteMutation = useDeleteUpdateMutation(projectId)
-
-  return (
-    <DeleteSection
-      tw="mt-16"
-      label="Verify update title"
-      verificationText={title}
-      buttonText={
-        deleteMutation.status === 'loading' ? 'Deleting...' : 'Delete update'
-      }
-      onDelete={() => {
-        deleteMutation.mutate(updateId, {
-          onSuccess: onDismiss,
-        })
-      }}
-      status={deleteMutation.status}
-    />
   )
 }
 
