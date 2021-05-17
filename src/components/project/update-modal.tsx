@@ -66,7 +66,6 @@ function ProjectEditModalContent({
   const [body, setBody] = useState(originalBody)
   useRedirectNewUpdate(projectId, id)
   const updateMutation = useUpdateMutation(projectId)
-  const deleteMutation = useDeleteUpdateMutation(projectId)
 
   const disabled = !title || !body || updateMutation.status === 'loading'
   return (
@@ -101,25 +100,50 @@ function ProjectEditModalContent({
             : 'Save update'}
         </SaveButton>
       </div>
-      {id !== 'new' ? (
-        <DeleteSection
-          tw="mt-16"
-          label="Verify update title"
-          verificationText={title}
-          buttonText={
-            deleteMutation.status === 'loading'
-              ? 'Deleting...'
-              : 'Delete update'
-          }
-          onDelete={() => {
-            deleteMutation.mutate(id, {
-              onSuccess: onDismiss,
-            })
-          }}
-          status={deleteMutation.status}
-        />
-      ) : null}
+      {
+        // cannot delete new updates or updates that belong to new projects which haven't been uploaded yet
+        id !== 'new' && projectId !== 'new' ? (
+          <DeleteUpdate
+            projectId={projectId}
+            updateId={id}
+            title={title}
+            onDismiss={onDismiss}
+          />
+        ) : null
+      }
     </>
+  )
+}
+
+type DeleteUpdateProps = {
+  projectId: number
+  updateId: number
+  title: string
+  onDismiss: ProjectEditModalContentProps['onDismiss']
+}
+function DeleteUpdate({
+  projectId,
+  updateId,
+  title,
+  onDismiss,
+}: DeleteUpdateProps) {
+  const deleteMutation = useDeleteUpdateMutation(projectId)
+
+  return (
+    <DeleteSection
+      tw="mt-16"
+      label="Verify update title"
+      verificationText={title}
+      buttonText={
+        deleteMutation.status === 'loading' ? 'Deleting...' : 'Delete update'
+      }
+      onDelete={() => {
+        deleteMutation.mutate(updateId, {
+          onSuccess: onDismiss,
+        })
+      }}
+      status={deleteMutation.status}
+    />
   )
 }
 

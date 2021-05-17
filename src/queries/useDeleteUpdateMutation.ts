@@ -2,13 +2,11 @@ import { useQueryClient, useMutation } from 'react-query'
 import produce from 'immer'
 
 import type { Updates } from './useUpdates'
-import type { ProjectId } from 'pages/api/project'
 
-export function useDeleteUpdateMutation(projectId: ProjectId) {
+export function useDeleteUpdateMutation(projectId: number) {
   const queryClient = useQueryClient()
   const updateKey = ['updates', { projectId }]
-  const callback = projectId === 'new' ? deleteUpdateOnNewProject : deleteUpdate
-  return useMutation(callback, {
+  return useMutation(deleteUpdate, {
     onSuccess: async (_, id) => {
       await queryClient.cancelQueries(updateKey)
       const previousUpdates = queryClient.getQueryData<Updates>(updateKey) ?? []
@@ -39,10 +37,4 @@ async function deleteUpdate(id: number) {
       throw new Error(data?.error ?? `Something went wrong`)
     }
   }
-}
-
-// this is here to throw warnings if someone we've allowed users to delete updates
-// on a project that doesn't actually exist yet
-async function deleteUpdateOnNewProject(id: number) {
-  throw new Error(`Can't delete an update on a new project`)
 }
