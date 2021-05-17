@@ -15,7 +15,7 @@ import {
 } from './index'
 import type { QueryStatus } from 'react-query'
 import type { Role } from '@prisma/client'
-import type { ProjectData } from 'pages/api/project'
+import type { ProjectData, ProjectId } from 'pages/api/project'
 
 export { Summary, LoadingSummary }
 
@@ -38,7 +38,7 @@ function LoadingSummary({ status }: LoadingSummaryProps) {
 }
 
 type SummaryProps = {
-  projectId: number | 'new'
+  projectId: ProjectId
   userRole: Role
   project: Omit<ProjectData, 'id'> // we don't need the id here, since it's already passed in as prop
 }

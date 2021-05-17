@@ -2,22 +2,23 @@ import { useQueryClient, useMutation } from 'react-query'
 import { useRouter } from 'next/router'
 import produce from 'immer'
 import { createProjectKey } from './useProject'
+import { createUpdateKey } from './useUpdateMutation'
 
 import type { Project } from './useProject'
 import type {
   ProjectMutationBody,
   ProjectUpdateData,
   NewProjectData,
+  ProjectId,
 } from 'pages/api/project'
 import type { Projects } from './useProjects'
-import { createUpdateKey } from './useUpdateMutation'
 
 export { useProjectMutation, createProjectKey, createNewProject }
 export type UpdateBody = Parameters<
   ReturnType<typeof useProjectMutation>['mutate']
 >[0]
 
-function useProjectMutation(projectId: number | 'new') {
+function useProjectMutation(projectId: ProjectId) {
   const router = useRouter()
   const queryClient = useQueryClient()
   return useMutation(projectMutation, {

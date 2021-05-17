@@ -6,7 +6,6 @@ import { DeleteSection, Modal, SaveButton } from '@components/modal'
 import { useClients } from '@queries/useClients'
 import { Button } from '@components/button'
 import { CameraIcon, ExpandIcon } from 'icons'
-import { ProjectMutationBody } from 'pages/api/project'
 import {
   ListboxButton,
   ListboxInput,
@@ -21,12 +20,13 @@ import { useProjectMutation } from '@queries/useProjectMutation'
 import { useDeleteProject } from '@queries/useDeleteProject'
 import { TextInput } from '@components/text-input'
 
+import type { ProjectId, ProjectMutationBody } from 'pages/api/project'
 import type { Project } from '@queries/useProject'
 
 export { SettingsModal, createSettingsHref }
 
 type SettingsModalProps = {
-  projectId: number | 'new'
+  projectId: ProjectId
   project: Omit<Project, 'id'> // we don't need the id here, since it's already passed in as prop
 }
 
@@ -351,7 +351,7 @@ const listboxOptionCss = [
   `,
 ]
 
-function createSettingsHref(projectId: number | 'new') {
+function createSettingsHref(projectId: ProjectId) {
   return {
     pathname: `/project/${projectId}`,
     query: { edit: 'settings' },

@@ -26,6 +26,7 @@ import { createEditUpdateHref } from './update-modal'
 import type { Updates } from '@queries/useUpdates'
 import type { QueryStatus } from 'react-query'
 import type { Role } from '@prisma/client'
+import type { ProjectId } from 'pages/api/project'
 
 export { ProjectInformation, LoadingProjectInformation }
 
@@ -47,7 +48,7 @@ function LoadingProjectInformation({ status }: LoadingProjectInformationProps) {
 }
 
 type ProjectInformationProps = {
-  projectId: number | 'new'
+  projectId: ProjectId
   userRole: Role
   updates: Updates
 }
@@ -158,7 +159,7 @@ function useOnScroll(onScroll: OnScrollFunction) {
   onScrollRef.current = onScroll
 }
 
-function AddUpdateButton({ projectId }: { projectId: number | 'new' }) {
+function AddUpdateButton({ projectId }: { projectId: ProjectId }) {
   return (
     <IconLink href={createEditUpdateHref(projectId, 'new')} replace={true}>
       <PlusIcon tw="w-6 h-6 fill-copper-300" />

@@ -14,11 +14,12 @@ import { useDeleteUpdateMutation } from '@queries/useDeleteUpdateMutation'
 
 import type { UpdateBody } from '@queries/useUpdateMutation'
 import type { Updates } from '@queries/useUpdates'
+import type { ProjectId } from 'pages/api/project'
 
 export { UpdateModal, createEditUpdateHref }
 
 type UpdateModalProps = {
-  projectId: number | 'new'
+  projectId: ProjectId
   updates: Updates
 }
 function UpdateModal({ projectId, updates }: UpdateModalProps) {
@@ -51,7 +52,7 @@ function UpdateModal({ projectId, updates }: UpdateModalProps) {
 }
 
 type ProjectEditModalContentProps = {
-  projectId: number | 'new'
+  projectId: ProjectId
   data?: Omit<UpdateBody, 'projectId'>
   onDismiss: () => void
 }
@@ -125,7 +126,7 @@ function ProjectEditModalContent({
 /**
  * Any update id that isn't found in our data defaults to path /project/projectId?edit=update&updateId=new
  */
-function useRedirectNewUpdate(projectId: number | 'new', id: UpdateBody['id']) {
+function useRedirectNewUpdate(projectId: ProjectId, id: UpdateBody['id']) {
   const router = useRouter()
   const { updateId } = router.query
 
@@ -139,7 +140,7 @@ function useRedirectNewUpdate(projectId: number | 'new', id: UpdateBody['id']) {
 }
 
 function createEditUpdateHref(
-  projectId: number | 'new',
+  projectId: ProjectId,
   updateId: UpdateBody['id']
 ) {
   return {

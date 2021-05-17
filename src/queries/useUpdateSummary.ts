@@ -6,13 +6,14 @@ import { createUpdateKey } from './useUpdateMutation'
 
 import type { Project } from './useProject'
 import type { UpdateSummaryBody, Summary } from 'pages/api/summary'
+import type { ProjectId } from 'pages/api/project'
 
 export { useUpdateSummary }
 export type UpdateBody = Parameters<
   ReturnType<typeof useUpdateSummary>['mutate']
 >[0]
 
-function useUpdateSummary(projectId: number | 'new') {
+function useUpdateSummary(projectId: ProjectId) {
   const router = useRouter()
   const queryClient = useQueryClient()
   return useMutation(updateSummary(projectId), {
@@ -40,7 +41,7 @@ function useUpdateSummary(projectId: number | 'new') {
   })
 }
 
-function updateSummary(projectId: number | 'new') {
+function updateSummary(projectId: ProjectId) {
   return async function (data: UpdateSummaryBody) {
     let bodyData = data
     if (projectId === 'new') {

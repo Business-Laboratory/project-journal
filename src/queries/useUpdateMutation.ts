@@ -1,17 +1,18 @@
 import { useQueryClient, useMutation } from 'react-query'
 import { preprocessUpdate } from './useUpdates'
 import { createNewProject } from './useProjectMutation'
+import { useRouter } from 'next/router'
 
 import type { Updates } from './useUpdates'
 import type { Update } from 'pages/api/update'
-import { useRouter } from 'next/router'
+import type { ProjectId } from 'pages/api/project'
 
 export { useUpdateMutation, createUpdateKey }
 export type UpdateBody = Parameters<
   ReturnType<typeof useUpdateMutation>['mutate']
 >[0]
 
-function useUpdateMutation(projectId: number | 'new') {
+function useUpdateMutation(projectId: ProjectId) {
   const queryClient = useQueryClient()
   const router = useRouter()
   return useMutation(createOrUpdateUpdate, {
@@ -57,10 +58,10 @@ function useUpdateMutation(projectId: number | 'new') {
 }
 
 type UpdateData = {
-  id: number | 'new'
+  id: ProjectId
   title: string
   body: string
-  projectId: number | 'new'
+  projectId: ProjectId
 }
 async function createOrUpdateUpdate(data: UpdateData) {
   // if this update belongs to a new project, create the project first

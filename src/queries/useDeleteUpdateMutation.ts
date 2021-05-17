@@ -2,8 +2,9 @@ import { useQueryClient, useMutation } from 'react-query'
 import produce from 'immer'
 
 import type { Updates } from './useUpdates'
+import type { ProjectId } from 'pages/api/project'
 
-export function useDeleteUpdateMutation(projectId: number | 'new') {
+export function useDeleteUpdateMutation(projectId: ProjectId) {
   const queryClient = useQueryClient()
   const updateKey = ['updates', { projectId }]
   const callback = projectId === 'new' ? deleteUpdateOnNewProject : deleteUpdate

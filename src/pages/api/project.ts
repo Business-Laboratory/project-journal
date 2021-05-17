@@ -11,8 +11,9 @@ import type { Summary } from '@prisma/client'
 export type ProjectData = PrepareAPIData<ReturnType<typeof getProject>>
 export type ProjectUpdateData = PrepareAPIData<ReturnType<typeof updateProject>>
 export type NewProjectData = PrepareAPIData<ReturnType<typeof createProject>>
+export type ProjectId = number | 'new'
 export type ProjectMutationBody = {
-  id: number | 'new'
+  id: ProjectId
   name: string
   imageStorageBlobUrl?: string
   clientId: number | null

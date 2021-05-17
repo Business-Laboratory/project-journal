@@ -3,13 +3,15 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 
 import { MarkdownTextArea, Modal, SaveButton } from '@components/modal'
-import { Project } from '@queries/useProject'
 import { useUpdateSummary } from '@queries/useUpdateSummary'
+
+import type { Project } from '@queries/useProject'
+import type { ProjectId } from 'pages/api/project'
 
 export { SummaryModal, createEditDescriptionHref, createEditRoadmapHref }
 
 type SummaryModalProps = {
-  projectId: number | 'new'
+  projectId: ProjectId
   summary: Project['summary']
 }
 
@@ -93,14 +95,14 @@ function SummaryEditModalContent({
   )
 }
 
-function createEditDescriptionHref(projectId: number | 'new') {
+function createEditDescriptionHref(projectId: ProjectId) {
   return {
     pathname: `/project/${projectId}`,
     query: { edit: 'description' },
   }
 }
 
-function createEditRoadmapHref(projectId: number | 'new') {
+function createEditRoadmapHref(projectId: ProjectId) {
   return {
     pathname: `/project/${projectId}`,
     query: { edit: 'roadmap' },
