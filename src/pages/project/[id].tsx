@@ -18,7 +18,6 @@ import { useProject } from '@queries/useProject'
 import { useAuth } from '@components/auth-context'
 import { useUpdates } from '@queries/useUpdates'
 
-import type { Project } from '@queries/useProject'
 import type { Role } from '@prisma/client'
 
 export default function Project() {
