@@ -1,5 +1,4 @@
 import { useQueryClient, useMutation } from 'react-query'
-import { useRouter } from 'next/router'
 import produce from 'immer'
 import { createProjectKey } from './useProject'
 import { createUpdateKey } from './useUpdateMutation'
@@ -19,7 +18,6 @@ export type UpdateBody = Parameters<
 >[0]
 
 function useProjectMutation(projectId: ProjectId) {
-  const router = useRouter()
   const queryClient = useQueryClient()
   return useMutation(projectMutation, {
     onSuccess: async (project) => {
@@ -48,7 +46,6 @@ function useProjectMutation(projectId: ProjectId) {
       queryClient.setQueryData<Projects>('projects', newProjects)
       if (projectId === 'new') {
         queryClient.setQueryData(createUpdateKey(project.id), [])
-        router.replace(`./${project.id}`)
       }
     },
     onSettled: () => {

@@ -22,6 +22,7 @@ import { TextInput } from '@components/text-input'
 
 import type { ProjectId, ProjectMutationBody } from 'pages/api/project'
 import type { Project } from '@queries/useProject'
+import type { UploadBlobTokenData } from 'pages/api/generate-upload-blob-token'
 
 export { SettingsModal, createSettingsHref }
 
@@ -65,7 +66,6 @@ function SettingsEditModalContent({
     initialState(project)
   )
   const [imageFile, setImageFile] = useState<File | null>(null)
-  const [tempImageUrl, setTempImageUrl] = useState(project.imageUrl)
   const [imageUpload, setImageUpload] = useState<'idle' | 'loading'>('idle')
 
   const projectMutation = useProjectMutation(projectId)
@@ -75,8 +75,11 @@ function SettingsEditModalContent({
     !name || projectMutation.status === 'loading' || imageUpload === 'loading'
 
   const handleProjectSave = async () => {
+    let imageStorageBlobUrl
+    let newProjectId = projectId // uploading an image to a new project will create the project, so we need to keep track of the id
     if (imageFile !== null) {
       setImageUpload('loading')
+
       const result = await fetch('/api/generate-upload-blob-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -85,29 +88,27 @@ function SettingsEditModalContent({
           fileName: imageFile?.name,
         }),
       })
-      const { sasUrl } = await result.json()
+      const { sasUrl, id } = (await result.json()) as UploadBlobTokenData
 
       // lazy load the image uploader since it's pretty large
       const { uploadImage } = await import('@utils/upload-image')
-
-      const imageStorageBlobUrl = await uploadImage(sasUrl, imageFile)
-      projectMutation.mutate(
-        { id: projectId, name, imageStorageBlobUrl, clientId, team },
-        projectId !== 'new'
-          ? {
-              onSuccess: () => {
-                setImageUpload('idle')
-                onDismiss()
-              },
-            }
-          : undefined
-      )
-    } else {
-      projectMutation.mutate(
-        { id: projectId, name, clientId, team },
-        projectId !== 'new' ? { onSuccess: onDismiss } : undefined
-      )
+      imageStorageBlobUrl = await uploadImage(sasUrl, imageFile)
+      newProjectId = id
     }
+
+    projectMutation.mutate(
+      { id: newProjectId, name, imageStorageBlobUrl, clientId, team },
+      {
+        onSuccess: (project) => {
+          setImageUpload('idle')
+          if (projectId === 'new') {
+            router.replace(`./${project.id}`)
+          } else {
+            onDismiss()
+          }
+        },
+      }
+    )
   }
 
   return (
@@ -117,7 +118,7 @@ function SettingsEditModalContent({
         value={name}
         onChange={(newName) => dispatch({ type: 'SET_NAME', payload: newName })}
         label="Project name"
-        placeholder="Untitled project"
+        placeholder="Project name"
       />
       <label tw="flex flex-col w-full" htmlFor="client-select">
         <span id="client-select" tw="bl-text-xs text-gray-yellow-300">
@@ -131,46 +132,7 @@ function SettingsEditModalContent({
           }
         />
       </label>
-      <div tw="flex flex-row w-full justify-between space-x-8">
-        <Button tw="min-w-min self-start inline-flex">
-          <label htmlFor="image" tw="space-x-4 items-center inline-flex">
-            <CameraIcon tw="inline fill-gray-yellow-600 w-5 h-5" />
-            <span tw="bl-text-lg">
-              {!tempImageUrl ? 'Upload project image' : 'Change project image'}
-            </span>
-            <input
-              tw="w-full h-full"
-              hidden
-              type="file"
-              id="image"
-              onChange={(e) => {
-                const file = e.target.files?.[0]
-                if (file) {
-                  const reader = new FileReader()
-                  reader.readAsDataURL(file)
-                  reader.onload = () => {
-                    setTempImageUrl(reader.result?.toString() ?? '')
-                    setImageFile(file)
-                  }
-                }
-              }}
-              name="img"
-              accept="image/*"
-            />
-          </label>
-        </Button>
-        {/*Hardcoded width and height*/}
-        {tempImageUrl !== null ? (
-          <div tw="relative self-end w-64 h-36">
-            <Image
-              tw="object-cover"
-              layout="fill"
-              src={tempImageUrl}
-              alt={name}
-            />
-          </div>
-        ) : null}
-      </div>
+      <ImageInput imageUrl={project.imageUrl} onChange={setImageFile} />
       <div tw="w-full">
         <TeamMultiSelect
           team={team}
@@ -195,7 +157,7 @@ function SettingsEditModalContent({
         <DeleteSection
           tw="mt-16 w-full"
           label="Verify project name"
-          verificationText={name || 'Project Name'}
+          verificationText={name || 'Project name'}
           buttonText={
             projectDeleteMutation.status === 'loading'
               ? 'Deleting...'
@@ -210,6 +172,52 @@ function SettingsEditModalContent({
           }}
           status={projectDeleteMutation.status}
         />
+      ) : null}
+    </div>
+  )
+}
+
+type ImageInputProps = {
+  imageUrl: string | null
+  onChange: (file: File) => void
+}
+function ImageInput({ imageUrl, onChange }: ImageInputProps) {
+  const [tempImageUrl, setTempImageUrl] = useState(imageUrl)
+
+  return (
+    <div tw="flex flex-row w-full justify-between space-x-8">
+      <Button tw="min-w-min self-start inline-flex">
+        <label htmlFor="image" tw="space-x-4 items-center inline-flex">
+          <CameraIcon tw="inline fill-gray-yellow-600 w-5 h-5" />
+          <span tw="bl-text-lg">
+            {!tempImageUrl ? 'Upload project image' : 'Change project image'}
+          </span>
+          <input
+            tw="w-full h-full"
+            hidden
+            type="file"
+            id="image"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) {
+                const reader = new FileReader()
+                reader.readAsDataURL(file)
+                reader.onload = () => {
+                  setTempImageUrl(reader.result?.toString() ?? '')
+                  onChange(file)
+                }
+              }
+            }}
+            name="img"
+            accept="image/*"
+          />
+        </label>
+      </Button>
+      {/*Hardcoded width and height*/}
+      {tempImageUrl !== null ? (
+        <div tw="relative self-end w-64 h-36">
+          <Image tw="object-cover" layout="fill" src={tempImageUrl} alt="" />
+        </div>
       ) : null}
     </div>
   )
