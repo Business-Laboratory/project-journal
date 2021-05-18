@@ -13,6 +13,7 @@ import { usePrefetchProject } from '@queries/useProject'
 import { usePrefetchUpdates } from '@queries/useUpdates'
 import { IconLink } from '@components/icon-link'
 import { createSettingsHref } from '@components/project'
+import React from 'react'
 
 export default function Projects() {
   return (
@@ -30,12 +31,20 @@ function CardGrid() {
   const { data, status } = useProjects()
 
   if (status === 'error') {
-    return <DataErrorMessage errorMessage="Unable to load projects" />
+    return (
+      <NoProjectsWrapper>
+        <DataErrorMessage errorMessage="Unable to load projects" />
+      </NoProjectsWrapper>
+    )
   }
 
   // when the user or the projects data is still loading, return nothing for 1 second, and then a spinner
   if (!user || status === 'loading') {
-    return <LoadingSpinner loadingMessage="Loading projects" />
+    return (
+      <NoProjectsWrapper>
+        <LoadingSpinner loadingMessage="Loading projects" />
+      </NoProjectsWrapper>
+    )
   }
 
   const userNameFormatted = user.name ?? 'you'
@@ -57,13 +66,17 @@ function CardGrid() {
       </div>
     </main>
   ) : (
-    <main tw="pt-10 space-y-8 mx-auto max-w-fit">
+    <NoProjectsWrapper>
       <AddProjectLink />
       <h1 tw="bl-text-3xl max-w-prose">
         There are currently no projects assigned to {userNameFormatted}
       </h1>
-    </main>
+    </NoProjectsWrapper>
   )
+}
+
+function NoProjectsWrapper({ children }: { children: React.ReactNode }) {
+  return <main tw="pt-10 px-8 space-y-8 mx-auto max-w-fit">{children}</main>
 }
 
 function AddProjectLink() {
