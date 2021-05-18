@@ -26,7 +26,7 @@ export default function Clients() {
       <Head>
         <title>Clients | Project Journal</title>
       </Head>
-      <main tw="py-10 w-9/12 min-w-max mx-auto space-y-8">
+      <main tw="py-10 w-5/6 md:w-3/4 xl:w-1/2 min-w-max mx-auto">
         <ClientList />
       </main>
     </>
@@ -50,13 +50,27 @@ function ClientList() {
     <>
       <AddClientLink />
       {clients.length > 0 ? (
-        clients.map(({ id, name, employees }) => (
-          <div key={id} tw="space-y-4">
-            <IconLink href={createEditClientHref(id)}>
-              <EditIcon tw="w-6 h-6 fill-copper-300" />
-              <span tw="bl-text-3xl">{name}</span>
-            </IconLink>
-            <div tw="grid grid-cols-3 gap-x-3 gap-y-2 bl-text-lg">
+        <section
+          tw="grid grid-cols-3 gap-x-3 gap-y-2 bl-text-lg mt-2"
+          css={css`
+            grid-template-columns: 1fr 1fr auto;
+          `}
+        >
+          {clients.map(({ id, name, employees }) => (
+            <Fragment key={id}>
+              <IconLink
+                href={createEditClientHref(id)}
+                tw="col-span-3 pt-6 pb-2"
+              >
+                <EditIcon tw="w-6 h-6 fill-copper-300" />
+                <span tw="bl-text-3xl">{name}</span>
+              </IconLink>
+              {/* <div
+              tw="grid grid-cols-3 gap-x-3 gap-y-2 bl-text-lg"
+              // css={css`
+              //   grid-template-columns: 1fr 1fr auto;
+              // `}
+            > */}
               <span tw="col-span-1">Name</span>
               <span tw="col-span-1">Email</span>
               <span tw="col-span-1">Role</span>
@@ -67,13 +81,12 @@ function ClientList() {
                   <span tw="bl-text-base col-span-1">{title}</span>
                 </Fragment>
               ))}
-            </div>
-          </div>
-        ))
+              {/* </div> */}
+            </Fragment>
+          ))}
+        </section>
       ) : (
-        <h1 tw="bl-text-3xl max-w-prose text-center">
-          No clients are available
-        </h1>
+        <h1 tw="bl-text-3xl text-center">No clients are available</h1>
       )}
       <EditClientModal clients={clients} />
     </>
