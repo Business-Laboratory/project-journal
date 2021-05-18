@@ -130,7 +130,7 @@ const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
         </label>
         <div ref={ref} css={inputWrapperCss(disabled)}>
           <div
-            tw="flex flex-row flex-wrap items-center flex-grow max-w-xl"
+            tw="flex flex-row flex-wrap items-center max-w-xl flex-grow"
             // we want to focus the input when this area is clicked, since for sighted mouse-users this
             // looks like part of the input
             onClick={() => {
@@ -162,7 +162,7 @@ const MultiSelectInput = forwardRef<HTMLDivElement, MultiSelectInputProps>(
             <ComboboxInput
               id={id}
               ref={inputRef}
-              tw="flex-grow placeholder-gray-yellow-300 focus:outline-none disabled:bg-transparent"
+              tw="flex-grow placeholder-gray-yellow-300 focus:outline-none disabled:bg-transparent h-6"
               css={css`
                 margin-top: ${inputMarginY};
                 margin-bottom: ${inputMarginY};
@@ -252,7 +252,7 @@ function SelectedAdmin({ name, onDelete, focus, onBlur }: SelectedAdminProps) {
 
   return (
     <div
-      tw="flex flex-row items-center px-2 bg-copper-400 text-gray-yellow-100 rounded-lg max-w-fit mr-6 bl-text-base"
+      tw="flex flex-row items-center px-2 bg-copper-400 text-gray-yellow-100 rounded-lg max-w-fit mr-6 bl-text-base my-3"
       // we need to stop propagation so that we can click on the wrapper of the input to focus the input
       onClick={(e) => e.stopPropagation()}
     >
@@ -386,10 +386,11 @@ function useFocusAdmin(
 function useKeepPopupOpen(
   inputRef: React.MutableRefObject<HTMLInputElement | null>
 ) {
-  const previousComboboxContext = useRef<Pick<
-    ReturnType<typeof useComboboxContext>,
-    'state' | 'isExpanded'
-  > | null>(null)
+  const previousComboboxContext =
+    useRef<Pick<
+      ReturnType<typeof useComboboxContext>,
+      'state' | 'isExpanded'
+    > | null>(null)
   const { state, isExpanded } = useComboboxContext()
   // this is a total hack, and is very unfortunately the only way to get the popup to
   // stay up after selecting a value: https://github.com/reach/reach-ui/issues/709
@@ -424,7 +425,7 @@ function useKeepPopupOpen(
 
 function inputWrapperCss(disabled: boolean) {
   return [
-    tw`flex flex-row items-center`,
+    tw`flex flex-row items-center justify-between`,
     css`
       /* need to inherit these css properties so the font can be overwritten properly */
       letter-spacing: inherit;

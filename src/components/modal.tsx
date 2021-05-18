@@ -42,7 +42,7 @@ const dialogCss = [
     backdrop-filter: blur(4px);
   `,
 ]
-const dialogContentCss = tw`relative w-1/2 my-16 mx-auto outline-none min-w-max bg-gray-yellow-100 py-16 px-24 shadow-bl border-2 border-copper-300 rounded`
+const dialogContentCss = tw`relative w-5/6 md:w-3/4 lg:w-1/2 max-w-4xl my-16 mx-auto outline-none min-w-max bg-gray-yellow-100 py-16 px-24 shadow-bl border-2 border-copper-300 rounded`
 const closeIconButtonCss = [
   tw`absolute w-12 h-12 top-0 right-0 hover:text-copper-300 focus:outline-none`,
   css`

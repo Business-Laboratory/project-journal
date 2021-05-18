@@ -13,6 +13,7 @@ import { usePrefetchProject } from '@queries/useProject'
 import { usePrefetchUpdates } from '@queries/useUpdates'
 import { IconLink } from '@components/icon-link'
 import { createSettingsHref } from '@components/project'
+import React from 'react'
 
 export default function Projects() {
   return (
@@ -20,9 +21,7 @@ export default function Projects() {
       <Head>
         <title>Projects | Project Journal</title>
       </Head>
-      <main tw="pt-10 w-9/12 space-y-8 mx-auto max-w-lg lg:max-w-none">
-        <CardGrid />
-      </main>
+      <CardGrid />
     </>
   )
 }
@@ -32,43 +31,60 @@ function CardGrid() {
   const { data, status } = useProjects()
 
   if (status === 'error') {
-    return <DataErrorMessage errorMessage="Unable to load projects" />
+    return (
+      <NoProjectsWrapper>
+        <DataErrorMessage errorMessage="Unable to load projects" />
+      </NoProjectsWrapper>
+    )
   }
 
   // when the user or the projects data is still loading, return nothing for 1 second, and then a spinner
   if (!user || status === 'loading') {
-    return <LoadingSpinner loadingMessage="Loading projects" />
+    return (
+      <NoProjectsWrapper>
+        <LoadingSpinner loadingMessage="Loading projects" />
+      </NoProjectsWrapper>
+    )
   }
 
   const userNameFormatted = user.name ?? 'you'
   const projects = data ?? []
 
+  return projects.length > 0 ? (
+    <main tw="pt-10 w-5/6 md:w-3/4 xl:w-1/2 space-y-8 mx-auto max-w-lg lg:max-w-none">
+      <AddProjectLink />
+      <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
+        {projects.map((project, idx) => (
+          <Card
+            key={project.id}
+            id={project.id}
+            name={project.name ? project.name : `Untitled Project (${idx + 1})`}
+            description={project.summary?.description ?? null}
+            imageUrl={project.imageUrl}
+          />
+        ))}
+      </div>
+    </main>
+  ) : (
+    <NoProjectsWrapper>
+      <AddProjectLink />
+      <h1 tw="bl-text-3xl max-w-prose">
+        There are currently no projects assigned to {userNameFormatted}
+      </h1>
+    </NoProjectsWrapper>
+  )
+}
+
+function NoProjectsWrapper({ children }: { children: React.ReactNode }) {
+  return <main tw="pt-10 px-8 space-y-8 mx-auto max-w-fit">{children}</main>
+}
+
+function AddProjectLink() {
   return (
-    <>
-      <IconLink href={createSettingsHref('new')}>
-        <PlusIcon tw="w-6 h-6 fill-copper-300" />
-        <span tw="bl-text-2xl">Add project</span>
-      </IconLink>
-      {projects.length > 0 ? (
-        <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
-          {projects.map((project, idx) => (
-            <Card
-              key={project.id}
-              id={project.id}
-              name={
-                project.name ? project.name : `Untitled Project (${idx + 1})`
-              }
-              description={project.summary?.description ?? null}
-              imageUrl={project.imageUrl}
-            />
-          ))}
-        </div>
-      ) : (
-        <h1 tw="bl-text-3xl max-w-prose text-center">
-          There are currently no projects assigned to {userNameFormatted}
-        </h1>
-      )}
-    </>
+    <IconLink href={createSettingsHref('new')}>
+      <PlusIcon tw="w-6 h-6 fill-copper-300" />
+      <span tw="bl-text-2xl">Add project</span>
+    </IconLink>
   )
 }
 
