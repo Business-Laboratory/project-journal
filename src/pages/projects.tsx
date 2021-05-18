@@ -20,7 +20,7 @@ export default function Projects() {
       <Head>
         <title>Projects | Project Journal</title>
       </Head>
-      <main tw="pt-10 w-9/12 space-y-8 mx-auto max-w-lg lg:max-w-none">
+      <main tw="pt-10 w-5/6 md:w-3/4 xl:w-1/2 space-y-8 mx-auto max-w-lg lg:max-w-none">
         <CardGrid />
       </main>
     </>
