@@ -26,9 +26,8 @@ export default function Clients() {
       <Head>
         <title>Clients | Project Journal</title>
       </Head>
-      <main tw="py-10 w-5/6 md:w-3/4 xl:w-1/2 min-w-max mx-auto">
-        <ClientList />
-      </main>
+
+      <ClientList />
     </>
   )
 }
@@ -46,43 +45,43 @@ function ClientList() {
 
   const clients = data ?? []
 
-  return (
-    <>
+  return clients.length > 0 ? (
+    <main tw="py-10 w-5/6 md:w-3/4 xl:w-1/2 min-w-max mx-auto">
       <AddClientLink />
-      {clients.length > 0 ? (
-        <section
-          tw="grid gap-x-3 gap-y-2 bl-text-lg mt-2"
-          css={css`
-            grid-template-columns: 1fr 1fr auto;
-          `}
-        >
-          {clients.map(({ id, name, employees }) => (
-            <Fragment key={id}>
-              <IconLink
-                href={createEditClientHref(id)}
-                tw="col-span-3 pt-6 pb-2"
-              >
-                <EditIcon tw="w-6 h-6 fill-copper-300" />
-                <span tw="bl-text-3xl">{name}</span>
-              </IconLink>
-              <span tw="col-span-1">Name</span>
-              <span tw="col-span-1">Email</span>
-              <span tw="col-span-1">Role</span>
-              {employees.map(({ userId, clientId, title, user }) => (
-                <Fragment key={`${userId}-${clientId}`}>
-                  <span tw="bl-text-base col-span-1">{user.name}</span>
-                  <span tw="bl-text-base col-span-1">{user.email}</span>
-                  <span tw="bl-text-base col-span-1">{title}</span>
-                </Fragment>
-              ))}
-            </Fragment>
-          ))}
-        </section>
-      ) : (
-        <h1 tw="bl-text-3xl text-center">No clients are available</h1>
-      )}
+
+      <section
+        tw="grid gap-x-3 gap-y-2 bl-text-lg mt-2"
+        css={css`
+          grid-template-columns: 1fr 1fr auto;
+        `}
+      >
+        {clients.map(({ id, name, employees }) => (
+          <Fragment key={id}>
+            <IconLink href={createEditClientHref(id)} tw="col-span-3 pt-6 pb-2">
+              <EditIcon tw="w-6 h-6 fill-copper-300" />
+              <span tw="bl-text-3xl">{name}</span>
+            </IconLink>
+            <span tw="col-span-1">Name</span>
+            <span tw="col-span-1">Email</span>
+            <span tw="col-span-1">Role</span>
+            {employees.map(({ userId, clientId, title, user }) => (
+              <Fragment key={`${userId}-${clientId}`}>
+                <span tw="bl-text-base col-span-1">{user.name}</span>
+                <span tw="bl-text-base col-span-1">{user.email}</span>
+                <span tw="bl-text-base col-span-1">{title}</span>
+              </Fragment>
+            ))}
+          </Fragment>
+        ))}
+      </section>
+
       <EditClientModal clients={clients} />
-    </>
+    </main>
+  ) : (
+    <main tw="py-10 space-y-8 max-w-fit mx-auto">
+      <AddClientLink />
+      <h1 tw="bl-text-3xl">No clients are available</h1>
+    </main>
   )
 }
 

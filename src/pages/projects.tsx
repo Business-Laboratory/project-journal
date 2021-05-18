@@ -20,9 +20,7 @@ export default function Projects() {
       <Head>
         <title>Projects | Project Journal</title>
       </Head>
-      <main tw="pt-10 w-5/6 md:w-3/4 xl:w-1/2 space-y-8 mx-auto max-w-lg lg:max-w-none">
-        <CardGrid />
-      </main>
+      <CardGrid />
     </>
   )
 }
@@ -43,32 +41,37 @@ function CardGrid() {
   const userNameFormatted = user.name ?? 'you'
   const projects = data ?? []
 
+  return projects.length > 0 ? (
+    <main tw="pt-10 w-5/6 md:w-3/4 xl:w-1/2 space-y-8 mx-auto max-w-lg lg:max-w-none">
+      <AddProjectLink />
+      <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
+        {projects.map((project, idx) => (
+          <Card
+            key={project.id}
+            id={project.id}
+            name={project.name ? project.name : `Untitled Project (${idx + 1})`}
+            description={project.summary?.description ?? null}
+            imageUrl={project.imageUrl}
+          />
+        ))}
+      </div>
+    </main>
+  ) : (
+    <main tw="pt-10 space-y-8 mx-auto max-w-fit">
+      <AddProjectLink />
+      <h1 tw="bl-text-3xl max-w-prose">
+        There are currently no projects assigned to {userNameFormatted}
+      </h1>
+    </main>
+  )
+}
+
+function AddProjectLink() {
   return (
-    <>
-      <IconLink href={createSettingsHref('new')}>
-        <PlusIcon tw="w-6 h-6 fill-copper-300" />
-        <span tw="bl-text-2xl">Add project</span>
-      </IconLink>
-      {projects.length > 0 ? (
-        <div tw="grid lg:grid-cols-2 grid-cols-1 gap-x-16 gap-y-5">
-          {projects.map((project, idx) => (
-            <Card
-              key={project.id}
-              id={project.id}
-              name={
-                project.name ? project.name : `Untitled Project (${idx + 1})`
-              }
-              description={project.summary?.description ?? null}
-              imageUrl={project.imageUrl}
-            />
-          ))}
-        </div>
-      ) : (
-        <h1 tw="bl-text-3xl max-w-prose text-center">
-          There are currently no projects assigned to {userNameFormatted}
-        </h1>
-      )}
-    </>
+    <IconLink href={createSettingsHref('new')}>
+      <PlusIcon tw="w-6 h-6 fill-copper-300" />
+      <span tw="bl-text-2xl">Add project</span>
+    </IconLink>
   )
 }
 
