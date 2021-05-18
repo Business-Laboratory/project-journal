@@ -51,7 +51,7 @@ function ClientList() {
       <AddClientLink />
       {clients.length > 0 ? (
         <section
-          tw="grid grid-cols-3 gap-x-3 gap-y-2 bl-text-lg mt-2"
+          tw="grid gap-x-3 gap-y-2 bl-text-lg mt-2"
           css={css`
             grid-template-columns: 1fr 1fr auto;
           `}
@@ -65,12 +65,6 @@ function ClientList() {
                 <EditIcon tw="w-6 h-6 fill-copper-300" />
                 <span tw="bl-text-3xl">{name}</span>
               </IconLink>
-              {/* <div
-              tw="grid grid-cols-3 gap-x-3 gap-y-2 bl-text-lg"
-              // css={css`
-              //   grid-template-columns: 1fr 1fr auto;
-              // `}
-            > */}
               <span tw="col-span-1">Name</span>
               <span tw="col-span-1">Email</span>
               <span tw="col-span-1">Role</span>
@@ -81,7 +75,6 @@ function ClientList() {
                   <span tw="bl-text-base col-span-1">{title}</span>
                 </Fragment>
               ))}
-              {/* </div> */}
             </Fragment>
           ))}
         </section>
@@ -173,7 +166,7 @@ function EditClientModalContent({
           css={[
             tw`grid gap-x-3 items-center mt-2`,
             css`
-              width: 650px;
+              min-width: 650px;
               grid-template-columns: repeat(3, minmax(0, 1fr)) ${theme(
                   'width.12'
                 )};
