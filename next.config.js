@@ -8,7 +8,7 @@ module.exports = withBundleAnalyzer({
   },
   disDir: '.next',
   images: {
-    domains: ['projectjournalassets.blob.core.windows.net'],
+    domains: ['projectjournalstorage.blob.core.windows.net'],
   },
   webpack(config) {
     config.module.rules.push({
